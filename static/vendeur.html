@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boutique Vendeur - SANI-FÉRÉ PRO</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .vendor-profile {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-teal) 100%);
+            color: white;
+            padding: var(--spacing-xl) 0;
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .vendor-profile-content {
+            display: flex;
+            gap: var(--spacing-lg);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .vendor-avatar-large {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--primary-green);
+            box-shadow: var(--shadow-lg);
+            border: 5px solid white;
+        }
+        
+        .vendor-info {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .vendor-name-large {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .vendor-bio {
+            font-size: 1.1rem;
+            margin-bottom: var(--spacing-md);
+            opacity: 0.95;
+        }
+        
+        .vendor-stats-large {
+            display: flex;
+            gap: var(--spacing-lg);
+            flex-wrap: wrap;
+        }
+        
+        .stat-large {
+            background: rgba(255,255,255,0.2);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-md);
+            backdrop-filter: blur(10px);
+        }
+        
+        .stat-large-value {
+            font-size: 2rem;
+            font-weight: 700;
+            display: block;
+        }
+        
+        .stat-large-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .contact-vendor {
+            background: var(--primary-orange);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: var(--radius-full);
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            box-shadow: var(--shadow-md);
+            margin-top: var(--spacing-md);
+        }
+        
+        .contact-vendor:hover {
+            background: var(--primary-red);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: var(--spacing-md);
+            border-bottom: 2px solid var(--border-gray);
+        }
+        
+        .tab {
+            background: none;
+            border: none;
+            padding: 1rem 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-gray);
+            cursor: pointer;
+            transition: var(--transition-fast);
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+        
+        .tab.active {
+            color: var(--primary-green);
+            border-bottom-color: var(--primary-green);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">🛍️</span>
+                <span>SANI-FÉRÉ PRO</span>
+            </a>
+            
+            <div class="search-bar">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="searchInput"
+                    placeholder="Chercher un produit..." 
+                    autocomplete="off"
+                >
+                <button class="search-btn" onclick="searchInVendor()">🔍 Chercher</button>
+            </div>
+            
+            <div class="nav-actions">
+                <a href="vendre.html" class="nav-btn primary">Vendre</a>
+                <a href="connexion.html" class="nav-btn">Connexion</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Profil Vendeur -->
+    <section class="vendor-profile">
+        <div class="container">
+            <div class="vendor-profile-content" id="vendorProfile">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contenu Principal -->
+    <div class="container">
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('produits')">
+                🛍️ Produits (<span id="productsCount">0</span>)
+            </button>
+            <button class="tab" onclick="switchTab('avis')">
+                ⭐ Avis (<span id="reviewsCount">0</span>)
+            </button>
+            <button class="tab" onclick="switchTab('apropos')">
+                ℹ️ À Propos
+            </button>
+        </div>
+        
+        <!-- Tab: Produits -->
+        <div id="produitsTab" class="tab-content active">
+            <div class="filters-bar">
+                <button class="filter-btn active" onclick="filterVendorProducts('tous')">Tous</button>
+                <button class="filter-btn" onclick="filterVendorProducts('recent')">Récents</button>
+                <button class="filter-btn" onclick="filterVendorProducts('popular')">Populaires</button>
+                <button class="filter-btn" onclick="filterVendorProducts('price-asc')">Prix ↑</button>
+                <button class="filter-btn" onclick="filterVendorProducts('price-desc')">Prix ↓</button>
+            </div>
+            
+            <div class="products-grid" id="vendorProductsGrid">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+            
+            <div class="load-more">
+                <button class="load-more-btn" id="loadMoreVendorBtn" onclick="loadMoreVendorProducts()">
+                    Voir Plus de Produits
+                </button>
+            </div>
+        </div>
+        
+        <!-- Tab: Avis -->
+        <div id="avisTab" class="tab-content">
+            <div id="reviewsContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab: À Propos -->
+        <div id="aproposTab" class="tab-content">
+            <div style="background: white; padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);">
+                <h3 style="margin-bottom: 1rem;">📍 Informations</h3>
+                <div id="vendorAbout">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>🛍️ SANI-FÉRÉ PRO</h3>
+                    <p>La marketplace de confiance du Mali. Achetez et vendez en toute sécurité avec Orange Money.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Liens Rapides</h3>
+                    <a href="index.html">Accueil</a>
+                    <a href="catalogue.html">Catalogue</a>
+                    <a href="vendre.html">Devenir Vendeur</a>
+                    <a href="aide.html">Aide</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p>📍 Bamako, Mali</p>
+                    <p>📧 contact@sanifere.ml</p>
+                    <p>📱 WhatsApp: +223 XX XX XX XX</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2026 SANI-FÉRÉ PRO - Alliance Sahel Services. Tous droits réservés. 🇲🇱</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+    <script src="vendeur.js"></script>
+</body>
+</html>

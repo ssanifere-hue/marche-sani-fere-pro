@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalogue - SANI-FÉRÉ PRO</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .advanced-filters {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-md);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .filter-group {
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .filter-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+        
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-gray);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+        }
+        
+        .price-range {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .sort-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+        }
+        
+        .results-count {
+            font-weight: 600;
+            color: var(--text-gray);
+        }
+        
+        .sort-select {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--border-gray);
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">🛍️</span>
+                <span>SANI-FÉRÉ PRO</span>
+            </a>
+            
+            <div class="search-bar">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="searchInput"
+                    placeholder="Chercher un produit, un vendeur..." 
+                    autocomplete="off"
+                >
+                <button class="search-btn" onclick="performSearch()">🔍 Chercher</button>
+            </div>
+            
+            <div class="nav-actions">
+                <a href="vendre.html" class="nav-btn primary">Vendre</a>
+                <a href="connexion.html" class="nav-btn">Connexion</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container" style="margin-top: 2rem;">
+        <h1 class="section-title">🛒 Catalogue Complet</h1>
+        
+        <!-- Filtres Avancés -->
+        <div class="advanced-filters">
+            <h3 style="margin-bottom: 1rem;">🔍 Filtres Avancés</h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                <div class="filter-group">
+                    <label>Catégorie</label>
+                    <select id="categoryFilter" onchange="applyFilters()">
+                        <option value="">Toutes les catégories</option>
+                        <option value="mode-femme">👗 Mode Femme</option>
+                        <option value="mode-homme">👔 Mode Homme</option>
+                        <option value="electronique">📱 Électronique</option>
+                        <option value="maison">🏠 Maison</option>
+                        <option value="enfants">👶 Enfants</option>
+                        <option value="meubles">🛋️ Meubles</option>
+                        <option value="beaute">💄 Beauté</option>
+                        <option value="sport">⚽ Sport</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Type de Vendeur</label>
+                    <select id="vendorTypeFilter" onchange="applyFilters()">
+                        <option value="">Tous les vendeurs</option>
+                        <option value="premium">⭐ Premium uniquement</option>
+                        <option value="verified">✓ Vérifiés</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Localisation</label>
+                    <select id="locationFilter" onchange="applyFilters()">
+                        <option value="">Tout le Mali</option>
+                        <option value="bamako">Bamako</option>
+                        <option value="sikasso">Sikasso</option>
+                        <option value="kayes">Kayes</option>
+                        <option value="segou">Ségou</option>
+                        <option value="mopti">Mopti</option>
+                        <option value="gao">Gao</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Prix (FCFA)</label>
+                    <div class="price-range">
+                        <input type="number" id="minPrice" placeholder="Min" onchange="applyFilters()">
+                        <span>-</span>
+                        <input type="number" id="maxPrice" placeholder="Max" onchange="applyFilters()">
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                <button class="filter-btn" onclick="applyFilters()" style="background: var(--primary-green); color: white; border-color: var(--primary-green);">
+                    Appliquer les Filtres
+                </button>
+                <button class="filter-btn" onclick="resetFilters()">
+                    Réinitialiser
+                </button>
+            </div>
+        </div>
+        
+        <!-- Barre de Tri et Résultats -->
+        <div class="sort-bar">
+            <div class="results-count" id="resultsCount">
+                Chargement...
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span>Trier par:</span>
+                <select class="sort-select" id="sortSelect" onchange="applySort()">
+                    <option value="recent">Plus récents</option>
+                    <option value="price-asc">Prix croissant</option>
+                    <option value="price-desc">Prix décroissant</option>
+                    <option value="popular">Populaires</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Grille de Produits -->
+        <div class="products-grid" id="catalogueGrid">
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+        </div>
+        
+        <!-- Bouton Charger Plus -->
+        <div class="load-more">
+            <button class="load-more-btn" id="loadMoreBtn" onclick="loadMoreCatalogue()">
+                Voir Plus de Produits
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>🛍️ SANI-FÉRÉ PRO</h3>
+                    <p>La marketplace de confiance du Mali. Achetez et vendez en toute sécurité avec Orange Money.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Liens Rapides</h3>
+                    <a href="index.html">Accueil</a>
+                    <a href="vendre.html">Devenir Vendeur</a>
+                    <a href="premium.html">Premium</a>
+                    <a href="aide.html">Centre d'Aide</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Catégories</h3>
+                    <a href="catalogue.html?categorie=mode">Mode</a>
+                    <a href="catalogue.html?categorie=electronique">Électronique</a>
+                    <a href="catalogue.html?categorie=maison">Maison</a>
+                    <a href="catalogue.html?categorie=beaute">Beauté</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p>📍 Bamako, Mali</p>
+                    <p>📧 contact@sanifere.ml</p>
+                    <p>📱 WhatsApp: +223 XX XX XX XX</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2026 SANI-FÉRÉ PRO - Alliance Sahel Services. Tous droits réservés. 🇲🇱</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+    <script src="catalogue.js"></script>
+</body>
+</html>

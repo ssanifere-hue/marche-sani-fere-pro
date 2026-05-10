@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - SANI-FÉRÉ PRO</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .auth-container {
+            max-width: 500px;
+            margin: 4rem auto;
+            padding: 0 var(--spacing-md);
+        }
+        
+        .auth-card {
+            background: white;
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .auth-tabs {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+            border-bottom: 2px solid var(--border-gray);
+        }
+        
+        .auth-tab {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: var(--spacing-md);
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-gray);
+            cursor: pointer;
+            transition: var(--transition-fast);
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+        
+        .auth-tab.active {
+            color: var(--primary-green);
+            border-bottom-color: var(--primary-green);
+        }
+        
+        .auth-form {
+            display: none;
+        }
+        
+        .auth-form.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid var(--border-gray);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            transition: var(--transition-fast);
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-green);
+        }
+        
+        .submit-btn {
+            width: 100%;
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: var(--radius-full);
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            box-shadow: var(--shadow-md);
+            margin-top: var(--spacing-md);
+        }
+        
+        .submit-btn:hover {
+            background: var(--secondary-teal);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .submit-btn:disabled {
+            background: var(--bg-gray);
+            color: var(--text-gray);
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .error-message {
+            background: #FEE;
+            color: #C00;
+            padding: var(--spacing-sm);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--spacing-md);
+            display: none;
+        }
+        
+        .success-message {
+            background: #EFE;
+            color: #080;
+            padding: var(--spacing-sm);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--spacing-md);
+            display: none;
+        }
+        
+        .form-footer {
+            text-align: center;
+            margin-top: var(--spacing-md);
+            color: var(--text-gray);
+        }
+        
+        .form-footer a {
+            color: var(--primary-green);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .account-type {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .type-option {
+            padding: var(--spacing-md);
+            border: 2px solid var(--border-gray);
+            border-radius: var(--radius-md);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+        
+        .type-option:hover,
+        .type-option.selected {
+            border-color: var(--primary-green);
+            background: rgba(0, 176, 116, 0.05);
+        }
+        
+        .type-option input[type="radio"] {
+            display: none;
+        }
+        
+        .type-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .type-label {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">🛍️</span>
+                <span>SANI-FÉRÉ PRO</span>
+            </a>
+            
+            <div class="nav-actions">
+                <a href="index.html" class="nav-btn">← Retour à l'accueil</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Auth Container -->
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1 style="text-align: center; margin-bottom: var(--spacing-lg); color: var(--text-dark);">
+                Bienvenue sur SANI-FÉRÉ PRO 🇲🇱
+            </h1>
+            
+            <!-- Tabs -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthTab('login')">Connexion</button>
+                <button class="auth-tab" onclick="switchAuthTab('register')">Inscription</button>
+            </div>
+            
+            <!-- Messages -->
+            <div id="errorMessage" class="error-message"></div>
+            <div id="successMessage" class="success-message"></div>
+            
+            <!-- Formulaire Connexion -->
+            <form id="loginForm" class="auth-form active" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="loginTelephone">📱 Numéro de téléphone</label>
+                    <input 
+                        type="tel" 
+                        id="loginTelephone" 
+                        placeholder="Ex: 70123456" 
+                        required
+                        pattern="[0-9]{8}"
+                        title="Entrez un numéro à 8 chiffres"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="loginPassword">🔒 Mot de passe</label>
+                    <input 
+                        type="password" 
+                        id="loginPassword" 
+                        placeholder="Votre mot de passe" 
+                        required
+                        minlength="6"
+                    >
+                </div>
+                
+                <button type="submit" class="submit-btn" id="loginBtn">
+                    Se Connecter
+                </button>
+                
+                <div class="form-footer">
+                    <p>Pas encore de compte ? <a href="#" onclick="switchAuthTab('register'); return false;">Inscrivez-vous</a></p>
+                </div>
+            </form>
+            
+            <!-- Formulaire Inscription -->
+            <form id="registerForm" class="auth-form" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>Type de compte</label>
+                    <div class="account-type">
+                        <label class="type-option selected">
+                            <input type="radio" name="accountType" value="acheteur" checked>
+                            <div class="type-icon">🛒</div>
+                            <div class="type-label">Acheteur</div>
+                        </label>
+                        <label class="type-option">
+                            <input type="radio" name="accountType" value="vendeur">
+                            <div class="type-icon">🏪</div>
+                            <div class="type-label">Vendeur</div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerNom">👤 Nom complet</label>
+                    <input 
+                        type="text" 
+                        id="registerNom" 
+                        placeholder="Ex: Ibrahim Koné" 
+                        required
+                        minlength="3"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerTelephone">📱 Numéro de téléphone</label>
+                    <input 
+                        type="tel" 
+                        id="registerTelephone" 
+                        placeholder="Ex: 70123456" 
+                        required
+                        pattern="[0-9]{8}"
+                        title="Entrez un numéro à 8 chiffres"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerEmail">📧 Email (optionnel)</label>
+                    <input 
+                        type="email" 
+                        id="registerEmail" 
+                        placeholder="Ex: ibrahim@example.com"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerPassword">🔒 Mot de passe</label>
+                    <input 
+                        type="password" 
+                        id="registerPassword" 
+                        placeholder="Min. 6 caractères" 
+                        required
+                        minlength="6"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerPasswordConfirm">🔒 Confirmer le mot de passe</label>
+                    <input 
+                        type="password" 
+                        id="registerPasswordConfirm" 
+                        placeholder="Répétez le mot de passe" 
+                        required
+                        minlength="6"
+                    >
+                </div>
+                
+                <button type="submit" class="submit-btn" id="registerBtn">
+                    Créer mon compte
+                </button>
+                
+                <div class="form-footer">
+                    <p>Déjà un compte ? <a href="#" onclick="switchAuthTab('login'); return false;">Connectez-vous</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 SANI-FÉRÉ PRO - Alliance Sahel Services. Tous droits réservés. 🇲🇱</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const API_BASE_URL = 'https://web-production-8f94.up.railway.app';
+        
+        // Gérer les onglets
+        function switchAuthTab(tab) {
+            // Mettre à jour les boutons
+            document.querySelectorAll('.auth-tab').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Mettre à jour les formulaires
+            document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+            document.getElementById(tab === 'login' ? 'loginForm' : 'registerForm').classList.add('active');
+            
+            // Effacer les messages
+            hideMessages();
+        }
+        
+        // Gérer la sélection du type de compte
+        document.querySelectorAll('.type-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.type-option').forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                this.querySelector('input[type="radio"]').checked = true;
+            });
+        });
+        
+        // Afficher/masquer les messages
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+        
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+        
+        function hideMessages() {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+        
+        // Connexion
+        async function handleLogin(event) {
+            event.preventDefault();
+            hideMessages();
+            
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = true;
+            btn.textContent = 'Connexion...';
+            
+            const telephone = document.getElementById('loginTelephone').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        telephone: telephone,
+                        mot_de_passe: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Sauvegarder le token
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    showSuccess('Connexion réussie ! Redirection...');
+                    
+                    // Rediriger vers le dashboard
+                    setTimeout(() => {
+                        window.location.href = data.user.role === 'vendeur' 
+                            ? '/dashboard' 
+                            : 'index.html';
+                    }, 1500);
+                } else {
+                    showError(data.detail || 'Identifiants incorrects');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showError('Erreur de connexion. Vérifiez votre connexion internet.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Se Connecter';
+            }
+        }
+        
+        // Inscription
+        async function handleRegister(event) {
+            event.preventDefault();
+            hideMessages();
+            
+            const password = document.getElementById('registerPassword').value;
+            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+            
+            if (password !== passwordConfirm) {
+                showError('Les mots de passe ne correspondent pas');
+                return;
+            }
+            
+            const btn = document.getElementById('registerBtn');
+            btn.disabled = true;
+            btn.textContent = 'Inscription...';
+            
+            const accountType = document.querySelector('input[name="accountType"]:checked').value;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        nom: document.getElementById('registerNom').value,
+                        telephone: document.getElementById('registerTelephone').value,
+                        email: document.getElementById('registerEmail').value || null,
+                        mot_de_passe: password,
+                        role: accountType
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showSuccess('Inscription réussie ! Redirection vers la connexion...');
+                    
+                    // Réinitialiser le formulaire et passer à connexion
+                    setTimeout(() => {
+                        document.getElementById('registerForm').reset();
+                        switchAuthTab('login');
+                        document.getElementById('loginTelephone').value = document.getElementById('registerTelephone').value;
+                    }, 2000);
+                } else {
+                    showError(data.detail || 'Erreur lors de l\'inscription');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showError('Erreur lors de l\'inscription. Vérifiez votre connexion internet.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Créer mon compte';
+            }
+        }
+    </script>
+</body>
+</html>

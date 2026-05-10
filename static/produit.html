@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produit - SANI-FÉRÉ PRO</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .product-page {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .product-gallery {
+            position: sticky;
+            top: calc(80px + var(--spacing-md));
+            height: fit-content;
+        }
+        
+        .main-image {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .thumbnail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 0.5rem;
+        }
+        
+        .thumbnail {
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: var(--transition-fast);
+        }
+        
+        .thumbnail:hover,
+        .thumbnail.active {
+            border-color: var(--primary-green);
+        }
+        
+        .product-details {
+            background: white;
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .product-title-large {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .product-price-large {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-green);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .buy-section {
+            background: linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 100%);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .buy-btn {
+            width: 100%;
+            background: var(--primary-orange);
+            color: white;
+            border: none;
+            padding: 1.25rem;
+            border-radius: var(--radius-full);
+            font-size: 1.25rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition-fast);
+            box-shadow: var(--shadow-md);
+            margin-top: var(--spacing-sm);
+        }
+        
+        .buy-btn:hover {
+            background: var(--primary-red);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .vendor-card-inline {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: var(--spacing-md);
+            background: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--spacing-md);
+            text-decoration: none;
+            color: var(--text-dark);
+            transition: var(--transition-fast);
+        }
+        
+        .vendor-card-inline:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .product-page {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-gallery {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">🛍️</span>
+                <span>SANI-FÉRÉ PRO</span>
+            </a>
+            
+            <div class="search-bar">
+                <input type="text" class="search-input" id="searchInput" placeholder="Chercher...">
+                <button class="search-btn" onclick="window.location.href='catalogue.html'">🔍</button>
+            </div>
+            
+            <div class="nav-actions">
+                <a href="vendre.html" class="nav-btn primary">Vendre</a>
+                <a href="connexion.html" class="nav-btn">Connexion</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="margin-top: 2rem;">
+        <div class="product-page" id="productPage">
+            <div class="loading" style="grid-column: 1/-1;">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 SANI-FÉRÉ PRO. Tous droits réservés. 🇲🇱</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const API_BASE_URL = 'https://web-production-8f94.up.railway.app';
+        let productId = null;
+        let productData = null;
+        let currentImageIndex = 0;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            productId = params.get('id');
+            
+            if (!productId) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            loadProduct();
+        });
+
+        async function loadProduct() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/produits/${productId}`);
+                const data = await response.json();
+                
+                if (!data.produit) throw new Error('Produit non trouvé');
+                
+                productData = data.produit;
+                displayProduct(productData);
+                
+            } catch (error) {
+                console.error('Erreur:', error);
+                document.getElementById('productPage').innerHTML = `
+                    <div style="grid-column: 1/-1; text-align:center; padding:3rem;">
+                        <h3>❌ Produit non trouvé</h3>
+                        <a href="index.html" class="nav-btn primary">Retour à l'accueil</a>
+                    </div>
+                `;
+            }
+        }
+
+        function displayProduct(product) {
+            const images = product.images && product.images.length > 0 
+                ? product.images 
+                : ['https://via.placeholder.com/600x600/E9ECEF/6C757D?text=Produit'];
+            
+            const thumbnails = images.map((img, i) => 
+                `<img src="${img}" class="thumbnail ${i === 0 ? 'active' : ''}" onclick="changeImage(${i})" onerror="this.src='https://via.placeholder.com/80x80/E9ECEF/6C757D?text=IMG'">`
+            ).join('');
+            
+            const isPremium = product.vendeur_premium || false;
+            const premiumBadge = isPremium ? '<span style="background: var(--premium-gradient); color: white; padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: 0.9rem;">✓ PREMIUM</span>' : '';
+            
+            const html = `
+                <div class="product-gallery">
+                    <img src="${images[0]}" id="mainImage" class="main-image" alt="${product.titre}" onerror="this.src='https://via.placeholder.com/600x600/E9ECEF/6C757D?text=Image'">
+                    <div class="thumbnail-grid">${thumbnails}</div>
+                </div>
+                
+                <div class="product-details">
+                    <h1 class="product-title-large">${product.titre}</h1>
+                    <div class="product-price-large">${formatPrice(product.prix)} FCFA</div>
+                    
+                    <div class="buy-section">
+                        <p style="margin-bottom: 0.5rem; font-weight: 600;">💳 Paiement sécurisé Orange Money</p>
+                        <button class="buy-btn" onclick="acheterProduit()">
+                            🛒 Acheter Maintenant
+                        </button>
+                    </div>
+                    
+                    <a href="vendeur.html?id=${product.vendeur_id}" class="vendor-card-inline">
+                        <div class="vendor-avatar" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                            ${product.vendeur_nom ? product.vendeur_nom.charAt(0).toUpperCase() : 'V'}
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 700; margin-bottom: 0.25rem;">
+                                ${product.vendeur_nom || 'Vendeur'} ${isPremium ? '<span style="color: var(--premium-gold);">✓</span>' : ''}
+                            </div>
+                            <div style="font-size: 0.9rem; color: var(--text-gray);">
+                                Voir la boutique →
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <div style="margin-bottom: var(--spacing-md);">
+                        <h3 style="margin-bottom: 0.5rem;">📝 Description</h3>
+                        <p style="color: var(--text-gray); line-height: 1.8;">
+                            ${product.description || 'Pas de description disponible.'}
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <h3 style="margin-bottom: 0.5rem;">ℹ️ Informations</h3>
+                        <div style="display: grid; gap: 0.5rem;">
+                            <div><strong>Catégorie:</strong> ${product.categorie || 'Non classé'}</div>
+                            <div><strong>État:</strong> ${product.etat || 'Neuf'}</div>
+                            <div><strong>Localisation:</strong> ${product.localisation || 'Mali'}</div>
+                            <div><strong>Publié le:</strong> ${formatDate(product.date_creation)}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('productPage').innerHTML = html;
+        }
+
+        function changeImage(index) {
+            currentImageIndex = index;
+            const images = productData.images || [];
+            document.getElementById('mainImage').src = images[index];
+            
+            document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
+                thumb.classList.toggle('active', i === index);
+            });
+        }
+
+        function acheterProduit() {
+            alert('🚧 Fonctionnalité en développement\\n\\nBientôt : Paiement sécurisé Orange Money !');
+        }
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('fr-FR').format(price);
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+    </script>
+</body>
+</html>

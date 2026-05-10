@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SANI-FÉRÉ PRO - Marché de Confiance du Mali 🇲🇱</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">🛍️</span>
+                <span>SANI-FÉRÉ PRO</span>
+            </a>
+            
+            <div class="search-bar">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="searchInput"
+                    placeholder="Chercher un produit, un vendeur..." 
+                    autocomplete="off"
+                >
+                <button class="search-btn" onclick="searchProducts()">🔍 Chercher</button>
+            </div>
+            
+            <div class="nav-actions">
+                <a href="vendre.html" class="nav-btn primary">Vendre</a>
+                <a href="connexion.html" class="nav-btn">Connexion</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>🇲🇱 Achetez et Vendez en Toute Confiance au Mali</h1>
+            <p>La première marketplace sécurisée avec Orange Money et vendeurs vérifiés ✓</p>
+        </div>
+    </section>
+
+    <!-- Categories -->
+    <section class="categories-section">
+        <div class="container">
+            <h2 class="section-title">📂 Catégories Populaires</h2>
+            <div class="categories-grid">
+                <a href="catalogue.html?categorie=mode-femme" class="category-card">
+                    <div class="category-icon">👗</div>
+                    <div class="category-name">Mode Femme</div>
+                </a>
+                <a href="catalogue.html?categorie=mode-homme" class="category-card">
+                    <div class="category-icon">👔</div>
+                    <div class="category-name">Mode Homme</div>
+                </a>
+                <a href="catalogue.html?categorie=electronique" class="category-card">
+                    <div class="category-icon">📱</div>
+                    <div class="category-name">Électronique</div>
+                </a>
+                <a href="catalogue.html?categorie=maison" class="category-card">
+                    <div class="category-icon">🏠</div>
+                    <div class="category-name">Maison</div>
+                </a>
+                <a href="catalogue.html?categorie=enfants" class="category-card">
+                    <div class="category-icon">👶</div>
+                    <div class="category-name">Enfants</div>
+                </a>
+                <a href="catalogue.html?categorie=meubles" class="category-card">
+                    <div class="category-icon">🛋️</div>
+                    <div class="category-name">Meubles</div>
+                </a>
+                <a href="catalogue.html?categorie=beaute" class="category-card">
+                    <div class="category-icon">💄</div>
+                    <div class="category-name">Beauté</div>
+                </a>
+                <a href="catalogue.html?categorie=sport" class="category-card">
+                    <div class="category-icon">⚽</div>
+                    <div class="category-name">Sport</div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Premium Vendors -->
+    <section class="premium-vendors">
+        <div class="container">
+            <h2 class="section-title">⭐ Vendeurs Premium Vérifiés</h2>
+            <div class="vendors-scroll" id="premiumVendors">
+                <!-- Chargé dynamiquement via JS -->
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent Products -->
+    <section class="products-section">
+        <div class="container">
+            <h2 class="section-title">🆕 Produits Récents</h2>
+            
+            <div class="filters-bar">
+                <button class="filter-btn active" onclick="filterByCategory('tous')">Tous</button>
+                <button class="filter-btn" onclick="filterByCategory('mode')">Mode</button>
+                <button class="filter-btn" onclick="filterByCategory('electronique')">Électronique</button>
+                <button class="filter-btn" onclick="filterByCategory('maison')">Maison</button>
+                <button class="filter-btn" onclick="filterByCategory('premium')">⭐ Premium</button>
+            </div>
+            
+            <div class="products-grid" id="productsGrid">
+                <!-- Chargé dynamiquement via JS -->
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+            
+            <div class="load-more">
+                <button class="load-more-btn" id="loadMoreBtn" onclick="loadMoreProducts()">
+                    Voir Plus de Produits
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>🛍️ SANI-FÉRÉ PRO</h3>
+                    <p>La marketplace de confiance du Mali. Achetez et vendez en toute sécurité avec Orange Money.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Liens Rapides</h3>
+                    <a href="catalogue.html">Catalogue</a>
+                    <a href="vendre.html">Devenir Vendeur</a>
+                    <a href="premium.html">Premium</a>
+                    <a href="aide.html">Centre d'Aide</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Catégories</h3>
+                    <a href="catalogue.html?categorie=mode">Mode</a>
+                    <a href="catalogue.html?categorie=electronique">Électronique</a>
+                    <a href="catalogue.html?categorie=maison">Maison</a>
+                    <a href="catalogue.html?categorie=beaute">Beauté</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p>📍 Bamako, Mali</p>
+                    <p>📧 contact@sanifere.ml</p>
+                    <p>📱 WhatsApp: +223 XX XX XX XX</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2026 SANI-FÉRÉ PRO - Alliance Sahel Services. Tous droits réservés. 🇲🇱</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
