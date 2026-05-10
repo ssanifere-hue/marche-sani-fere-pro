@@ -19,17 +19,24 @@ SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_urlsafe(32))
 ORANGE_MONEY_API_KEY = os.getenv("ORANGE_MONEY_API_KEY", "")
 
 app = FastAPI(title="Marche SANI-FÉRÉ PRO API")
-# Servir les fichiers statiques (marketplace publique)
-app.mount("/app", StaticFiles(directory="../static", html=True), name="static")
-# Chemins
+# Configuration du frontend
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-INDEX_HTML = os.path.join(BASE_DIR, "index.html")
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+INDEX_HTML = os.path.join(STATIC_DIR, "index.html")
+
+app.mount("/app/static", StaticFiles(directory=STATIC_DIR), name="static")
+
 
 @app.get("/app")
 def serve_frontend():
     if not os.path.exists(INDEX_HTML):
-        raise HTTPException(status_code=404, detail=f"Frontend file not found at {INDEX_HTML}")
+        # Essayer un chemin relatif si l'absolu échoue (pour Railway)
+        relative_path = "static/index.html"
+        if os.path.exists(relative_path):
+            return FileResponse(relative_path)
+        raise HTTPException(status_code=404, detail=f"Frontend file not found. Checked: {INDEX_HTML} and {os.path.abspath(relative_path)}")
     return FileResponse(INDEX_HTML)
+
 
 
 
