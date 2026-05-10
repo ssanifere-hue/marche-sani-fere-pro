@@ -9,3 +9,5 @@ bcrypt==3.2.2
 python-jose[cryptography]==3.3.0
 PyJWT==2.8.0
 python-dotenv==1.0.0
+cloudinary==1.38.0
+

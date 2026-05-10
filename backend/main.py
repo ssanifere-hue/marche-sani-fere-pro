@@ -12,6 +12,10 @@ from passlib.context import CryptContext
 import jwt
 from bson import ObjectId
 import secrets
+import cloudinary
+import cloudinary.uploader
+from fastapi import UploadFile, File
+
 
 # Configuration
 MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
@@ -19,6 +23,15 @@ SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_urlsafe(32))
 ORANGE_MONEY_API_KEY = os.getenv("ORANGE_MONEY_API_KEY", "")
 
 app = FastAPI(title="Marche SANI-FÉRÉ PRO API")
+
+# Cloudinary Configuration
+cloudinary.config(
+    cloud_name=os.getenv("CLOUD_NAME"),
+    api_key=os.getenv("API_KEY"),
+    api_secret=os.getenv("API_SECRET"),
+    secure=True
+)
+
 
 # Configuration du frontend
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -123,6 +136,15 @@ def create_access_token(data: dict):
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm="HS256")
 
+async def upload_image_to_cloudinary(file_or_base64):
+    """Télécharge une image sur Cloudinary et retourne l'URL sécurisée"""
+    try:
+        upload_result = cloudinary.uploader.upload(file_or_base64, folder="marche_sani_fere_pro")
+        return upload_result.get("secure_url")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur d'upload Cloudinary: {str(e)}")
+
+
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
         token = credentials.credentials
@@ -217,11 +239,13 @@ async def register(user: UserCreate):
             "description_boutique": user.description_boutique,
             "telephone": user.telephone,
             "est_premium": False,
+            "actif": False,  # Validation manuelle requise par l'admin
             "date_creation": datetime.utcnow(),
             "score": 0,
             "avis": []
         }
         await db.vendeurs.insert_one(vendeur_data)
+
     
     # Créer le token
     token = create_access_token({"user_id": user_id, "role": user.role})
@@ -276,12 +300,14 @@ async def inscription_vendeur(vendeur: VendeurCreate):
         "nom_boutique": vendeur.nom_boutique,
         "description_boutique": vendeur.description_boutique,
         "est_premium": False,
+        "actif": False,  # Validation manuelle requise
         "code_parrainage": generer_code_parrainage(),
         "parrains": [],  # Liste des vendeurs parrainés
         "commission_parrainage_gagnee": 0,
         "date_creation": datetime.utcnow(),
         "derniere_connexion": datetime.utcnow()
     }
+
     
     result = await db.vendeurs.insert_one(vendeur_data)
     
@@ -724,22 +750,34 @@ async def detail_produit(produit_id: str):
 
 @app.post("/api/produits")
 async def creer_produit(produit: ProduitCreate, current_user = Depends(get_current_user)):
-    """Ajouter un nouveau produit (Vendeur requis)"""
+    """Ajouter un nouveau produit (Vendeur requis et actif)"""
     
     if current_user["role"] != "vendeur":
         raise HTTPException(status_code=403, detail="Seuls les vendeurs peuvent ajouter des produits")
     
-    # Trouver le profil vendeur
+    # Trouver le profil vendeur et vérifier s'il est actif
     vendeur = await db.vendeurs.find_one({"user_id": str(current_user["_id"])})
     if not vendeur:
         raise HTTPException(status_code=404, detail="Profil vendeur non trouvé")
+    
+    if not vendeur.get("actif", False):
+        raise HTTPException(status_code=403, detail="Votre profil vendeur est en attente de validation par l'administrateur")
+    
+    # Gérer les images (Upload sur Cloudinary si c'est du base64)
+    final_images = []
+    for img in produit.images:
+        if img.startswith("data:image/"):
+            url = await upload_image_to_cloudinary(img)
+            final_images.append(url)
+        else:
+            final_images.append(img)
     
     produit_data = {
         "nom": produit.nom,
         "description": produit.description,
         "prix": produit.prix,
         "categorie": produit.categorie,
-        "images": produit.images,
+        "images": final_images,
         "stock": produit.stock,
         "est_premium": produit.est_premium,
         "vendeur_id": str(vendeur["_id"]),
@@ -750,8 +788,18 @@ async def creer_produit(produit: ProduitCreate, current_user = Depends(get_curre
     
     return {
         "message": "Produit ajouté avec succès",
-        "produit_id": str(result.inserted_id)
+        "produit_id": str(result.inserted_id),
+        "images": final_images
     }
+
+@app.post("/api/media/upload")
+async def upload_media(file: UploadFile = File(...), current_user = Depends(get_current_user)):
+    """Uploader une image directement sur Cloudinary"""
+    # Lire le contenu du fichier
+    contents = await file.read()
+    url = await upload_image_to_cloudinary(contents)
+    return {"url": url}
+
 
 # ==================== VENDEURS (EXTENDED) ====================
 
