@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Vendeur - SANI-FÉRÉ PRO</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/app/styles.css">
+
     <style>
         :root {
             --sidebar-width: 280px;
@@ -245,10 +246,11 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-brand">
-                <a href="index.html" class="logo" style="color: var(--primary-green);">
+                <a href="/app/index.html" class="logo" style="color: var(--primary-green);">
                     <span class="logo-icon">🛍️</span>
                     <span>SANI-FÉRÉ PRO</span>
                 </a>
+
             </div>
 
             <nav class="sidebar-nav">
@@ -453,15 +455,17 @@
             const userStr = localStorage.getItem('user');
             
             if (!token || !userStr) {
-                window.location.href = 'connexion.html';
+                window.location.href = '/app/connexion.html';
                 return;
             }
 
+
             currentUser = JSON.parse(userStr);
             if (currentUser.role !== 'vendeur') {
-                window.location.href = 'index.html';
+                window.location.href = '/app/index.html';
                 return;
             }
+
 
             document.getElementById('vendor-name-header').textContent = currentUser.nom;
             loadVendorProfile();
@@ -486,8 +490,9 @@
         function handleLogout() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = 'connexion.html';
+            window.location.href = '/app/connexion.html';
         }
+
 
         // Modal
         function openModal() { document.getElementById('productModal').style.display = 'flex'; }
@@ -558,10 +563,11 @@
             tbody.innerHTML = '';
             
             products.forEach(p => {
-                const imageUrl = (p.images && p.images.length > 0) ? p.images[0] : 'https://via.placeholder.com/150';
+                const imageUrl = (p.images && p.images.length > 0) ? p.images[0] : 'https://placehold.co/150x150?text=No+Image';
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><img src="${imageUrl}" class="prod-img" onerror="this.src='https://via.placeholder.com/150'"></td>
+                    <td><img src="${imageUrl}" class="prod-img" onerror="this.src='https://placehold.co/150x150?text=Error'"></td>
+
                     <td><strong>${p.nom}</strong></td>
                     <td class="text-success"><strong>${p.prix.toLocaleString()} FCFA</strong></td>
                     <td><span class="badge badge-warning">${p.categorie}</span></td>
