@@ -25,12 +25,20 @@ ORANGE_MONEY_API_KEY = os.getenv("ORANGE_MONEY_API_KEY", "")
 app = FastAPI(title="Marche SANI-FÉRÉ PRO API")
 
 # Cloudinary Configuration
+cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME") or os.getenv("CLOUD_NAME")
+api_key = os.getenv("CLOUDINARY_API_KEY") or os.getenv("API_KEY")
+api_secret = os.getenv("CLOUDINARY_API_SECRET") or os.getenv("API_SECRET")
+
+if not all([cloud_name, api_key, api_secret]):
+    print(f"⚠️ Cloudinary Config Warning: cloud_name={cloud_name}, api_key={api_key}, api_secret={'SET' if api_secret else 'MISSING'}")
+
 cloudinary.config(
-    cloud_name=os.getenv("CLOUD_NAME"),
-    api_key=os.getenv("API_KEY"),
-    api_secret=os.getenv("API_SECRET"),
+    cloud_name=cloud_name,
+    api_key=api_key,
+    api_secret=api_secret,
     secure=True
 )
+
 
 
 # Configuration du frontend
