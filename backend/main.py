@@ -67,6 +67,55 @@ app.add_middleware(
 client = AsyncIOMotorClient(MONGODB_URL)
 db = client.marche_sani_fere_pro
 
+@app.on_event("startup")
+async def startup_event():
+    # Vérifier/Créer le compte démo
+    demo_phone = "70000000"
+    demo_password = "demo1234"
+    
+    user = await db.users.find_one({"telephone": demo_phone})
+    if not user:
+        user_data = {
+            "nom": "Demo",
+            "prenom": "User",
+            "telephone": demo_phone,
+            "email": "demo@example.com",
+            "mot_de_passe": hash_password(demo_password),
+            "role": "vendeur",
+            "portefeuille": 5000,
+            "date_inscription": datetime.utcnow()
+        }
+        result = await db.users.insert_one(user_data)
+        user_id = str(result.inserted_id)
+        
+        # Créer profil vendeur démo (actif par défaut pour la démo)
+        vendeur_data = {
+            "user_id": user_id,
+            "nom_boutique": "Boutique Démo Mali",
+            "description_boutique": "Compte de démonstration pour SANI-FÉRÉ PRO",
+            "telephone": demo_phone,
+            "est_premium": True,
+            "actif": True,
+            "date_creation": datetime.utcnow(),
+            "score": 5,
+            "avis": []
+        }
+        await db.vendeurs.insert_one(vendeur_data)
+        print("Compte démo créé avec succès")
+    else:
+        # S'assurer que le mot de passe est à jour avec le hash actuel
+        await db.users.update_one(
+            {"_id": user["_id"]},
+            {"$set": {"mot_de_passe": hash_password(demo_password)}}
+        )
+        # S'assurer que le vendeur est actif pour la démo
+        await db.vendeurs.update_one(
+            {"user_id": str(user["_id"])},
+            {"$set": {"actif": True, "est_premium": True}}
+        )
+        print("Compte démo mis à jour")
+
+
 # Security
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
@@ -262,8 +311,10 @@ async def register(user: UserCreate):
         "message": "Inscription réussie",
         "user_id": user_id,
         "token": token,
+        "access_token": token,  # Compatibilité frontend
         "bonus": 1000
     }
+
 
 @app.post("/api/auth/login")
 async def login(credentials: UserLogin):
@@ -278,6 +329,8 @@ async def login(credentials: UserLogin):
     return {
         "message": "Connexion réussie",
         "token": token,
+        "access_token": token,  # Compatibilité frontend
+
         "user": {
             "id": str(user["_id"]),
             "nom": user["nom"],
