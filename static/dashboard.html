@@ -253,19 +253,20 @@
 
             <nav class="sidebar-nav">
                 <div class="nav-item">
-                    <a href="#" class="nav-link active" onclick="showSection('overview')">
+                    <a href="#" class="nav-link active" onclick="showSection(event, 'overview')">
                         <span>📊</span> <span>Tableau de bord</span>
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a href="#" class="nav-link" onclick="showSection('products')">
+                    <a href="#" class="nav-link" onclick="showSection(event, 'products')">
                         <span>📦</span> <span>Mes Produits</span>
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a href="#" class="nav-link" onclick="showSection('profile')">
+                    <a href="#" class="nav-link" onclick="showSection(event, 'profile')">
                         <span>👤</span> <span>Mon Profil</span>
                     </a>
+
                 </div>
             </nav>
 
@@ -468,13 +469,18 @@
         });
 
         // Navigation
-        function showSection(sectionId) {
+        function showSection(event, sectionId) {
+            if (event) event.preventDefault();
             document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
-            document.getElementById(`section-${sectionId}`).classList.remove('hidden');
+            const target = document.getElementById(`section-${sectionId}`);
+            if (target) target.classList.remove('hidden');
             
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            }
         }
+
 
         // Logout
         function handleLogout() {
@@ -552,9 +558,10 @@
             tbody.innerHTML = '';
             
             products.forEach(p => {
+                const imageUrl = (p.images && p.images.length > 0) ? p.images[0] : 'https://via.placeholder.com/150';
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><img src="${p.images[0] || 'https://via.placeholder.com/50'}" class="prod-img"></td>
+                    <td><img src="${imageUrl}" class="prod-img" onerror="this.src='https://via.placeholder.com/150'"></td>
                     <td><strong>${p.nom}</strong></td>
                     <td class="text-success"><strong>${p.prix.toLocaleString()} FCFA</strong></td>
                     <td><span class="badge badge-warning">${p.categorie}</span></td>
@@ -563,6 +570,7 @@
                 tbody.appendChild(tr);
             });
         }
+
 
         // Submit Produit
         async function handleProductSubmit(event) {
