@@ -41,6 +41,14 @@ STATIC_DIR = os.path.join(BASE_DIR, "static")
 # et que les liens relatifs (styles.css, app.js) fonctionnent.
 app.mount("/app", StaticFiles(directory=STATIC_DIR, html=True), name="static")
 
+@app.get("/dashboard")
+async def serve_dashboard():
+    dashboard_path = os.path.join(STATIC_DIR, "dashboard.html")
+    if not os.path.exists(dashboard_path):
+        raise HTTPException(status_code=404, detail="Dashboard file not found")
+    return FileResponse(dashboard_path)
+
+
 
 
 

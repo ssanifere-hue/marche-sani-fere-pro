@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Vendeur - SANI-FÉRÉ PRO</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --sidebar-width: 280px;
+        }
+
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid var(--border-gray);
+            padding: var(--spacing-md);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        .sidebar-brand {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            flex: 1;
+        }
+
+        .nav-item {
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.875rem 1rem;
+            text-decoration: none;
+            color: var(--text-gray);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            transition: var(--transition-fast);
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(0, 176, 116, 0.1);
+            color: var(--primary-green);
+        }
+
+        .sidebar-footer {
+            padding-top: var(--spacing-md);
+            border-top: 1px solid var(--border-gray);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: var(--spacing-lg);
+            background: var(--bg-light);
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .stat-card {
+            background: white;
+            padding: var(--spacing-md);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-number {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        /* Product Table */
+        .content-card {
+            background: white;
+            padding: var(--spacing-md);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 2px solid var(--border-gray);
+            color: var(--text-gray);
+            font-weight: 600;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-gray);
+            vertical-align: middle;
+        }
+
+        .prod-img {
+            width: 50px;
+            height: 50px;
+            border-radius: var(--radius-sm);
+            object-fit: cover;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .badge-success { background: #EFE; color: #080; }
+        .badge-warning { background: #FFF5E6; color: #D60; }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .form-group { margin-bottom: var(--spacing-md); }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-gray);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-gray);
+        }
+
+        /* Profile Section */
+        .profile-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-lg);
+        }
+
+        .info-group {
+            padding: var(--spacing-sm);
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .info-label {
+            color: var(--text-gray);
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar { width: 80px; padding: var(--spacing-sm); }
+            .sidebar-brand span, .nav-link span, .sidebar-footer span { display: none; }
+            .main-content { margin-left: 80px; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; }
+            .profile-info { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <a href="index.html" class="logo" style="color: var(--primary-green);">
+                    <span class="logo-icon">🛍️</span>
+                    <span>SANI-FÉRÉ PRO</span>
+                </a>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-item">
+                    <a href="#" class="nav-link active" onclick="showSection('overview')">
+                        <span>📊</span> <span>Tableau de bord</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" onclick="showSection('products')">
+                        <span>📦</span> <span>Mes Produits</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" onclick="showSection('profile')">
+                        <span>👤</span> <span>Mon Profil</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="#" class="nav-link" onclick="handleLogout()">
+                    <span>🚪</span> <span>Déconnexion</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Overview Section -->
+            <section id="section-overview">
+                <div class="page-header">
+                    <h1>Bonjour, <span id="vendor-name-header">Vendeur</span> 👋</h1>
+                    <button class="nav-btn primary" onclick="openModal()">+ Ajouter un Produit</button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-label">Total Produits</span>
+                        <span class="stat-number" id="stat-total-products">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Ventes (Ce mois)</span>
+                        <span class="stat-number">0 FCFA</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Note Vendeur</span>
+                        <span class="stat-number">⭐ 5.0</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Statut Compte</span>
+                        <span class="badge badge-success" id="vendor-status" style="width: fit-content; margin-top: 0.5rem;">Actif</span>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h2 class="mb-2">Produits Récents</h2>
+                    <div class="table-responsive">
+                        <table id="recent-products-table">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Produit</th>
+                                    <th>Prix</th>
+                                    <th>Catégorie</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Chargé dynamiquement -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Products Section -->
+            <section id="section-products" class="hidden">
+                <div class="page-header">
+                    <h1>Gestion des Produits</h1>
+                    <button class="nav-btn primary" onclick="openModal()">+ Nouveau Produit</button>
+                </div>
+                <div class="content-card">
+                    <div class="table-responsive">
+                        <table id="all-products-table">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Nom</th>
+                                    <th>Prix</th>
+                                    <th>Catégorie</th>
+                                    <th>Stock</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Chargé dynamiquement -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Profile Section -->
+            <section id="section-profile" class="hidden">
+                <div class="page-header">
+                    <h1>Informations de la Boutique</h1>
+                </div>
+                <div class="content-card">
+                    <div class="profile-info">
+                        <div class="info-group">
+                            <div class="info-label">Nom du Vendeur</div>
+                            <div class="info-value" id="profile-full-name">...</div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Nom de la Boutique</div>
+                            <div class="info-value" id="profile-shop-name">...</div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Téléphone</div>
+                            <div class="info-value" id="profile-phone">...</div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Email</div>
+                            <div class="info-value" id="profile-email">...</div>
+                        </div>
+                        <div class="info-group" style="grid-column: span 2;">
+                            <div class="info-label">Description</div>
+                            <div class="info-value" id="profile-desc">...</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal Ajouter Produit -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Ajouter un Nouveau Produit</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="productForm" onsubmit="handleProductSubmit(event)">
+                <div class="form-group">
+                    <label for="prodName">Nom du produit</label>
+                    <input type="text" id="prodName" required placeholder="Ex: Bazin Riche Getzner">
+                </div>
+                <div class="form-group">
+                    <label for="prodPrice">Prix (FCFA)</label>
+                    <input type="number" id="prodPrice" required placeholder="Ex: 25000">
+                </div>
+                <div class="form-group">
+                    <label for="prodCategory">Catégorie</label>
+                    <select id="prodCategory" required>
+                        <option value="mode-femme">Mode Femme</option>
+                        <option value="mode-homme">Mode Homme</option>
+                        <option value="electronique">Électronique</option>
+                        <option value="maison">Maison</option>
+                        <option value="enfants">Enfants</option>
+                        <option value="meubles">Meubles</option>
+                        <option value="beaute">Beauté</option>
+                        <option value="sport">Sport</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="prodStock">Stock initial</label>
+                    <input type="number" id="prodStock" value="1" min="1">
+                </div>
+                <div class="form-group">
+                    <label for="prodDesc">Description</label>
+                    <textarea id="prodDesc" rows="3" required placeholder="Détails du produit..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="prodImage">Image du produit</label>
+                    <input type="file" id="prodImage" accept="image/*" required onchange="previewImage(event)">
+                    <div id="imagePreview" style="margin-top: 1rem; display: none;">
+                        <img src="" alt="Preview" style="max-width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius-sm);">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" id="prodPremium" style="width: auto;">
+                        Mettre en avant (Premium ⭐)
+                    </label>
+                </div>
+                <button type="submit" class="submit-btn" id="submitProdBtn">Publier le Produit</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://web-production-8f94.up.railway.app';
+        let currentUser = null;
+        let token = null;
+        let base64Image = null;
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            token = localStorage.getItem('token');
+            const userStr = localStorage.getItem('user');
+            
+            if (!token || !userStr) {
+                window.location.href = 'connexion.html';
+                return;
+            }
+
+            currentUser = JSON.parse(userStr);
+            if (currentUser.role !== 'vendeur') {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            document.getElementById('vendor-name-header').textContent = currentUser.nom;
+            loadVendorProfile();
+            loadProducts();
+        });
+
+        // Navigation
+        function showSection(sectionId) {
+            document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`section-${sectionId}`).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
+        // Logout
+        function handleLogout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'connexion.html';
+        }
+
+        // Modal
+        function openModal() { document.getElementById('productModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('productModal').style.display = 'none'; }
+
+        // Preview Image
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    base64Image = e.target.result;
+                    const preview = document.getElementById('imagePreview');
+                    preview.style.display = 'block';
+                    preview.querySelector('img').src = base64Image;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Charger Profil
+        async function loadVendorProfile() {
+            // Dans un vrai cas, on appellerait un endpoint /api/vendeurs/me
+            // Ici on utilise les données du localStorage et on simule
+            document.getElementById('profile-full-name').textContent = currentUser.prenom + ' ' + currentUser.nom;
+            document.getElementById('profile-phone').textContent = currentUser.telephone;
+            document.getElementById('profile-email').textContent = currentUser.email || 'Non renseigné';
+            
+            try {
+                // Essayer de récupérer les infos boutique
+                const response = await fetch(`${API_BASE_URL}/api/vendeurs/premium`);
+                const vendors = await response.json();
+                // Simulation d'une recherche par nom (à améliorer avec un endpoint dédié)
+                const myShop = vendors.find(v => v.nom_boutique.includes(currentUser.nom));
+                if (myShop) {
+                    document.getElementById('profile-shop-name').textContent = myShop.nom_boutique;
+                    document.getElementById('profile-desc').textContent = myShop.description || 'Pas de description';
+                } else {
+                    document.getElementById('profile-shop-name').textContent = 'Ma Boutique SANI-FÉRÉ';
+                    document.getElementById('profile-desc').textContent = 'Boutique enregistrée sur SANI-FÉRÉ PRO';
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // Charger Produits
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/produits?limit=100`);
+                const data = await response.json();
+                
+                // On filtre les produits par vendeur si possible
+                // Ici on simule car le backend retourne tous les produits
+                const myProducts = data.produits; 
+                
+                document.getElementById('stat-total-products').textContent = myProducts.length;
+                
+                renderTable('recent-products-table', myProducts.slice(0, 5));
+                renderTable('all-products-table', myProducts);
+            } catch (error) {
+                console.error('Erreur chargement produits:', error);
+            }
+        }
+
+        function renderTable(tableId, products) {
+            const tbody = document.querySelector(`#${tableId} tbody`);
+            tbody.innerHTML = '';
+            
+            products.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><img src="${p.images[0] || 'https://via.placeholder.com/50'}" class="prod-img"></td>
+                    <td><strong>${p.nom}</strong></td>
+                    <td class="text-success"><strong>${p.prix.toLocaleString()} FCFA</strong></td>
+                    <td><span class="badge badge-warning">${p.categorie}</span></td>
+                    <td>${tableId.includes('all') ? (p.stock || 1) : new Date(p.date_creation).toLocaleDateString()}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Submit Produit
+        async function handleProductSubmit(event) {
+            event.preventDefault();
+            const btn = document.getElementById('submitProdBtn');
+            btn.disabled = true;
+            btn.textContent = 'Publication en cours...';
+
+            const payload = {
+                nom: document.getElementById('prodName').value,
+                description: document.getElementById('prodDesc').value,
+                prix: parseInt(document.getElementById('prodPrice').value),
+                categorie: document.getElementById('prodCategory').value,
+                images: [base64Image],
+                stock: parseInt(document.getElementById('prodStock').value),
+                est_premium: document.getElementById('prodPremium').checked
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/produits`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    alert('Produit publié avec succès !');
+                    closeModal();
+                    document.getElementById('productForm').reset();
+                    document.getElementById('imagePreview').style.display = 'none';
+                    loadProducts();
+                } else {
+                    const err = await response.json();
+                    alert('Erreur: ' + (err.detail || 'Impossible de publier'));
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Erreur de connexion au serveur');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Publier le Produit';
+            }
+        }
+    </script>
+</body>
+</html>
