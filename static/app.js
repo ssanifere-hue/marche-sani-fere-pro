@@ -10,10 +10,19 @@ let hasMore = true;
 // Initialisation au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
     updateNavbar();
-    loadPremiumVendors();
-    loadProducts();
-    setupInfiniteScroll();
+    
+    // Charger les vendeurs premium seulement si le conteneur existe (index.html)
+    if (document.getElementById('premiumVendors')) {
+        loadPremiumVendors();
+    }
+    
+    // Charger les produits seulement si la grille existe (index.html)
+    if (document.getElementById('productsGrid')) {
+        loadProducts();
+        setupInfiniteScroll();
+    }
 });
+
 
 
 // ========================================
@@ -21,11 +30,12 @@ document.addEventListener('DOMContentLoaded', () => {
 // ========================================
 
 async function loadPremiumVendors() {
+    const container = document.getElementById('premiumVendors');
+    if (!container) return;
+    
     try {
         const response = await fetch(`${API_BASE_URL}/api/vendeurs/premium`);
         const data = await response.json();
-        
-        const container = document.getElementById('premiumVendors');
         
         if (!data.vendeurs || data.vendeurs.length === 0) {
             container.innerHTML = '<p style="text-align:center;padding:2rem;">Aucun vendeur premium pour le moment</p>';
@@ -64,7 +74,11 @@ async function loadPremiumVendors() {
 async function loadProducts(reset = false) {
     if (isLoading) return;
     
+    const grid = document.getElementById('productsGrid');
+    if (!grid) return;
+    
     if (reset || currentPage === 1) {
+
         currentPage = 1;
         hasMore = true;
         document.getElementById('productsGrid').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
