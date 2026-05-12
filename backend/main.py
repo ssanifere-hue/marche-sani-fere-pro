@@ -328,8 +328,15 @@ async def register(user: UserCreate):
         "user_id": user_id,
         "token": token,
         "access_token": token,  # Compatibilité frontend
+        "user": {
+            "id": user_id,
+            "nom": user.nom,
+            "prenom": user.prenom or "",
+            "role": user.role
+        },
         "bonus": 1000
     }
+
 
 
 @app.post("/api/auth/login")

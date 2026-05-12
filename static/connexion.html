@@ -340,8 +340,12 @@
         // Gérer les onglets
         function switchAuthTab(tab) {
             // Mettre à jour les boutons
-            document.querySelectorAll('.auth-tab').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            document.querySelectorAll('.auth-tab').forEach(btn => {
+                btn.classList.remove('active');
+                if (tab === 'login' && btn.textContent.includes('Connexion')) btn.classList.add('active');
+                if (tab === 'register' && btn.textContent.includes('Inscription')) btn.classList.add('active');
+            });
+
             
             // Mettre à jour les formulaires
             document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
@@ -480,15 +484,20 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    showSuccess('Inscription réussie ! Redirection vers la connexion...');
+                    // Sauvegarder le token et l'utilisateur pour l'auto-login
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
                     
-                    // Réinitialiser le formulaire et passer à connexion
+                    showSuccess('Inscription réussie ! Redirection...');
+                    
+                    // Rediriger immédiatement vers la page appropriée
                     setTimeout(() => {
-                        document.getElementById('registerForm').reset();
-                        switchAuthTab('login');
-                        document.getElementById('loginTelephone').value = document.getElementById('registerTelephone').value;
-                    }, 2000);
+                        window.location.href = data.user.role === 'vendeur' 
+                            ? '/dashboard' 
+                            : 'index.html';
+                    }, 1500);
                 } else {
+
                     showError(data.detail || 'Erreur lors de l\'inscription');
                 }
             } catch (error) {
