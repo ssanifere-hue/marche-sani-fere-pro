@@ -259,16 +259,17 @@
                     </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="registerNom">👤 Nom complet</label>
-                    <input 
-                        type="text" 
-                        id="registerNom" 
-                        placeholder="Ex: Ibrahim Koné" 
-                        required
-                        minlength="3"
-                    >
+                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label for="registerNom">👤 Nom</label>
+                        <input type="text" id="registerNom" placeholder="Ex: Koné" required>
+                    </div>
+                    <div>
+                        <label for="registerPrenom">👤 Prénom</label>
+                        <input type="text" id="registerPrenom" placeholder="Ex: Ibrahim" required>
+                    </div>
                 </div>
+
                 
                 <div class="form-group">
                     <label for="registerTelephone">📱 Numéro de téléphone</label>
@@ -362,10 +363,20 @@
         // Afficher/masquer les messages
         function showError(message) {
             const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
+            
+            // Si le message est un tableau (validation FastAPI 422)
+            if (Array.isArray(message)) {
+                errorDiv.textContent = message.map(err => err.msg).join(', ');
+            } else if (typeof message === 'object') {
+                errorDiv.textContent = message.detail || JSON.stringify(message);
+            } else {
+                errorDiv.textContent = message;
+            }
+            
             errorDiv.style.display = 'block';
             document.getElementById('successMessage').style.display = 'none';
         }
+
         
         function showSuccess(message) {
             const successDiv = document.getElementById('successMessage');
@@ -457,11 +468,13 @@
                     },
                     body: JSON.stringify({
                         nom: document.getElementById('registerNom').value,
+                        prenom: document.getElementById('registerPrenom').value,
                         telephone: document.getElementById('registerTelephone').value,
                         email: document.getElementById('registerEmail').value || null,
                         mot_de_passe: password,
                         role: accountType
                     })
+
                 });
                 
                 const data = await response.json();

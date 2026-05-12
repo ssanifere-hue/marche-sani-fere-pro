@@ -124,13 +124,14 @@ security = HTTPBearer()
 
 class UserCreate(BaseModel):
     nom: str
-    prenom: str
+    prenom: Optional[str] = ""
     telephone: str = Field(..., pattern=r"^\d{8}$")
-    email: EmailStr
+    email: Optional[EmailStr] = None
     mot_de_passe: str
     role: str = "client"  # "client" ou "vendeur"
     nom_boutique: Optional[str] = None
     description_boutique: Optional[str] = None
+
 
 class UserLogin(BaseModel):
     telephone: str
@@ -290,7 +291,8 @@ async def register(user: UserCreate):
     # Créer l'utilisateur
     user_data = {
         "nom": user.nom,
-        "prenom": user.prenom,
+        "prenom": user.prenom or "",
+
         "telephone": user.telephone,
         "email": user.email,
         "mot_de_passe": hash_password(user.mot_de_passe),
