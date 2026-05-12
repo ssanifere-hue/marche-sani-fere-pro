@@ -254,8 +254,9 @@
             const html = `
                 <div class="product-gallery">
                     <img src="${images[0]}" id="mainImage" class="main-image" alt="${productName}" onerror="this.src='https://via.placeholder.com/600x600/E9ECEF/6C757D?text=Image'">
-                    <div class="thumbnail-grid">${thumbnails}</div>
+                    ${images.length > 1 ? `<div class="thumbnail-grid">${thumbnails}</div>` : ''}
                 </div>
+
                 
                 <div class="product-details">
                     <h1 class="product-title-large">${productName}</h1>
