@@ -431,9 +431,8 @@
                     setTimeout(() => {
                         window.location.href = data.user.role === 'vendeur' 
                             ? '/dashboard' 
-                            : '/app/index.html';
+                            : 'index.html';
                     }, 1500);
-
                 } else {
                     showError(data.detail || 'Identifiants incorrects');
                 }
@@ -495,9 +494,8 @@
                     setTimeout(() => {
                         window.location.href = data.user.role === 'vendeur' 
                             ? '/dashboard' 
-                            : '/app/index.html';
+                            : 'index.html';
                     }, 1500);
-
                 } else {
 
                     showError(data.detail || 'Erreur lors de l\'inscription');

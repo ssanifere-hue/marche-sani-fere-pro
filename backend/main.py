@@ -794,7 +794,7 @@ async def lister_produits(
         "produits": [
             {
                 "id": str(p["_id"]),
-                "titre": p["nom"],  # Mappé vers titre pour le frontend
+                "nom": p["nom"],
                 "description": p["description"],
                 "prix": p["prix"],
                 "categorie": p["categorie"],
@@ -805,7 +805,6 @@ async def lister_produits(
             }
             for p in produits
         ]
-
     }
 
 @app.get("/api/produits/{produit_id}")
@@ -820,22 +819,18 @@ async def detail_produit(produit_id: str):
     vendeur = await db.vendeurs.find_one({"_id": ObjectId(produit["vendeur_id"])})
     
     return {
-        "produit": {
-            "id": str(produit["_id"]),
-            "titre": produit["nom"],
-            "description": produit["description"],
-            "prix": produit["prix"],
-            "categorie": produit.get("categorie"),
-            "etat": produit.get("etat", "Neuf"),
-            "localisation": produit.get("localisation", "Mali"),
-            "images": produit.get("images", []),
-            "vendeur_id": str(vendeur["_id"]) if vendeur else None,
-            "vendeur_nom": vendeur["nom_boutique"] if vendeur else "Vendeur Inconnu",
-            "vendeur_premium": vendeur.get("est_premium", False) if vendeur else False,
-            "date_creation": produit["date_creation"]
-        }
+        "id": str(produit["_id"]),
+        "nom": produit["nom"],
+        "description": produit["description"],
+        "prix": produit["prix"],
+        "categorie": produit["categorie"],
+        "images": produit.get("images", []),
+        "vendeur": {
+            "id": str(vendeur["_id"]),
+            "nom_boutique": vendeur["nom_boutique"]
+        } if vendeur else None,
+        "date_creation": produit["date_creation"]
     }
-
 
 @app.post("/api/produits")
 async def creer_produit(produit: ProduitCreate, current_user = Depends(get_current_user)):
