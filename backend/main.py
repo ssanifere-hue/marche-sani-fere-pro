@@ -194,12 +194,22 @@ def create_access_token(data: dict):
     return jwt.encode(to_encode, SECRET_KEY, algorithm="HS256")
 
 async def upload_image_to_cloudinary(file_or_base64):
-    """Télécharge une image sur Cloudinary et retourne l'URL sécurisée"""
+    """Télécharge une image sur Cloudinary et retourne l'URL sécurisée (Unsigned Upload)"""
     try:
-        upload_result = cloudinary.uploader.upload(file_or_base64, folder="marche_sani_fere_pro")
+        # L'upload non signé nécessite un 'upload_preset' configuré dans Cloudinary
+        upload_preset = os.getenv("CLOUDINARY_UPLOAD_PRESET", "ml_default")
+        
+        upload_result = cloudinary.uploader.upload(
+            file_or_base64, 
+            folder="marche_sani_fere_pro",
+            unsigned=True,
+            upload_preset=upload_preset
+        )
         return upload_result.get("secure_url")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur d'upload Cloudinary: {str(e)}")
+        # Retourner une erreur JSON propre comme demandé
+        raise HTTPException(status_code=400, detail=f"Cloudinary upload failed: {str(e)}")
+
 
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
