@@ -132,11 +132,12 @@ function displayVendorAbout(vendor) {
 async function loadVendorProducts(reset = false) {
     if (isLoadingVendorProducts) return;
     
-    if (reset) {
+    if (reset || vendorProductsPage === 1) {
         vendorProductsPage = 1;
         hasMoreVendorProducts = true;
         document.getElementById('vendorProductsGrid').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
     }
+
     
     isLoadingVendorProducts = true;
     updateLoadMoreVendorButton(true);
@@ -170,11 +171,12 @@ async function loadVendorProducts(reset = false) {
         
         const productsHTML = data.produits.map(product => createVendorProductCard(product)).join('');
         
-        if (reset) {
+        if (reset || vendorProductsPage === 1) {
             grid.innerHTML = productsHTML;
         } else {
             grid.insertAdjacentHTML('beforeend', productsHTML);
         }
+
         
         hasMoreVendorProducts = data.produits.length === 24;
         vendorProductsPage++;
@@ -198,15 +200,16 @@ async function loadVendorProducts(reset = false) {
 
 // Créer carte produit
 function createVendorProductCard(product) {
+    const productName = product.nom || product.titre || 'Produit';
     const imageUrl = product.images && product.images.length > 0 
         ? product.images[0] 
-        : `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(product.titre || 'Produit')}`;
+        : `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(productName)}`;
     
     return `
         <a href="produit.html?id=${product.id}" class="product-card">
-            <img src="${imageUrl}" alt="${product.titre}" class="product-image" onerror="this.src='https://via.placeholder.com/300x300/E9ECEF/6C757D?text=Image'">
+            <img src="${imageUrl}" alt="${productName}" class="product-image" onerror="this.src='https://via.placeholder.com/300x300/E9ECEF/6C757D?text=Image'">
             <div class="product-info">
-                <div class="product-title">${product.titre}</div>
+                <div class="product-title">${productName}</div>
                 <div class="product-price">${formatPrice(product.prix)} FCFA</div>
             </div>
         </a>
