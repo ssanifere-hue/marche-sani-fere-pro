@@ -197,7 +197,8 @@ async def upload_image_to_cloudinary(file_or_base64):
     """Télécharge une image sur Cloudinary et retourne l'URL sécurisée (Unsigned Upload)"""
     try:
         # L'upload non signé nécessite un 'upload_preset' configuré dans Cloudinary
-        upload_preset = os.getenv("CLOUDINARY_UPLOAD_PRESET", "ml_default")
+        # Le nom exact à créer est : marche_sani_fere_pro
+        upload_preset = os.getenv("CLOUDINARY_UPLOAD_PRESET", "marche_sani_fere_pro")
         
         upload_result = cloudinary.uploader.upload(
             file_or_base64, 
@@ -207,8 +208,11 @@ async def upload_image_to_cloudinary(file_or_base64):
         )
         return upload_result.get("secure_url")
     except Exception as e:
-        # Retourner une erreur JSON propre comme demandé
+        # Message d'erreur spécifique demandé par le client
+        if "Upload preset not found" in str(e):
+            raise HTTPException(status_code=400, detail="Upload preset not configured correctly")
         raise HTTPException(status_code=400, detail=f"Cloudinary upload failed: {str(e)}")
+
 
 
 
