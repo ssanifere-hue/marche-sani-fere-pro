@@ -9,10 +9,12 @@ let hasMore = true;
 
 // Initialisation au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
+    updateNavbar();
     loadPremiumVendors();
     loadProducts();
     setupInfiniteScroll();
 });
+
 
 // ========================================
 // VENDEURS PREMIUM
@@ -244,31 +246,38 @@ function updateLoadMoreButton(loading) {
 }
 
 // ========================================
-// UTILITAIRES
+// SESSION & NAVBAR
 // ========================================
 
-// Générer des données de démo si l'API ne répond pas
-function generateDemoProducts(count = 20) {
-    const categories = ['Mode', 'Électronique', 'Maison', 'Beauté'];
-    const products = [];
-    
-    for (let i = 0; i < count; i++) {
-        products.push({
-            id: `demo-${i}`,
-            titre: `Produit ${i + 1} - ${categories[i % categories.length]}`,
-            prix: Math.floor(Math.random() * 100000) + 5000,
-            images: [],
-            vendeur_nom: `Vendeur ${Math.floor(Math.random() * 20) + 1}`,
-            vendeur_premium: Math.random() > 0.7
-        });
+function updateNavbar() {
+    const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
+    const navActions = document.querySelector('.nav-actions');
+
+    if (token && userStr && navActions) {
+        try {
+            const user = JSON.parse(userStr);
+            const firstName = user.prenom || user.nom || 'Compte';
+            
+            navActions.innerHTML = `
+                ${user.role === 'vendeur' 
+                    ? '<a href="/dashboard" class="nav-btn primary">Dashboard</a>' 
+                    : '<a href="vendre.html" class="nav-btn primary">Vendre</a>'}
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span style="font-weight: 600; color: var(--text-dark);">👤 ${firstName}</span>
+                    <a href="#" class="nav-btn" onclick="handleLogout(event)">Déconnexion</a>
+                </div>
+            `;
+        } catch (e) {
+            console.error('Erreur parsing user session:', e);
+        }
     }
-    
-    return products;
 }
 
-// Afficher les produits de démo
-function showDemoProducts() {
-    const grid = document.getElementById('productsGrid');
-    const products = generateDemoProducts(20);
-    grid.innerHTML = products.map(p => createProductCard(p)).join('');
+function handleLogout(event) {
+    if (event) event.preventDefault();
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
 }
+
