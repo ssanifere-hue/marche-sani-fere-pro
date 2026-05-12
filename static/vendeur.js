@@ -29,13 +29,15 @@ async function loadVendorProfile() {
         const response = await fetch(`${API_BASE_URL}/api/vendeurs/${vendorId}`);
         const data = await response.json();
         
-        if (!data.vendeur) {
+        // L'API renvoie les données directement (pas dans data.vendeur)
+        if (!data.id && !data.nom_boutique) {
             throw new Error('Vendeur non trouvé');
         }
         
-        vendorData = data.vendeur;
+        vendorData = data;
         displayVendorProfile(vendorData);
         displayVendorAbout(vendorData);
+
         
     } catch (error) {
         console.error('Erreur chargement profil vendeur:', error);
@@ -132,11 +134,12 @@ function displayVendorAbout(vendor) {
 async function loadVendorProducts(reset = false) {
     if (isLoadingVendorProducts) return;
     
-    if (reset) {
+    if (reset || vendorProductsPage === 1) {
         vendorProductsPage = 1;
         hasMoreVendorProducts = true;
         document.getElementById('vendorProductsGrid').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
     }
+
     
     isLoadingVendorProducts = true;
     updateLoadMoreVendorButton(true);
@@ -154,7 +157,7 @@ async function loadVendorProducts(reset = false) {
         const grid = document.getElementById('vendorProductsGrid');
         
         if (!data.produits || data.produits.length === 0) {
-            if (reset) {
+            if (reset || vendorProductsPage === 1) {
                 grid.innerHTML = `
                     <div style="grid-column: 1/-1; text-align:center; padding:3rem;">
                         <h3>📦 Aucun produit disponible</h3>
@@ -167,14 +170,16 @@ async function loadVendorProducts(reset = false) {
             isLoadingVendorProducts = false;
             return;
         }
+
         
         const productsHTML = data.produits.map(product => createVendorProductCard(product)).join('');
         
-        if (reset) {
+        if (reset || vendorProductsPage === 1) {
             grid.innerHTML = productsHTML;
         } else {
             grid.insertAdjacentHTML('beforeend', productsHTML);
         }
+
         
         hasMoreVendorProducts = data.produits.length === 24;
         vendorProductsPage++;
@@ -182,7 +187,7 @@ async function loadVendorProducts(reset = false) {
     } catch (error) {
         console.error('Erreur chargement produits vendeur:', error);
         const grid = document.getElementById('vendorProductsGrid');
-        if (reset) {
+        if (reset || vendorProductsPage === 1) {
             grid.innerHTML = `
                 <div style="grid-column: 1/-1; text-align:center; padding:3rem;">
                     <h3>❌ Erreur de chargement</h3>
@@ -190,6 +195,7 @@ async function loadVendorProducts(reset = false) {
                 </div>
             `;
         }
+
     } finally {
         isLoadingVendorProducts = false;
         updateLoadMoreVendorButton(false);
@@ -198,20 +204,22 @@ async function loadVendorProducts(reset = false) {
 
 // Créer carte produit
 function createVendorProductCard(product) {
+    const productName = product.nom || product.titre || 'Produit';
     const imageUrl = product.images && product.images.length > 0 
         ? product.images[0] 
-        : `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(product.titre || 'Produit')}`;
+        : `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(productName)}`;
     
     return `
         <a href="produit.html?id=${product.id}" class="product-card">
-            <img src="${imageUrl}" alt="${product.titre}" class="product-image" onerror="this.src='https://via.placeholder.com/300x300/E9ECEF/6C757D?text=Image'">
+            <img src="${imageUrl}" alt="${productName}" class="product-image" onerror="this.src='https://via.placeholder.com/300x300/E9ECEF/6C757D?text=Image'">
             <div class="product-info">
-                <div class="product-title">${product.titre}</div>
+                <div class="product-title">${productName}</div>
                 <div class="product-price">${formatPrice(product.prix)} FCFA</div>
             </div>
         </a>
     `;
 }
+
 
 // Filtrer produits vendeur
 function filterVendorProducts(filter) {
@@ -220,11 +228,14 @@ function filterVendorProducts(filter) {
     // Mettre à jour UI
     document.querySelectorAll('.filters-bar .filter-btn').forEach(btn => {
         btn.classList.remove('active');
+        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(`'${filter}'`)) {
+            btn.classList.add('active');
+        }
     });
-    event.target.classList.add('active');
     
     loadVendorProducts(true);
 }
+
 
 // Charger plus de produits
 function loadMoreVendorProducts() {
@@ -274,8 +285,12 @@ function contactVendor() {
 // Gérer les tabs
 function switchTab(tabName) {
     // Mettre à jour les boutons
-    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-    event.target.classList.add('active');
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.getAttribute('onclick') && tab.getAttribute('onclick').includes(`'${tabName}'`)) {
+            tab.classList.add('active');
+        }
+    });
     
     // Mettre à jour le contenu
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));

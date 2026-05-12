@@ -80,9 +80,10 @@ async function loadProducts(reset = false) {
             if (currentFilter === 'premium') {
                 url += '&premium=true';
             } else {
-                url += `&categorie=${currentFilter}`;
+                url += `&category=${currentFilter}`;
             }
         }
+
         
         const response = await fetch(url);
         const data = await response.json();
@@ -120,7 +121,7 @@ async function loadProducts(reset = false) {
     } catch (error) {
         console.error('Erreur chargement produits:', error);
         const grid = document.getElementById('productsGrid');
-        if (reset) {
+        if (reset || currentPage === 1) {
             grid.innerHTML = `
                 <div style="grid-column: 1/-1; text-align:center; padding:3rem;">
                     <h3>Erreur de chargement</h3>
@@ -176,12 +177,16 @@ function filterByCategory(category) {
     // Mettre à jour UI des boutons
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.remove('active');
+        // Si le bouton correspond à la catégorie, on l'active
+        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(`'${category}'`)) {
+            btn.classList.add('active');
+        }
     });
-    event.target.classList.add('active');
     
     // Recharger les produits
     loadProducts(true);
 }
+
 
 // ========================================
 // RECHERCHE

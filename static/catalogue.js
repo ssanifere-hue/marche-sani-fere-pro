@@ -31,10 +31,11 @@ function loadURLParams() {
         document.getElementById('searchInput').value = catalogueFilters.search;
     }
     
-    if (params.has('categorie')) {
-        catalogueFilters.category = params.get('categorie');
+    if (params.has('category')) {
+        catalogueFilters.category = params.get('category');
         document.getElementById('categoryFilter').value = catalogueFilters.category;
     }
+
 }
 
 // Charger les produits
@@ -56,10 +57,10 @@ async function loadCatalogueProducts(reset = false) {
         let url = `${API_BASE_URL}/api/produits?page=${cataloguePage}&limit=24`;
         
         if (catalogueFilters.search) {
-            url += `&search=${encodeURIComponent(catalogueFilters.search)}`;
+            url += `&q=${encodeURIComponent(catalogueFilters.search)}`;
         }
         if (catalogueFilters.category) {
-            url += `&categorie=${catalogueFilters.category}`;
+            url += `&category=${catalogueFilters.category}`;
         }
         if (catalogueFilters.vendorType === 'premium') {
             url += `&premium=true`;
@@ -68,14 +69,15 @@ async function loadCatalogueProducts(reset = false) {
             url += `&localisation=${catalogueFilters.location}`;
         }
         if (catalogueFilters.minPrice) {
-            url += `&prix_min=${catalogueFilters.minPrice}`;
+            url += `&min_price=${catalogueFilters.minPrice}`;
         }
         if (catalogueFilters.maxPrice) {
-            url += `&prix_max=${catalogueFilters.maxPrice}`;
+            url += `&max_price=${catalogueFilters.maxPrice}`;
         }
         if (catalogueFilters.sort) {
             url += `&sort=${catalogueFilters.sort}`;
         }
+
         
         const response = await fetch(url);
         const data = await response.json();
@@ -123,7 +125,7 @@ async function loadCatalogueProducts(reset = false) {
     } catch (error) {
         console.error('Erreur chargement catalogue:', error);
         const grid = document.getElementById('catalogueGrid');
-        if (reset) {
+        if (reset || cataloguePage === 1) {
             grid.innerHTML = `
                 <div style="grid-column: 1/-1; text-align:center; padding:3rem;">
                     <h3>❌ Erreur de chargement</h3>
