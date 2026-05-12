@@ -31,10 +31,15 @@ function loadURLParams() {
         document.getElementById('searchInput').value = catalogueFilters.search;
     }
     
-    if (params.has('category')) {
-        catalogueFilters.category = params.get('category');
-        document.getElementById('categoryFilter').value = catalogueFilters.category;
+    const cat = params.get('category') || params.get('categorie');
+    if (cat) {
+        catalogueFilters.category = cat;
+        const filterElem = document.getElementById('categoryFilter');
+        if (filterElem) {
+            filterElem.value = cat;
+        }
     }
+
 
 }
 
