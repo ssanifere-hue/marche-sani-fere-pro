@@ -41,11 +41,12 @@ function loadURLParams() {
 async function loadCatalogueProducts(reset = false) {
     if (isLoadingCatalogue) return;
     
-    if (reset) {
+    if (reset || cataloguePage === 1) {
         cataloguePage = 1;
         hasMoreCatalogue = true;
         document.getElementById('catalogueGrid').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
     }
+
     
     isLoadingCatalogue = true;
     updateLoadMoreCatalogueButton(true);
@@ -82,7 +83,7 @@ async function loadCatalogueProducts(reset = false) {
         const grid = document.getElementById('catalogueGrid');
         
         if (!data.produits || data.produits.length === 0) {
-            if (reset) {
+            if (reset || cataloguePage === 1) {
                 grid.innerHTML = `
                     <div style="grid-column: 1/-1; text-align:center; padding:3rem;">
                         <h3>😢 Aucun produit trouvé</h3>
@@ -99,14 +100,16 @@ async function loadCatalogueProducts(reset = false) {
             isLoadingCatalogue = false;
             return;
         }
+
         
         const productsHTML = data.produits.map(product => createProductCard(product)).join('');
         
-        if (reset) {
+        if (reset || cataloguePage === 1) {
             grid.innerHTML = productsHTML;
         } else {
             grid.insertAdjacentHTML('beforeend', productsHTML);
         }
+
         
         // Mettre à jour le compteur
         if (reset) {

@@ -90,7 +90,7 @@ async function loadProducts(reset = false) {
         const grid = document.getElementById('productsGrid');
         
         if (!data.produits || data.produits.length === 0) {
-            if (reset) {
+            if (reset || currentPage === 1) {
                 grid.innerHTML = `
                     <div style="grid-column: 1/-1; text-align:center; padding:3rem;">
                         <h3>Aucun produit trouvé</h3>
@@ -106,11 +106,12 @@ async function loadProducts(reset = false) {
         
         const productsHTML = data.produits.map(product => createProductCard(product)).join('');
         
-        if (reset) {
+        if (reset || currentPage === 1) {
             grid.innerHTML = productsHTML;
         } else {
             grid.insertAdjacentHTML('beforeend', productsHTML);
         }
+
         
         // Vérifier s'il y a plus de produits
         hasMore = data.produits.length === 20;
