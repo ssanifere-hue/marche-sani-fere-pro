@@ -7,13 +7,50 @@ let currentFilter = 'tous';
 let isLoading = false;
 let hasMore = true;
 
+// ========================================
+// SESSION & NAVBAR
+// ========================================
+
+function updateNavbar() {
+    const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
+    const navActions = document.querySelector('.nav-actions');
+
+    if (token && userStr && navActions) {
+        try {
+            const user = JSON.parse(userStr);
+            const firstName = user.prenom || user.nom || 'Compte';
+            
+            navActions.innerHTML = `
+                ${user.role === 'vendeur' 
+                    ? '<a href="/dashboard" class="nav-btn primary">Dashboard</a>' 
+                    : '<a href="vendre.html" class="nav-btn primary">Vendre</a>'}
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span style="font-weight: 600; color: var(--text-dark);">👤 ${firstName}</span>
+                    <a href="#" class="nav-btn" onclick="handleLogout(event)">Déconnexion</a>
+                </div>
+            `;
+        } catch (e) {
+            console.error('Erreur parsing user session:', e);
+        }
+    }
+}
+
+function handleLogout(event) {
+    if (event) event.preventDefault();
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/app/index.html';
+}
+
 // Initialisation au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
-    if (typeof updateNavbar === 'function') updateNavbar();
+    updateNavbar();
     loadPremiumVendors();
     loadProducts();
     setupInfiniteScroll();
 });
+
 
 
 
@@ -254,39 +291,5 @@ function updateLoadMoreButton(loading) {
     }
 }
 
-// ========================================
-// SESSION & NAVBAR
-// ========================================
 
-function updateNavbar() {
-    const token = localStorage.getItem('token');
-    const userStr = localStorage.getItem('user');
-    const navActions = document.querySelector('.nav-actions');
-
-    if (token && userStr && navActions) {
-        try {
-            const user = JSON.parse(userStr);
-            const firstName = user.prenom || user.nom || 'Compte';
-            
-            navActions.innerHTML = `
-                ${user.role === 'vendeur' 
-                    ? '<a href="/dashboard" class="nav-btn primary">Dashboard</a>' 
-                    : '<a href="vendre.html" class="nav-btn primary">Vendre</a>'}
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <span style="font-weight: 600; color: var(--text-dark);">👤 ${firstName}</span>
-                    <a href="#" class="nav-btn" onclick="handleLogout(event)">Déconnexion</a>
-                </div>
-            `;
-        } catch (e) {
-            console.error('Erreur parsing user session:', e);
-        }
-    }
-}
-
-function handleLogout(event) {
-    if (event) event.preventDefault();
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = 'index.html';
-}
 
