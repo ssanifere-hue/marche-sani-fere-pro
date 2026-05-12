@@ -18,25 +18,29 @@ let hasMoreCatalogue = true;
 // Initialisation
 document.addEventListener('DOMContentLoaded', () => {
     loadURLParams();
-    loadCatalogueProducts();
+    loadCatalogueProducts(true);
     setupCatalogueScroll();
 });
+
 
 // Charger les paramètres de l'URL
 function loadURLParams() {
     const params = new URLSearchParams(window.location.search);
     
-    if (params.has('search')) {
-        catalogueFilters.search = params.get('search');
+    if (params.has('search') || params.has('q')) {
+        catalogueFilters.search = params.get('search') || params.get('q');
         document.getElementById('searchInput').value = catalogueFilters.search;
     }
     
-    if (params.has('category')) {
-        catalogueFilters.category = params.get('category');
-        document.getElementById('categoryFilter').value = catalogueFilters.category;
+    // Accepter les deux formes: ?category= et ?categorie=
+    const cat = params.get('category') || params.get('categorie');
+    if (cat) {
+        catalogueFilters.category = cat;
+        const filterEl = document.getElementById('categoryFilter');
+        if (filterEl) filterEl.value = cat;
     }
-
 }
+
 
 // Charger les produits
 async function loadCatalogueProducts(reset = false) {
