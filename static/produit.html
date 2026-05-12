@@ -246,8 +246,9 @@
                 : ['https://via.placeholder.com/600x600/E9ECEF/6C757D?text=Produit'];
             
             const thumbnails = images.map((img, i) => 
-                `<img src="${img}" class="thumbnail ${i === 0 ? 'active' : ''}" onclick="changeImage(${i})" onerror="this.src='https://via.placeholder.com/80x80/E9ECEF/6C757D?text=IMG'">`
+                `<img src="${img}" class="thumbnail ${i === 0 ? 'active' : ''}" onclick="changeImage(${i})" onmouseover="changeImage(${i})" onerror="this.src='https://via.placeholder.com/80x80/E9ECEF/6C757D?text=IMG'">`
             ).join('');
+
             
             const isPremium = product.est_premium || product.vendeur_premium || false;
             
@@ -307,13 +308,20 @@
 
         function changeImage(index) {
             currentImageIndex = index;
-            const images = productData.images || [];
-            document.getElementById('mainImage').src = images[index];
+            const images = productData.images && productData.images.length > 0 
+                ? productData.images 
+                : ['https://via.placeholder.com/600x600/E9ECEF/6C757D?text=Produit'];
+            
+            const mainImg = document.getElementById('mainImage');
+            if (mainImg && images[index]) {
+                mainImg.src = images[index];
+            }
             
             document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
                 thumb.classList.toggle('active', i === index);
             });
         }
+
 
         function acheterProduit() {
             alert('🚧 Fonctionnalité en développement\\n\\nBientôt : Paiement sécurisé Orange Money !');
