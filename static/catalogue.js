@@ -76,12 +76,7 @@ async function loadCatalogueProducts(reset = false) {
             url += `&sort=${catalogueFilters.sort}`;
         }
         
-        const headers = {};
-        const token = localStorage.getItem('token');
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-
-        const response = await fetch(url, { headers });
-
+        const response = await fetch(url);
         const data = await response.json();
         
         const grid = document.getElementById('catalogueGrid');
@@ -144,20 +139,23 @@ async function loadCatalogueProducts(reset = false) {
 
 // Créer une carte produit
 function createProductCard(product) {
-    const isPremium = product.vendeur_premium || false;
+    const isPremium = product.est_premium || product.vendeur_premium || false;
     const premiumBadge = isPremium ? '<div class="product-badge">✓ PREMIUM</div>' : '';
     const verifiedIcon = isPremium ? '<span class="vendor-verified">✓</span>' : '';
     
+    // Compatibilité: backend renvoie 'nom', frontend utilisait 'titre'
+    const productName = product.nom || product.titre || 'Produit';
+    
     const imageUrl = product.images && product.images.length > 0 
         ? product.images[0] 
-        : `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(product.titre || 'Produit')}`;
+        : `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(productName)}`;
     
     return `
         <a href="produit.html?id=${product.id}" class="product-card">
             ${premiumBadge}
-            <img src="${imageUrl}" alt="${product.titre}" class="product-image" onerror="this.src='https://via.placeholder.com/300x300/E9ECEF/6C757D?text=Image'">
+            <img src="${imageUrl}" alt="${productName}" class="product-image" onerror="this.src='https://via.placeholder.com/300x300/E9ECEF/6C757D?text=Image'">
             <div class="product-info">
-                <div class="product-title">${product.titre}</div>
+                <div class="product-title">${productName}</div>
                 <div class="product-price">${formatPrice(product.prix)} FCFA</div>
                 <div class="product-vendor">
                     👤 ${product.vendeur_nom || 'Vendeur'} ${verifiedIcon}

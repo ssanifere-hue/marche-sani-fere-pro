@@ -7,42 +7,6 @@ let currentFilter = 'tous';
 let isLoading = false;
 let hasMore = true;
 
-// ========================================
-// SESSION & NAVBAR
-// ========================================
-
-function updateNavbar() {
-    const token = localStorage.getItem('token');
-    const userStr = localStorage.getItem('user');
-    const navActions = document.querySelector('.nav-actions');
-
-    if (token && userStr && navActions) {
-        try {
-            const user = JSON.parse(userStr);
-            const firstName = user.prenom || user.nom || 'Compte';
-            
-            navActions.innerHTML = `
-                ${user.role === 'vendeur' 
-                    ? '<a href="/dashboard" class="nav-btn primary">Dashboard</a>' 
-                    : '<a href="vendre.html" class="nav-btn primary">Vendre</a>'}
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <span style="font-weight: 600; color: var(--text-dark);">👤 ${firstName}</span>
-                    <a href="#" class="nav-btn" onclick="handleLogout(event)">Déconnexion</a>
-                </div>
-            `;
-        } catch (e) {
-            console.error('Erreur parsing user session:', e);
-        }
-    }
-}
-
-function handleLogout(event) {
-    if (event) event.preventDefault();
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/app/index.html';
-}
-
 // Initialisation au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
     updateNavbar();
@@ -52,20 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-
-
 // ========================================
 // VENDEURS PREMIUM
 // ========================================
 
 async function loadPremiumVendors() {
     try {
-        const headers = {};
-        const token = localStorage.getItem('token');
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-
-        const response = await fetch(`${API_BASE_URL}/api/vendeurs/premium`, { headers });
-
+        const response = await fetch(`${API_BASE_URL}/api/vendeurs/premium`);
         const data = await response.json();
         
         const container = document.getElementById('premiumVendors');
@@ -107,7 +64,7 @@ async function loadPremiumVendors() {
 async function loadProducts(reset = false) {
     if (isLoading) return;
     
-    if (reset) {
+    if (reset || currentPage === 1) {
         currentPage = 1;
         hasMore = true;
         document.getElementById('productsGrid').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
@@ -125,12 +82,9 @@ async function loadProducts(reset = false) {
             } else {
                 url += `&categorie=${currentFilter}`;
             }
-        const headers = {};
-        const token = localStorage.getItem('token');
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-
-        const response = await fetch(url, { headers });
-
+        }
+        
+        const response = await fetch(url);
         const data = await response.json();
         
         const grid = document.getElementById('productsGrid');
@@ -180,21 +134,24 @@ async function loadProducts(reset = false) {
 }
 
 function createProductCard(product) {
-    const isPremium = product.vendeur_premium || false;
+    const isPremium = product.est_premium || product.vendeur_premium || false;
     const premiumBadge = isPremium ? '<div class="product-badge">✓ PREMIUM</div>' : '';
     const verifiedIcon = isPremium ? '<span class="vendor-verified">✓</span>' : '';
+    
+    // Compatibilité: backend renvoie 'nom', frontend utilisait 'titre'
+    const productName = product.nom || product.titre || 'Produit';
     
     // Image par défaut si pas d'image
     const imageUrl = product.images && product.images.length > 0 
         ? product.images[0] 
-        : `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(product.titre || 'Produit')}`;
+        : `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(productName)}`;
     
     return `
         <a href="produit.html?id=${product.id}" class="product-card">
             ${premiumBadge}
-            <img src="${imageUrl}" alt="${product.titre}" class="product-image" onerror="this.src='https://via.placeholder.com/300x300/E9ECEF/6C757D?text=Image'">
+            <img src="${imageUrl}" alt="${productName}" class="product-image" onerror="this.src='https://via.placeholder.com/300x300/E9ECEF/6C757D?text=Image'">
             <div class="product-info">
-                <div class="product-title">${product.titre}</div>
+                <div class="product-title">${productName}</div>
                 <div class="product-price">${formatPrice(product.prix)} FCFA</div>
                 <div class="product-vendor">
                     👤 ${product.vendeur_nom || 'Vendeur'} ${verifiedIcon}
@@ -291,5 +248,39 @@ function updateLoadMoreButton(loading) {
     }
 }
 
+// ========================================
+// SESSION & NAVBAR
+// ========================================
 
+function updateNavbar() {
+    const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
+    const navActions = document.querySelector('.nav-actions');
+
+    if (token && userStr && navActions) {
+        try {
+            const user = JSON.parse(userStr);
+            const firstName = user.prenom || user.nom || 'Compte';
+            
+            navActions.innerHTML = `
+                ${user.role === 'vendeur' 
+                    ? '<a href="/dashboard" class="nav-btn primary">Dashboard</a>' 
+                    : '<a href="vendre.html" class="nav-btn primary">Vendre</a>'}
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span style="font-weight: 600; color: var(--text-dark);">👤 ${firstName}</span>
+                    <a href="#" class="nav-btn" onclick="handleLogout(event)">Déconnexion</a>
+                </div>
+            `;
+        } catch (e) {
+            console.error('Erreur parsing user session:', e);
+        }
+    }
+}
+
+function handleLogout(event) {
+    if (event) event.preventDefault();
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+}
 

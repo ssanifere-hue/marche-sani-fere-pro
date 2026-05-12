@@ -139,7 +139,7 @@
                 <button class="search-btn" onclick="window.location.href='catalogue.html'">🔍</button>
             </div>
             
-            <div class="nav-actions">
+            <div class="nav-actions" id="navActions">
                 <a href="vendre.html" class="nav-btn primary">Vendre</a>
                 <a href="connexion.html" class="nav-btn">Connexion</a>
             </div>
@@ -162,16 +162,14 @@
         </div>
     </footer>
 
-    <script src="app.js"></script>
     <script>
-
         const API_BASE_URL = 'https://web-production-8f94.up.railway.app';
         let productId = null;
         let productData = null;
         let currentImageIndex = 0;
 
         document.addEventListener('DOMContentLoaded', () => {
-            if (typeof updateNavbar === 'function') updateNavbar();
+            updateNavbar();
             
             const params = new URLSearchParams(window.location.search);
             productId = params.get('id');
@@ -184,15 +182,46 @@
             loadProduct();
         });
 
+        // Session navbar (même logique que app.js)
+        function updateNavbar() {
+            const token = localStorage.getItem('token');
+            const userStr = localStorage.getItem('user');
+            const navActions = document.getElementById('navActions');
+            if (token && userStr && navActions) {
+                try {
+                    const user = JSON.parse(userStr);
+                    const firstName = user.prenom || user.nom || 'Compte';
+                    navActions.innerHTML = `
+                        ${user.role === 'vendeur'
+                            ? '<a href="/dashboard" class="nav-btn primary">Dashboard</a>'
+                            : '<a href="vendre.html" class="nav-btn primary">Vendre</a>'}
+                        <div style="display:flex;align-items:center;gap:1rem;">
+                            <span style="font-weight:600;color:var(--text-dark);">👤 ${firstName}</span>
+                            <a href="#" class="nav-btn" onclick="handleLogout(event)">Déconnexion</a>
+                        </div>
+                    `;
+                } catch(e) {}
+            }
+        }
+        function handleLogout(e) {
+            if(e) e.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
 
         async function loadProduct() {
             try {
                 const response = await fetch(`${API_BASE_URL}/api/produits/${productId}`);
+                
+                if (!response.ok) throw new Error('Produit non trouvé');
+                
                 const data = await response.json();
                 
-                if (!data.produit) throw new Error('Produit non trouvé');
+                // L'API renvoie les champs directement (pas dans data.produit)
+                if (!data.id && !data.nom) throw new Error('Produit non trouvé');
                 
-                productData = data.produit;
+                productData = data;
                 displayProduct(productData);
                 
             } catch (error) {
@@ -207,6 +236,11 @@
         }
 
         function displayProduct(product) {
+            // Compatibilité: backend renvoie 'nom', frontend utilisait 'titre'
+            const productName = product.nom || product.titre || 'Produit';
+            const vendorName = (product.vendeur && product.vendeur.nom_boutique) || product.vendeur_nom || 'Vendeur';
+            const vendorId = (product.vendeur && product.vendeur.id) || product.vendeur_id || '';
+            
             const images = product.images && product.images.length > 0 
                 ? product.images 
                 : ['https://via.placeholder.com/600x600/E9ECEF/6C757D?text=Produit'];
@@ -215,17 +249,16 @@
                 `<img src="${img}" class="thumbnail ${i === 0 ? 'active' : ''}" onclick="changeImage(${i})" onerror="this.src='https://via.placeholder.com/80x80/E9ECEF/6C757D?text=IMG'">`
             ).join('');
             
-            const isPremium = product.vendeur_premium || false;
-            const premiumBadge = isPremium ? '<span style="background: var(--premium-gradient); color: white; padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: 0.9rem;">✓ PREMIUM</span>' : '';
+            const isPremium = product.est_premium || product.vendeur_premium || false;
             
             const html = `
                 <div class="product-gallery">
-                    <img src="${images[0]}" id="mainImage" class="main-image" alt="${product.titre}" onerror="this.src='https://via.placeholder.com/600x600/E9ECEF/6C757D?text=Image'">
+                    <img src="${images[0]}" id="mainImage" class="main-image" alt="${productName}" onerror="this.src='https://via.placeholder.com/600x600/E9ECEF/6C757D?text=Image'">
                     <div class="thumbnail-grid">${thumbnails}</div>
                 </div>
                 
                 <div class="product-details">
-                    <h1 class="product-title-large">${product.titre}</h1>
+                    <h1 class="product-title-large">${productName}</h1>
                     <div class="product-price-large">${formatPrice(product.prix)} FCFA</div>
                     
                     <div class="buy-section">
@@ -235,13 +268,13 @@
                         </button>
                     </div>
                     
-                    <a href="vendeur.html?id=${product.vendeur_id}" class="vendor-card-inline">
+                    <a href="vendeur.html?id=${vendorId}" class="vendor-card-inline">
                         <div class="vendor-avatar" style="width: 60px; height: 60px; font-size: 1.5rem;">
-                            ${product.vendeur_nom ? product.vendeur_nom.charAt(0).toUpperCase() : 'V'}
+                            ${vendorName.charAt(0).toUpperCase()}
                         </div>
                         <div style="flex: 1;">
                             <div style="font-weight: 700; margin-bottom: 0.25rem;">
-                                ${product.vendeur_nom || 'Vendeur'} ${isPremium ? '<span style="color: var(--premium-gold);">✓</span>' : ''}
+                                ${vendorName} ${isPremium ? '<span style="color: var(--premium-gold);">✓</span>' : ''}
                             </div>
                             <div style="font-size: 0.9rem; color: var(--text-gray);">
                                 Voir la boutique →
@@ -269,6 +302,7 @@
             `;
             
             document.getElementById('productPage').innerHTML = html;
+            document.title = `${productName} - SANI-FÉRÉ PRO`;
         }
 
         function changeImage(index) {
