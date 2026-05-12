@@ -9,11 +9,12 @@ let hasMore = true;
 
 // Initialisation au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
-    updateNavbar();
+    if (typeof updateNavbar === 'function') updateNavbar();
     loadPremiumVendors();
     loadProducts();
     setupInfiniteScroll();
 });
+
 
 
 // ========================================
@@ -22,7 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadPremiumVendors() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/vendeurs/premium`);
+        const headers = {};
+        const token = localStorage.getItem('token');
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const response = await fetch(`${API_BASE_URL}/api/vendeurs/premium`, { headers });
+
         const data = await response.json();
         
         const container = document.getElementById('premiumVendors');
@@ -82,9 +88,12 @@ async function loadProducts(reset = false) {
             } else {
                 url += `&categorie=${currentFilter}`;
             }
-        }
-        
-        const response = await fetch(url);
+        const headers = {};
+        const token = localStorage.getItem('token');
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const response = await fetch(url, { headers });
+
         const data = await response.json();
         
         const grid = document.getElementById('productsGrid');

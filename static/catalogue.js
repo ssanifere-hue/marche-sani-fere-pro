@@ -76,7 +76,12 @@ async function loadCatalogueProducts(reset = false) {
             url += `&sort=${catalogueFilters.sort}`;
         }
         
-        const response = await fetch(url);
+        const headers = {};
+        const token = localStorage.getItem('token');
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const response = await fetch(url, { headers });
+
         const data = await response.json();
         
         const grid = document.getElementById('catalogueGrid');

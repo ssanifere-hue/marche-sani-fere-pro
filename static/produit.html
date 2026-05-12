@@ -162,13 +162,17 @@
         </div>
     </footer>
 
+    <script src="app.js"></script>
     <script>
+
         const API_BASE_URL = 'https://web-production-8f94.up.railway.app';
         let productId = null;
         let productData = null;
         let currentImageIndex = 0;
 
         document.addEventListener('DOMContentLoaded', () => {
+            if (typeof updateNavbar === 'function') updateNavbar();
+            
             const params = new URLSearchParams(window.location.search);
             productId = params.get('id');
             
@@ -179,6 +183,7 @@
             
             loadProduct();
         });
+
 
         async function loadProduct() {
             try {
