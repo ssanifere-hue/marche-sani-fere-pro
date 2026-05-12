@@ -1,5 +1,5 @@
 // Configuration API
-const API_BASE_URL = 'https://web-production-8f94.up.railway.app';
+var API_BASE_URL = 'https://web-production-8f94.up.railway.app';
 
 // State global
 let currentPage = 1;
@@ -26,6 +26,7 @@ async function loadPremiumVendors() {
         const data = await response.json();
         
         const container = document.getElementById('premiumVendors');
+        if (!container) return; // Exit if not on the home page
         
         if (!data.vendeurs || data.vendeurs.length === 0) {
             container.innerHTML = '<p style="text-align:center;padding:2rem;">Aucun vendeur premium pour le moment</p>';
@@ -52,8 +53,10 @@ async function loadPremiumVendors() {
         
     } catch (error) {
         console.error('Erreur chargement vendeurs premium:', error);
-        document.getElementById('premiumVendors').innerHTML = 
-            '<p style="text-align:center;padding:2rem;">Erreur de chargement</p>';
+        const container = document.getElementById('premiumVendors');
+        if (container) {
+            container.innerHTML = '<p style="text-align:center;padding:2rem;">Erreur de chargement</p>';
+        }
     }
 }
 
@@ -89,6 +92,7 @@ async function loadProducts(reset = false) {
         const data = await response.json();
         
         const grid = document.getElementById('productsGrid');
+        if (!grid) return; // Exit if not on the home page
         
         if (!data.produits || data.produits.length === 0) {
             if (reset || currentPage === 1) {
@@ -121,7 +125,7 @@ async function loadProducts(reset = false) {
     } catch (error) {
         console.error('Erreur chargement produits:', error);
         const grid = document.getElementById('productsGrid');
-        if (reset || currentPage === 1) {
+        if (grid && (reset || currentPage === 1)) {
             grid.innerHTML = `
                 <div style="grid-column: 1/-1; text-align:center; padding:3rem;">
                     <h3>Erreur de chargement</h3>
