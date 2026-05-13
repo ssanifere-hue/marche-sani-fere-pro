@@ -10,6 +10,7 @@ let hasMore = true;
 // Initialisation au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
     updateNavbar();
+    loadCategories(); // Charger les catégories dynamiquement
     loadPremiumVendors();
     loadProducts();
     setupInfiniteScroll();
@@ -57,6 +58,35 @@ async function loadPremiumVendors() {
         if (container) {
             container.innerHTML = '<p style="text-align:center;padding:2rem;">Erreur de chargement</p>';
         }
+    }
+}
+
+// ========================================
+// CATÉGORIES DYNAMIQUES
+// ========================================
+
+async function loadCategories() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/categories`);
+        const categories = await response.json();
+        
+        const grid = document.querySelector('.categories-grid');
+        if (!grid) return;
+        
+        if (!categories || categories.length === 0) {
+            grid.innerHTML = '<p>Aucune catégorie disponible</p>';
+            return;
+        }
+        
+        grid.innerHTML = categories.map(cat => `
+            <a href="catalogue.html?category=${encodeURIComponent(cat.nom)}" class="category-card">
+                <div class="category-icon">${cat.icone || '📦'}</div>
+                <div class="category-name">${cat.nom}</div>
+            </a>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Erreur chargement catégories:', error);
     }
 }
 
@@ -148,9 +178,13 @@ function createProductCard(product) {
     const productName = product.nom || product.titre || 'Produit';
     
     // Image par défaut si pas d'image
-    const imageUrl = product.images && product.images.length > 0 
-        ? product.images[0] 
-        : `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(productName)}`;
+    let imageUrl = `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(productName)}`;
+    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+        const firstImage = product.images[0];
+        if (firstImage && firstImage.trim() !== "") {
+            imageUrl = firstImage;
+        }
+    }
     
     return `
         <a href="produit.html?id=${product.id}" class="product-card">

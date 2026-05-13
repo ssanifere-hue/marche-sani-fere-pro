@@ -82,7 +82,7 @@ function displayVendorProfile(vendor) {
                     <span class="stat-large-label">Produits</span>
                 </div>
                 <div class="stat-large">
-                    <span class="stat-large-value">${formatMemberDate(vendor.date_inscription)}</span>
+                    <span class="stat-large-value">${formatMemberDate(vendor.date_creation)}</span>
                     <span class="stat-large-label">Membre depuis</span>
                 </div>
             </div>
@@ -205,9 +205,13 @@ async function loadVendorProducts(reset = false) {
 // Créer carte produit
 function createVendorProductCard(product) {
     const productName = product.nom || product.titre || 'Produit';
-    const imageUrl = product.images && product.images.length > 0 
-        ? product.images[0] 
-        : `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(productName)}`;
+    let imageUrl = `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(productName)}`;
+    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+        const firstImage = product.images[0];
+        if (firstImage && firstImage.trim() !== "") {
+            imageUrl = firstImage;
+        }
+    }
     
     return `
         <a href="produit.html?id=${product.id}" class="product-card">
@@ -359,16 +363,9 @@ function formatFullDate(dateStr) {
 }
 
 function formatMemberDate(dateStr) {
+    if (!dateStr) return 'Inconnu';
     const date = new Date(dateStr);
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (isNaN(date.getTime())) return 'Inconnu';
     
-    if (diffDays < 30) {
-        return `${diffDays}j`;
-    } else if (diffDays < 365) {
-        return `${Math.floor(diffDays / 30)}m`;
-    } else {
-        return `${Math.floor(diffDays / 365)}a`;
-    }
+    return date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
 }

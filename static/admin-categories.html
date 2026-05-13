@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Catégories - Admin SANI-FÉRÉ PRO</title>
+    <link rel="stylesheet" href="/app/styles.css">
+    <style>
+        .admin-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-gray);
+        }
+        .category-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .category-icon-view {
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-light);
+            border-radius: var(--radius-md);
+        }
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        .modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="header">
+            <h1>📂 Gestion des Catégories</h1>
+            <button class="nav-btn primary" onclick="openModal()">+ Nouvelle Catégorie</button>
+        </div>
+        
+        <div id="categoriesList">
+            <p style="text-align:center; padding:2rem;">Chargement des catégories...</p>
+        </div>
+        
+        <div style="margin-top: 2rem;">
+            <a href="dashboard.html" style="color: var(--primary-green); text-decoration: none;">← Retour au Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Modal Ajout/Edition -->
+    <div id="categoryModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Nouvelle Catégorie</h2>
+            <form id="categoryForm" onsubmit="handleFormSubmit(event)">
+                <input type="hidden" id="catId">
+                <div class="form-group">
+                    <label>Nom de la catégorie</label>
+                    <input type="text" id="catNom" required placeholder="Ex: Alimentation">
+                </div>
+                <div class="form-group">
+                    <label>Icône (Emoji)</label>
+                    <input type="text" id="catIcone" required placeholder="Ex: 🍎">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="nav-btn primary" style="flex:1">Enregistrer</button>
+                    <button type="button" class="nav-btn" onclick="closeModal()" style="flex:1">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://web-production-8f94.up.railway.app';
+        let token = localStorage.getItem('token');
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!token) {
+                window.location.href = 'connexion.html';
+                return;
+            }
+            loadCategories();
+        });
+
+        async function loadCategories() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/categories`);
+                const categories = await response.json();
+                
+                const list = document.getElementById('categoriesList');
+                if (categories.length === 0) {
+                    list.innerHTML = '<p style="text-align:center; padding:2rem;">Aucune catégorie.</p>';
+                    return;
+                }
+                
+                list.innerHTML = categories.map(cat => `
+                    <div class="category-item">
+                        <div class="category-info">
+                            <div class="category-icon-view">${cat.icone || '📦'}</div>
+                            <div>
+                                <strong>${cat.nom}</strong>
+                            </div>
+                        </div>
+                        <div class="actions">
+                            <button class="nav-btn btn-sm" onclick="editCategory('${cat.id}', '${cat.nom}', '${cat.icone}')">Modifier</button>
+                            <button class="nav-btn btn-sm" style="color:red; border-color:red;" onclick="deleteCategory('${cat.id}')">Supprimer</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error(error);
+                alert('Erreur de chargement');
+            }
+        }
+
+        function openModal(id = '', nom = '', icone = '') {
+            document.getElementById('modalTitle').textContent = id ? 'Modifier la catégorie' : 'Nouvelle Catégorie';
+            document.getElementById('catId').value = id;
+            document.getElementById('catNom').value = nom;
+            document.getElementById('catIcone').value = icone;
+            document.getElementById('categoryModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('categoryModal').style.display = 'none';
+        }
+
+        function editCategory(id, nom, icone) {
+            openModal(id, nom, icone);
+        }
+
+        async function deleteCategory(id) {
+            if (!confirm('Supprimer cette catégorie ?')) return;
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/categories/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    loadCategories();
+                } else {
+                    alert('Erreur lors de la suppression (Admin requis)');
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            const id = document.getElementById('catId').value;
+            const nom = document.getElementById('catNom').value;
+            const icone = document.getElementById('catIcone').value;
+            
+            const url = id ? `${API_BASE_URL}/api/categories/${id}` : `${API_BASE_URL}/api/categories`;
+            const method = id ? 'PUT' : 'POST';
+            
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ nom, icone })
+                });
+                
+                if (response.ok) {
+                    closeModal();
+                    loadCategories();
+                } else {
+                    alert('Erreur (Admin requis)');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Erreur de connexion');
+            }
+        }
+    </script>
+</body>
+</html>

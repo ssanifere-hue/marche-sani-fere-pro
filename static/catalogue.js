@@ -18,6 +18,7 @@ let hasMoreCatalogue = true;
 // Initialisation
 document.addEventListener('DOMContentLoaded', () => {
     loadURLParams();
+    loadCategoriesForFilter(); // Charger les catégories pour le filtre
     loadCatalogueProducts(true);
     setupCatalogueScroll();
 });
@@ -155,9 +156,13 @@ function createProductCard(product) {
     // Compatibilité: backend renvoie 'nom', frontend utilisait 'titre'
     const productName = product.nom || product.titre || 'Produit';
     
-    const imageUrl = product.images && product.images.length > 0 
-        ? product.images[0] 
-        : `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(productName)}`;
+    let imageUrl = `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(productName)}`;
+    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+        const firstImage = product.images[0];
+        if (firstImage && firstImage.trim() !== "") {
+            imageUrl = firstImage;
+        }
+    }
     
     return `
         <a href="produit.html?id=${product.id}" class="product-card">
@@ -176,6 +181,36 @@ function createProductCard(product) {
 
 function formatPrice(price) {
     return new Intl.NumberFormat('fr-FR').format(price);
+}
+
+// Charger les catégories pour le select
+async function loadCategoriesForFilter() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/categories`);
+        const categories = await response.json();
+        
+        const select = document.getElementById('categoryFilter');
+        if (!select) return;
+        
+        // Garder l'option "Toutes les catégories"
+        select.innerHTML = '<option value="">Toutes les catégories</option>';
+        
+        categories.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat.nom;
+            option.textContent = `${cat.icone || '📦'} ${cat.nom}`;
+            
+            // Si la catégorie est sélectionnée via l'URL
+            if (catalogueFilters.category === cat.nom) {
+                option.selected = true;
+            }
+            
+            select.appendChild(option);
+        });
+        
+    } catch (error) {
+        console.error('Erreur chargement catégories filtre:', error);
+    }
 }
 
 // Appliquer les filtres
