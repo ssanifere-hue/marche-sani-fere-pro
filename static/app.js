@@ -10,80 +10,11 @@ let hasMore = true;
 // Initialisation au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
     updateNavbar();
-    loadCategories();
     loadPremiumVendors();
     loadProducts();
     setupInfiniteScroll();
 });
 
-
-// ========================================
-// CATEGORIES DYNAMIQUES
-// ========================================
-async function loadCategories() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/categories`);
-        if (!response.ok) return;
-        const categories = await response.json();
-        
-        // 1. Home Grid
-        const grid = document.getElementById('homeCategoriesGrid');
-        if (grid) {
-            grid.innerHTML = categories.map(c => `
-                <a href="catalogue.html?category=${encodeURIComponent(c.nom.toLowerCase())}" class="category-card">
-                    <div class="category-icon">${c.icone}</div>
-                    <div class="category-name">${c.nom}</div>
-                </a>
-            `).join('');
-        }
-        
-        // 2. Home Filters
-        const filters = document.getElementById('homeFiltersBar');
-        if (filters) {
-            let filtersHTML = `<button class="filter-btn active" onclick="filterByCategory('tous')">Tous</button>`;
-            categories.slice(0, 4).forEach(c => {
-                filtersHTML += `<button class="filter-btn" onclick="filterByCategory('${c.nom.toLowerCase()}')">${c.nom}</button>`;
-            });
-            filtersHTML += `<button class="filter-btn" onclick="filterByCategory('premium')">⭐ Premium</button>`;
-            filters.innerHTML = filtersHTML;
-        }
-        
-        // 3. Catalogue Select
-        const catSelect = document.getElementById('categoryFilter');
-        if (catSelect) {
-            const firstOption = catSelect.options[0];
-            catSelect.innerHTML = '';
-            catSelect.appendChild(firstOption);
-            categories.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c.nom.toLowerCase();
-                opt.textContent = `${c.icone} ${c.nom}`;
-                catSelect.appendChild(opt);
-            });
-            const params = new URLSearchParams(window.location.search);
-            if (params.has('category')) {
-                catSelect.value = params.get('category').toLowerCase();
-            }
-        }
-        
-        // 4. Dashboard Select
-        const prodSelect = document.getElementById('prodCategory');
-        if (prodSelect) {
-            const firstOption = prodSelect.options[0];
-            prodSelect.innerHTML = '';
-            prodSelect.appendChild(firstOption);
-            categories.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c.nom; // Exact name for DB storage
-                opt.textContent = `${c.icone} ${c.nom}`;
-                prodSelect.appendChild(opt);
-            });
-        }
-        
-    } catch (error) {
-        console.error('Erreur chargement categories:', error);
-    }
-}
 
 // ========================================
 // VENDEURS PREMIUM
@@ -217,7 +148,7 @@ function createProductCard(product) {
     const productName = product.nom || product.titre || 'Produit';
     
     // Image par défaut si pas d'image
-    const imageUrl = product.images?.[0] 
+    const imageUrl = product.images && product.images.length > 0 
         ? product.images[0] 
         : `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(productName)}`;
     

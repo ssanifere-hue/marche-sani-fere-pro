@@ -45,10 +45,39 @@
     <section class="categories-section">
         <div class="container">
             <h2 class="section-title">📂 Catégories Populaires</h2>
-            <div class="categories-grid" id="homeCategoriesGrid">
-                <div class="loading">
-                    <div class="spinner"></div>
-                </div>
+            <div class="categories-grid">
+                <a href="catalogue.html?categorie=mode-femme" class="category-card">
+                    <div class="category-icon">👗</div>
+                    <div class="category-name">Mode Femme</div>
+                </a>
+                <a href="catalogue.html?categorie=mode-homme" class="category-card">
+                    <div class="category-icon">👔</div>
+                    <div class="category-name">Mode Homme</div>
+                </a>
+                <a href="catalogue.html?categorie=electronique" class="category-card">
+                    <div class="category-icon">📱</div>
+                    <div class="category-name">Électronique</div>
+                </a>
+                <a href="catalogue.html?categorie=maison" class="category-card">
+                    <div class="category-icon">🏠</div>
+                    <div class="category-name">Maison</div>
+                </a>
+                <a href="catalogue.html?categorie=enfants" class="category-card">
+                    <div class="category-icon">👶</div>
+                    <div class="category-name">Enfants</div>
+                </a>
+                <a href="catalogue.html?categorie=meubles" class="category-card">
+                    <div class="category-icon">🛋️</div>
+                    <div class="category-name">Meubles</div>
+                </a>
+                <a href="catalogue.html?categorie=beaute" class="category-card">
+                    <div class="category-icon">💄</div>
+                    <div class="category-name">Beauté</div>
+                </a>
+                <a href="catalogue.html?categorie=sport" class="category-card">
+                    <div class="category-icon">⚽</div>
+                    <div class="category-name">Sport</div>
+                </a>
             </div>
         </div>
     </section>
@@ -71,8 +100,12 @@
         <div class="container">
             <h2 class="section-title">🆕 Produits Récents</h2>
             
-            <div class="filters-bar" id="homeFiltersBar">
-                <!-- Chargé dynamiquement via JS -->
+            <div class="filters-bar">
+                <button class="filter-btn active" onclick="filterByCategory('tous')">Tous</button>
+                <button class="filter-btn" onclick="filterByCategory('mode')">Mode</button>
+                <button class="filter-btn" onclick="filterByCategory('electronique')">Électronique</button>
+                <button class="filter-btn" onclick="filterByCategory('maison')">Maison</button>
+                <button class="filter-btn" onclick="filterByCategory('premium')">⭐ Premium</button>
             </div>
             
             <div class="products-grid" id="productsGrid">

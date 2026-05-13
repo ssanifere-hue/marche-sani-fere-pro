@@ -243,9 +243,9 @@
             const vendorName = (product.vendeur && product.vendeur.nom_boutique) || product.vendeur_nom || 'Vendeur';
             const vendorId = (product.vendeur && product.vendeur.id) || product.vendeur_id || '';
             
-            const images = product.images?.[0]
+            const images = product.images && product.images.length > 0 
                 ? product.images 
-                : [`https://via.placeholder.com/600x600/E9ECEF/6C757D?text=${encodeURIComponent(productName)}`];
+                : ['https://via.placeholder.com/600x600/E9ECEF/6C757D?text=Produit'];
             
             const thumbnails = images.map((img, i) => 
                 `<img src="${img}" class="thumbnail ${i === 0 ? 'active' : ''}" onclick="changeImage(${i})" onerror="this.src='https://via.placeholder.com/80x80/E9ECEF/6C757D?text=IMG'">`

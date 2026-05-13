@@ -155,7 +155,7 @@ function createProductCard(product) {
     // Compatibilité: backend renvoie 'nom', frontend utilisait 'titre'
     const productName = product.nom || product.titre || 'Produit';
     
-    const imageUrl = product.images?.[0] 
+    const imageUrl = product.images && product.images.length > 0 
         ? product.images[0] 
         : `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(productName)}`;
     
