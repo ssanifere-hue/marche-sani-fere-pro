@@ -178,6 +178,10 @@ class VenteCreate(BaseModel):
 class CodeParrainage(BaseModel):
     code: str
 
+class CategoryCreate(BaseModel):
+    nom: str
+    icone: str
+
 # ==================== HELPER FUNCTIONS ====================
 
 def hash_password(password: str) -> str:
@@ -769,7 +773,7 @@ async def lister_produits(
             {"description": {"$regex": q, "$options": "i"}}
         ]
     if category:
-        query["categorie"] = category
+        query["categorie"] = {"$regex": f"^{category}$", "$options": "i"}
     if min_price is not None or max_price is not None:
         query["prix"] = {}
         if min_price is not None: query["prix"]["$gte"] = min_price
@@ -945,6 +949,77 @@ async def avis_vendeur(vendeur_id: str):
         raise HTTPException(status_code=404, detail="Vendeur non trouvé")
     
     return vendeur.get("avis", [])
+
+# ==================== CATEGORIES API ====================
+
+@app.get("/api/categories")
+async def get_categories():
+    """Lister toutes les catégories"""
+    categories = await db.categories.find({}).to_list(100)
+    
+    # Check if empty, and if so, seed default categories as requested
+    if not categories:
+        default_categories = [
+            {"nom": "Alimentation", "icone": "🍎"},
+            {"nom": "Quincaillerie", "icone": "🔧"},
+            {"nom": "Plomberie", "icone": "🚰"},
+            {"nom": "Électricité", "icone": "⚡"},
+            {"nom": "Agriculture", "icone": "🌾"},
+            {"nom": "Santé & Pharmacie", "icone": "💊"},
+            {"nom": "Téléphonie", "icone": "📱"},
+            {"nom": "Informatique", "icone": "💻"},
+            {"nom": "Véhicules", "icone": "🚗"},
+            {"nom": "Moto & Pièces", "icone": "🏍️"},
+            {"nom": "Bâtiment & Construction", "icone": "🏗️"},
+            {"nom": "Services", "icone": "💼"},
+            {"nom": "Livres & Fournitures", "icone": "📚"}
+        ]
+        
+        for cat in default_categories:
+            cat["date_creation"] = datetime.utcnow().isoformat()
+            
+        await db.categories.insert_many(default_categories)
+        categories = await db.categories.find({}).to_list(100)
+
+    return [
+        {
+            "id": str(c["_id"]),
+            "nom": c["nom"],
+            "icone": c["icone"],
+            "date_creation": c.get("date_creation")
+        }
+        for c in categories
+    ]
+
+@app.post("/api/admin/categories")
+async def create_category(category: CategoryCreate):
+    """Ajouter une catégorie (ADMIN ONLY)"""
+    new_cat = {
+        "nom": category.nom,
+        "icone": category.icone,
+        "date_creation": datetime.utcnow().isoformat()
+    }
+    result = await db.categories.insert_one(new_cat)
+    return {"id": str(result.inserted_id), "message": "Catégorie créée avec succès"}
+
+@app.put("/api/admin/categories/{category_id}")
+async def update_category(category_id: str, category: CategoryCreate):
+    """Modifier une catégorie (ADMIN ONLY)"""
+    result = await db.categories.update_one(
+        {"_id": ObjectId(category_id)},
+        {"$set": {"nom": category.nom, "icone": category.icone}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Catégorie non trouvée ou aucune modification")
+    return {"message": "Catégorie mise à jour avec succès"}
+
+@app.delete("/api/admin/categories/{category_id}")
+async def delete_category(category_id: str):
+    """Supprimer une catégorie (ADMIN ONLY)"""
+    result = await db.categories.delete_one({"_id": ObjectId(category_id)})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Catégorie non trouvée")
+    return {"message": "Catégorie supprimée avec succès"}
 
 # ==================== ADMIN DASHBOARD ====================
 

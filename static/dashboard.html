@@ -407,14 +407,8 @@
                 <div class="form-group">
                     <label for="prodCategory">Catégorie</label>
                     <select id="prodCategory" required>
-                        <option value="mode-femme">Mode Femme</option>
-                        <option value="mode-homme">Mode Homme</option>
-                        <option value="electronique">Électronique</option>
-                        <option value="maison">Maison</option>
-                        <option value="enfants">Enfants</option>
-                        <option value="meubles">Meubles</option>
-                        <option value="beaute">Beauté</option>
-                        <option value="sport">Sport</option>
+                        <option value="">Sélectionnez une catégorie...</option>
+                        <!-- Chargé dynamiquement -->
                     </select>
                 </div>
                 <div class="form-group">
@@ -563,7 +557,7 @@
             tbody.innerHTML = '';
             
             products.forEach(p => {
-                const imageUrl = (p.images && p.images.length > 0) ? p.images[0] : 'https://placehold.co/150x150?text=No+Image';
+                const imageUrl = p.images?.[0] ? p.images[0] : `https://placehold.co/150x150?text=${encodeURIComponent(p.nom || 'Produit')}`;
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><img src="${imageUrl}" class="prod-img" onerror="this.src='https://placehold.co/150x150?text=Error'"></td>

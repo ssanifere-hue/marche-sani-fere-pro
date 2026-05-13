@@ -82,9 +82,10 @@ function displayVendorProfile(vendor) {
                     <span class="stat-large-label">Produits</span>
                 </div>
                 <div class="stat-large">
-                    <span class="stat-large-value">${formatMemberDate(vendor.date_inscription)}</span>
+                    <span class="stat-large-value">${formatMemberDate(vendor.date_creation)}</span>
                     <span class="stat-large-label">Membre depuis</span>
                 </div>
+
             </div>
             <button class="contact-vendor" onclick="contactVendor()">
                 💬 Contacter le Vendeur
@@ -107,7 +108,7 @@ function displayVendorAbout(vendor) {
                 <strong>📍 Localisation:</strong> ${vendor.localisation || 'Mali'}
             </div>
             <div>
-                <strong>📅 Membre depuis:</strong> ${formatFullDate(vendor.date_inscription)}
+                <strong>📅 Membre depuis:</strong> ${formatFullDate(vendor.date_creation)}
             </div>
             <div>
                 <strong>✉️ Email:</strong> ${vendor.email || 'Non renseigné'}
@@ -205,7 +206,7 @@ async function loadVendorProducts(reset = false) {
 // Créer carte produit
 function createVendorProductCard(product) {
     const productName = product.nom || product.titre || 'Produit';
-    const imageUrl = product.images && product.images.length > 0 
+    const imageUrl = product.images?.[0] 
         ? product.images[0] 
         : `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(productName)}`;
     
@@ -354,21 +355,18 @@ function formatDate(dateStr) {
 }
 
 function formatFullDate(dateStr) {
+    if (!dateStr) return 'Non renseigné';
     const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return 'Non renseigné';
     return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 function formatMemberDate(dateStr) {
+    if (!dateStr) return 'Récemment';
     const date = new Date(dateStr);
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (isNaN(date.getTime())) return 'Récemment';
     
-    if (diffDays < 30) {
-        return `${diffDays}j`;
-    } else if (diffDays < 365) {
-        return `${Math.floor(diffDays / 30)}m`;
-    } else {
-        return `${Math.floor(diffDays / 365)}a`;
-    }
+    const month = date.toLocaleString('fr-FR', { month: 'long' });
+    const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
+    return `${capitalizedMonth} ${date.getFullYear()}`;
 }
