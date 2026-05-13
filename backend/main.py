@@ -114,36 +114,6 @@ async def startup_event():
             {"$set": {"actif": True, "est_premium": True}}
         )
         print("Compte démo mis à jour")
-    
-    # Initialiser les catégories si vide
-    count_cats = await db.categories.count_documents({})
-    if count_cats == 0:
-        default_categories = [
-            {"nom": "Mode Femme", "icone": "👗"},
-            {"nom": "Mode Homme", "icone": "👔"},
-            {"nom": "Alimentation", "icone": "🍎"},
-            {"nom": "Quincaillerie", "icone": "🛠️"},
-            {"nom": "Plomberie", "icone": "🚰"},
-            {"nom": "Électricité", "icone": "⚡"},
-            {"nom": "Agriculture", "icone": "🌾"},
-            {"nom": "Santé & Pharmacie", "icone": "🏥"},
-            {"nom": "Téléphonie", "icone": "📱"},
-            {"nom": "Informatique", "icone": "💻"},
-            {"nom": "Véhicules", "icone": "🚗"},
-            {"nom": "Moto & Pièces", "icone": "🏍️"},
-            {"nom": "Bâtiment & Construction", "icone": "🏗️"},
-            {"nom": "Services", "icone": "🤝"},
-            {"nom": "Livres & Fournitures", "icone": "📚"},
-            {"nom": "Maison", "icone": "🏠"},
-            {"nom": "Enfants", "icone": "👶"},
-            {"nom": "Meubles", "icone": "🛋️"},
-            {"nom": "Beauté", "icone": "💄"},
-            {"nom": "Sport", "icone": "⚽"}
-        ]
-        for cat in default_categories:
-            cat["date_creation"] = datetime.utcnow()
-            await db.categories.insert_one(cat)
-        print("Catégories initialisées")
 
 
 # Security
@@ -207,16 +177,6 @@ class VenteCreate(BaseModel):
 
 class CodeParrainage(BaseModel):
     code: str
-
-class CategoryCreate(BaseModel):
-    nom: str
-    icone: str
-
-class Category(BaseModel):
-    id: str
-    nom: str
-    icone: str
-    date_creation: datetime
 
 # ==================== HELPER FUNCTIONS ====================
 
@@ -985,61 +945,6 @@ async def avis_vendeur(vendeur_id: str):
         raise HTTPException(status_code=404, detail="Vendeur non trouvé")
     
     return vendeur.get("avis", [])
-
-
-# ==================== CATEGORIES (DYNAMIC) ====================
-
-@app.get("/api/categories")
-async def lister_categories():
-    """Lister toutes les catégories"""
-    categories = await db.categories.find().sort("nom", 1).to_list(100)
-    return [
-        {
-            "id": str(c["_id"]),
-            "nom": c["nom"],
-            "icone": c.get("icone", "📦"),
-            "date_creation": c.get("date_creation")
-        }
-        for c in categories
-    ]
-
-@app.post("/api/categories")
-async def creer_categorie(cat: CategoryCreate, current_user = Depends(get_current_user)):
-    """Créer une catégorie (ADMIN ONLY)"""
-    # Pour le moment, on vérifie si le rôle est 'vendeur' ou 'admin' 
-    # (En prod, on devrait avoir un rôle admin strict)
-    # On va autoriser le compte démo ou les utilisateurs avec role admin
-    if current_user["role"] != "admin" and current_user["telephone"] != "70000000":
-        raise HTTPException(status_code=403, detail="Accès réservé aux administrateurs")
-    
-    cat_data = {
-        "nom": cat.nom,
-        "icone": cat.icone,
-        "date_creation": datetime.utcnow()
-    }
-    result = await db.categories.insert_one(cat_data)
-    return {"message": "Catégorie créée", "id": str(result.inserted_id)}
-
-@app.put("/api/categories/{cat_id}")
-async def modifier_categorie(cat_id: str, cat: CategoryCreate, current_user = Depends(get_current_user)):
-    """Modifier une catégorie (ADMIN ONLY)"""
-    if current_user["role"] != "admin" and current_user["telephone"] != "70000000":
-        raise HTTPException(status_code=403, detail="Accès réservé aux administrateurs")
-    
-    await db.categories.update_one(
-        {"_id": ObjectId(cat_id)},
-        {"$set": {"nom": cat.nom, "icone": cat.icone}}
-    )
-    return {"message": "Catégorie mise à jour"}
-
-@app.delete("/api/categories/{cat_id}")
-async def supprimer_categorie(cat_id: str, current_user = Depends(get_current_user)):
-    """Supprimer une catégorie (ADMIN ONLY)"""
-    if current_user["role"] != "admin" and current_user["telephone"] != "70000000":
-        raise HTTPException(status_code=403, detail="Accès réservé aux administrateurs")
-    
-    await db.categories.delete_one({"_id": ObjectId(cat_id)})
-    return {"message": "Catégorie supprimée"}
 
 # ==================== ADMIN DASHBOARD ====================
 
