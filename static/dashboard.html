@@ -392,10 +392,11 @@
     <div id="productModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Ajouter un Nouveau Produit</h2>
+                <h2 id="modalTitle">Ajouter un Nouveau Produit</h2>
                 <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
             <form id="productForm" onsubmit="handleProductSubmit(event)">
+                <input type="hidden" id="prodId" value="">
                 <div class="form-group">
                     <label for="prodName">Nom du produit</label>
                     <input type="text" id="prodName" required placeholder="Ex: Bazin Riche Getzner">
@@ -422,7 +423,7 @@
                 </div>
                 <div class="form-group">
                     <label for="prodImage">Image du produit</label>
-                    <input type="file" id="prodImage" accept="image/*" required onchange="previewImage(event)">
+                    <input type="file" id="prodImage" accept="image/*" onchange="previewImage(event)">
                     <div id="imagePreview" style="margin-top: 1rem; display: none;">
                         <img src="" alt="Preview" style="max-width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius-sm);">
                     </div>
@@ -491,7 +492,17 @@
 
 
         // Modal
-        function openModal() { document.getElementById('productModal').style.display = 'flex'; }
+        function openModal(isEdit = false) { 
+            document.getElementById('productModal').style.display = 'flex'; 
+            if (!isEdit) {
+                document.getElementById('modalTitle').textContent = 'Ajouter un Nouveau Produit';
+                document.getElementById('prodId').value = '';
+                document.getElementById('productForm').reset();
+                document.getElementById('imagePreview').style.display = 'none';
+                base64Image = null;
+                document.getElementById('prodImage').required = true;
+            }
+        }
         function closeModal() { document.getElementById('productModal').style.display = 'none'; }
 
         // Preview Image
@@ -581,13 +592,20 @@
                 const validImages = (p.images || []).filter(img => img && img.trim());
                 const imageUrl = validImages.length > 0 ? validImages[0] : 'https://placehold.co/150x150?text=No+Image';
                 const tr = document.createElement('tr');
+                const isAllTable = tableId.includes('all');
                 tr.innerHTML = `
                     <td><img src="${imageUrl}" class="prod-img" onerror="this.src='https://placehold.co/150x150?text=Error'"></td>
 
                     <td><strong>${p.nom}</strong></td>
                     <td class="text-success"><strong>${p.prix.toLocaleString()} FCFA</strong></td>
                     <td><span class="badge badge-warning">${p.categorie}</span></td>
-                    <td>${tableId.includes('all') ? (p.stock || 1) : new Date(p.date_creation).toLocaleDateString()}</td>
+                    <td>${isAllTable ? (p.stock || 1) : new Date(p.date_creation).toLocaleDateString()}</td>
+                    ${isAllTable ? `
+                    <td>
+                        <button class="nav-btn primary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; min-width: auto;" onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&apos;")})'>✏️</button>
+                        <button class="nav-btn" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; background: #ffebee; color: #c62828; min-width: auto; border: none;" onclick="deleteProduct('${p.id}', '${p.nom.replace(/'/g, "\\'")}')">🗑️</button>
+                    </td>
+                    ` : ''}
                 `;
                 tbody.appendChild(tr);
             });
@@ -599,21 +617,30 @@
             event.preventDefault();
             const btn = document.getElementById('submitProdBtn');
             btn.disabled = true;
-            btn.textContent = 'Publication en cours...';
+            btn.textContent = 'Enregistrement en cours...';
+
+            const prodId = document.getElementById('prodId').value;
+            const isEdit = !!prodId;
 
             const payload = {
                 nom: document.getElementById('prodName').value,
                 description: document.getElementById('prodDesc').value,
                 prix: parseInt(document.getElementById('prodPrice').value),
                 categorie: document.getElementById('prodCategory').value,
-                images: [base64Image],
                 stock: parseInt(document.getElementById('prodStock').value),
                 est_premium: document.getElementById('prodPremium').checked
             };
 
+            if (base64Image) {
+                payload.images = [base64Image];
+            }
+
             try {
-                const response = await fetch(`${API_BASE_URL}/api/produits`, {
-                    method: 'POST',
+                const url = isEdit ? `${API_BASE_URL}/api/produits/${prodId}` : `${API_BASE_URL}/api/produits`;
+                const method = isEdit ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
@@ -622,14 +649,15 @@
                 });
 
                 if (response.ok) {
-                    alert('Produit publié avec succès !');
+                    alert(isEdit ? 'Produit modifié avec succès !' : 'Produit publié avec succès !');
                     closeModal();
                     document.getElementById('productForm').reset();
                     document.getElementById('imagePreview').style.display = 'none';
+                    base64Image = null;
                     loadProducts();
                 } else {
                     const err = await response.json();
-                    alert('Erreur: ' + (err.detail || 'Impossible de publier'));
+                    alert('Erreur: ' + (err.detail || 'Impossible d\'enregistrer'));
                 }
             } catch (error) {
                 console.error(error);
@@ -637,6 +665,59 @@
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Publier le Produit';
+            }
+        }
+
+        // Edit Product
+        function editProduct(product) {
+            document.getElementById('modalTitle').textContent = 'Modifier le Produit';
+            document.getElementById('prodId').value = product.id;
+            document.getElementById('prodName').value = product.nom;
+            document.getElementById('prodPrice').value = product.prix;
+            document.getElementById('prodCategory').value = product.categorie;
+            document.getElementById('prodStock').value = product.stock || 1;
+            document.getElementById('prodDesc').value = product.description || '';
+            document.getElementById('prodPremium').checked = product.est_premium || false;
+
+            document.getElementById('prodImage').required = false;
+
+            const preview = document.getElementById('imagePreview');
+            base64Image = null; // On ne renvoie pas l'image existante si elle n'est pas modifiée
+            
+            const validImages = (product.images || []).filter(img => img && img.trim());
+            if (validImages.length > 0) {
+                preview.style.display = 'block';
+                preview.querySelector('img').src = validImages[0];
+            } else {
+                preview.style.display = 'none';
+                preview.querySelector('img').src = '';
+            }
+
+            openModal(true);
+        }
+
+        // Delete Product
+        async function deleteProduct(id, nom) {
+            if (!confirm(`Voulez-vous vraiment supprimer le produit "${nom}" ?`)) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/produits/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    alert('Produit supprimé avec succès');
+                    loadProducts();
+                } else {
+                    const err = await response.json();
+                    alert('Erreur: ' + (err.detail || 'Impossible de supprimer'));
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Erreur de connexion au serveur');
             }
         }
     </script>

@@ -175,6 +175,15 @@ class ProduitCreate(BaseModel):
     stock: int = 1
     est_premium: bool = False
 
+class ProduitUpdate(BaseModel):
+    nom: Optional[str] = None
+    description: Optional[str] = None
+    prix: Optional[int] = None
+    categorie: Optional[str] = None
+    images: Optional[List[str]] = None
+    stock: Optional[int] = None
+    est_premium: Optional[bool] = None
+
 class CategoryCreate(BaseModel):
     nom: str
     icone: str = "📦"
@@ -914,6 +923,56 @@ async def creer_produit(produit: ProduitCreate, current_user = Depends(get_curre
         "produit_id": str(result.inserted_id),
         "images": final_images
     }
+
+@app.put("/api/produits/{produit_id}")
+async def modifier_produit(produit_id: str, produit: ProduitUpdate, current_user = Depends(get_current_user)):
+    """Modifier un produit existant (Vendeur propriétaire ou Admin)"""
+    if current_user["role"] not in ["vendeur", "admin"]:
+        raise HTTPException(status_code=403, detail="Non autorisé")
+        
+    existing_product = await db.produits.find_one({"_id": ObjectId(produit_id)})
+    if not existing_product:
+        raise HTTPException(status_code=404, detail="Produit non trouvé")
+        
+    if current_user["role"] == "vendeur":
+        vendeur = await db.vendeurs.find_one({"user_id": str(current_user["_id"])})
+        if not vendeur or str(existing_product["vendeur_id"]) != str(vendeur["_id"]):
+            raise HTTPException(status_code=403, detail="Vous n'êtes pas propriétaire de ce produit")
+            
+    update_data = {k: v for k, v in produit.dict(exclude_unset=True).items() if v is not None}
+    
+    if "images" in update_data:
+        final_images = []
+        for img in update_data["images"]:
+            if img.startswith("data:image/"):
+                url = await upload_image_to_cloudinary(img)
+                final_images.append(url)
+            else:
+                final_images.append(img)
+        update_data["images"] = final_images
+
+    if update_data:
+        await db.produits.update_one({"_id": ObjectId(produit_id)}, {"$set": update_data})
+        
+    return {"message": "Produit modifié avec succès"}
+
+@app.delete("/api/produits/{produit_id}")
+async def supprimer_produit(produit_id: str, current_user = Depends(get_current_user)):
+    """Supprimer un produit existant (Vendeur propriétaire ou Admin)"""
+    if current_user["role"] not in ["vendeur", "admin"]:
+        raise HTTPException(status_code=403, detail="Non autorisé")
+        
+    existing_product = await db.produits.find_one({"_id": ObjectId(produit_id)})
+    if not existing_product:
+        raise HTTPException(status_code=404, detail="Produit non trouvé")
+        
+    if current_user["role"] == "vendeur":
+        vendeur = await db.vendeurs.find_one({"user_id": str(current_user["_id"])})
+        if not vendeur or str(existing_product["vendeur_id"]) != str(vendeur["_id"]):
+            raise HTTPException(status_code=403, detail="Vous n'êtes pas propriétaire de ce produit")
+            
+    await db.produits.delete_one({"_id": ObjectId(produit_id)})
+    return {"message": "Produit supprimé avec succès"}
 
 @app.post("/api/media/upload")
 async def upload_media(file: UploadFile = File(...), current_user = Depends(get_current_user)):
