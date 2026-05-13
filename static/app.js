@@ -1,5 +1,5 @@
 // Configuration API
-var API_BASE_URL = window.location.origin;
+var API_BASE_URL = 'https://web-production-8f94.up.railway.app';
 
 // State global
 let currentPage = 1;
@@ -71,18 +71,16 @@ async function loadCategories() {
     
     try {
         const response = await fetch(`${API_BASE_URL}/api/categories`);
-        if (!response.ok) throw new Error('Erreur serveur');
-        
         const categories = await response.json();
         
-        if (!categories || !Array.isArray(categories) || categories.length === 0) {
+        if (!categories || categories.length === 0) {
             container.innerHTML = '<p style="text-align:center;padding:2rem;">Aucune catégorie disponible</p>';
             return;
         }
         
         container.innerHTML = categories.map(cat => `
             <a href="catalogue.html?category=${cat.slug}" class="category-card">
-                <div class="category-icon">${cat.icone || '📦'}</div>
+                <div class="category-icon">${cat.icone}</div>
                 <div class="category-name">${cat.nom}</div>
             </a>
         `).join('');

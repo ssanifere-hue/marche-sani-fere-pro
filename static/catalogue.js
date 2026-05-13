@@ -1,5 +1,5 @@
 // Configuration
-var API_BASE_URL = window.location.origin;
+var API_BASE_URL = 'https://web-production-8f94.up.railway.app';
 
 // État
 let cataloguePage = 1;
