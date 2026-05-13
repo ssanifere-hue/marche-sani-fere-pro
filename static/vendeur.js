@@ -53,16 +53,17 @@ async function loadVendorProfile() {
 
 // Afficher le profil vendeur
 function displayVendorProfile(vendor) {
-    const isPremium = vendor.abonnement === 'premium';
+    const isPremium = vendor.est_premium || false;
     const premiumBadge = isPremium ? '<span style="background: var(--premium-gradient); padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: 0.9rem;">✓ PREMIUM</span>' : '';
     
-    const initial = vendor.nom ? vendor.nom.charAt(0).toUpperCase() : 'V';
+    const vendorDisplayName = vendor.nom_boutique || vendor.nom || 'Vendeur';
+    const initial = vendorDisplayName.charAt(0).toUpperCase();
     
     const html = `
         <div class="vendor-avatar-large">${initial}</div>
         <div class="vendor-info">
             <div class="vendor-name-large">
-                ${vendor.nom || 'Vendeur'}
+                ${vendorDisplayName}
                 ${premiumBadge}
             </div>
             <div class="vendor-bio">
@@ -82,7 +83,7 @@ function displayVendorProfile(vendor) {
                     <span class="stat-large-label">Produits</span>
                 </div>
                 <div class="stat-large">
-                    <span class="stat-large-value">${formatMemberDate(vendor.date_inscription)}</span>
+                    <span class="stat-large-value">${formatMemberDate(vendor.date_creation || vendor.date_inscription)}</span>
                     <span class="stat-large-label">Membre depuis</span>
                 </div>
             </div>
@@ -99,7 +100,7 @@ function displayVendorProfile(vendor) {
 
 // Afficher À Propos
 function displayVendorAbout(vendor) {
-    const isPremium = vendor.abonnement === 'premium';
+    const isPremium = vendor.est_premium || false;
     
     const html = `
         <div style="display: grid; gap: 1rem;">
@@ -107,7 +108,7 @@ function displayVendorAbout(vendor) {
                 <strong>📍 Localisation:</strong> ${vendor.localisation || 'Mali'}
             </div>
             <div>
-                <strong>📅 Membre depuis:</strong> ${formatFullDate(vendor.date_inscription)}
+                <strong>📅 Membre depuis:</strong> ${formatFullDate(vendor.date_creation || vendor.date_inscription)}
             </div>
             <div>
                 <strong>✉️ Email:</strong> ${vendor.email || 'Non renseigné'}
@@ -205,8 +206,9 @@ async function loadVendorProducts(reset = false) {
 // Créer carte produit
 function createVendorProductCard(product) {
     const productName = product.nom || product.titre || 'Produit';
-    const imageUrl = product.images && product.images.length > 0 
-        ? product.images[0] 
+    const validImages = (product.images || []).filter(img => img && img.trim());
+    const imageUrl = validImages.length > 0 
+        ? validImages[0] 
         : `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(productName)}`;
     
     return `
@@ -354,12 +356,16 @@ function formatDate(dateStr) {
 }
 
 function formatFullDate(dateStr) {
+    if (!dateStr) return 'Non renseigné';
     const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return 'Non renseigné';
     return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 function formatMemberDate(dateStr) {
+    if (!dateStr) return 'N/A';
     const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return 'N/A';
     const now = new Date();
     const diffTime = Math.abs(now - date);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));

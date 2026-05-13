@@ -45,39 +45,8 @@
     <section class="categories-section">
         <div class="container">
             <h2 class="section-title">📂 Catégories Populaires</h2>
-            <div class="categories-grid">
-                <a href="catalogue.html?categorie=mode-femme" class="category-card">
-                    <div class="category-icon">👗</div>
-                    <div class="category-name">Mode Femme</div>
-                </a>
-                <a href="catalogue.html?categorie=mode-homme" class="category-card">
-                    <div class="category-icon">👔</div>
-                    <div class="category-name">Mode Homme</div>
-                </a>
-                <a href="catalogue.html?categorie=electronique" class="category-card">
-                    <div class="category-icon">📱</div>
-                    <div class="category-name">Électronique</div>
-                </a>
-                <a href="catalogue.html?categorie=maison" class="category-card">
-                    <div class="category-icon">🏠</div>
-                    <div class="category-name">Maison</div>
-                </a>
-                <a href="catalogue.html?categorie=enfants" class="category-card">
-                    <div class="category-icon">👶</div>
-                    <div class="category-name">Enfants</div>
-                </a>
-                <a href="catalogue.html?categorie=meubles" class="category-card">
-                    <div class="category-icon">🛋️</div>
-                    <div class="category-name">Meubles</div>
-                </a>
-                <a href="catalogue.html?categorie=beaute" class="category-card">
-                    <div class="category-icon">💄</div>
-                    <div class="category-name">Beauté</div>
-                </a>
-                <a href="catalogue.html?categorie=sport" class="category-card">
-                    <div class="category-icon">⚽</div>
-                    <div class="category-name">Sport</div>
-                </a>
+            <div class="categories-grid" id="categoriesGrid">
+                <div class="loading"><div class="spinner"></div></div>
             </div>
         </div>
     </section>
@@ -140,13 +109,11 @@
                     <a href="aide.html">Centre d'Aide</a>
                 </div>
                 
-                <div class="footer-section">
+                <div class="footer-section" id="footerCategories">
                     <h3>Catégories</h3>
-                    <a href="catalogue.html?categorie=mode">Mode</a>
-                    <a href="catalogue.html?categorie=electronique">Électronique</a>
-                    <a href="catalogue.html?categorie=maison">Maison</a>
-                    <a href="catalogue.html?categorie=beaute">Beauté</a>
+                    <a href="catalogue.html">Voir tout</a>
                 </div>
+
                 
                 <div class="footer-section">
                     <h3>Contact</h3>

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Catégories - SANI-FÉRÉ PRO Admin</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .admin-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .admin-header h1 {
+            font-size: 1.8rem;
+            color: var(--text-dark);
+        }
+        .add-form {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .add-form .form-field {
+            flex: 1;
+            min-width: 200px;
+        }
+        .add-form label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            color: var(--text-gray);
+        }
+        .add-form input {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        .add-form input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+        }
+        .icon-field {
+            max-width: 80px;
+        }
+        .icon-field input {
+            text-align: center;
+            font-size: 1.5rem;
+        }
+        .btn-add {
+            padding: 0.6rem 1.5rem;
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+        .btn-add:hover { opacity: 0.9; }
+        .btn-add:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .cat-table {
+            width: 100%;
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+        .cat-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .cat-table th {
+            background: var(--bg-light);
+            padding: 0.8rem 1rem;
+            text-align: left;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .cat-table td {
+            padding: 0.8rem 1rem;
+            border-top: 1px solid #f0f0f0;
+            vertical-align: middle;
+        }
+        .cat-table tr:hover td {
+            background: #fafafa;
+        }
+        .cat-icon { font-size: 1.5rem; }
+        .cat-name { font-weight: 600; }
+        .cat-slug {
+            font-size: 0.85rem;
+            color: var(--text-gray);
+            font-family: monospace;
+        }
+        .cat-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .btn-edit, .btn-delete, .btn-save, .btn-cancel {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+        .btn-edit { background: #e3f2fd; color: #1565c0; }
+        .btn-save { background: #e8f5e9; color: #2e7d32; }
+        .btn-cancel { background: #f5f5f5; color: #616161; }
+        .btn-delete { background: #ffebee; color: #c62828; }
+        .btn-edit:hover, .btn-delete:hover, .btn-save:hover, .btn-cancel:hover { opacity: 0.8; }
+        
+        .edit-input {
+            padding: 0.3rem 0.5rem;
+            border: 2px solid var(--primary-green);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            width: 100%;
+        }
+        .edit-icon-input {
+            width: 50px;
+            text-align: center;
+            font-size: 1.3rem;
+        }
+        .cat-count {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            margin-bottom: 1rem;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-green);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .status-msg {
+            padding: 0.8rem 1rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            font-weight: 600;
+            display: none;
+        }
+        .status-msg.success { display: block; background: #e8f5e9; color: #2e7d32; }
+        .status-msg.error { display: block; background: #ffebee; color: #c62828; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">🛍️ SANI-FÉRÉ <span>PRO</span></a>
+            <div class="nav-actions">
+                <a href="index.html" class="nav-btn">Accueil</a>
+                <a href="/dashboard" class="nav-btn primary">Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <div>
+                <a href="/dashboard" class="back-link">← Retour au Dashboard</a>
+                <h1>📂 Gestion des Catégories</h1>
+            </div>
+        </div>
+
+        <div id="statusMsg" class="status-msg"></div>
+
+        <!-- Add Category Form -->
+        <div class="add-form">
+            <div class="form-field icon-field">
+                <label>Icône</label>
+                <input type="text" id="newIcon" value="📦" maxlength="4">
+            </div>
+            <div class="form-field">
+                <label>Nom de la catégorie</label>
+                <input type="text" id="newName" placeholder="Ex: Alimentation" required>
+            </div>
+            <button class="btn-add" id="addBtn" onclick="addCategory()">+ Ajouter</button>
+        </div>
+
+        <!-- Categories Table -->
+        <div class="cat-count" id="catCount"></div>
+        <div class="cat-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:60px">Icône</th>
+                        <th>Nom</th>
+                        <th>Slug</th>
+                        <th style="width:160px">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="catBody">
+                    <tr><td colspan="4" style="text-align:center;padding:2rem;">Chargement...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://web-production-8f94.up.railway.app';
+        const token = localStorage.getItem('token');
+        let categories = [];
+
+        document.addEventListener('DOMContentLoaded', loadCategories);
+
+        async function loadCategories() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/categories`);
+                categories = await response.json();
+                renderTable();
+            } catch (error) {
+                showStatus('Erreur de chargement des catégories', 'error');
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('catBody');
+            document.getElementById('catCount').textContent = `${categories.length} catégorie${categories.length > 1 ? 's' : ''}`;
+            
+            if (categories.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:2rem;">Aucune catégorie</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = categories.map(cat => `
+                <tr id="row-${cat.id}">
+                    <td class="cat-icon">${cat.icone}</td>
+                    <td class="cat-name">${cat.nom}</td>
+                    <td class="cat-slug">${cat.slug}</td>
+                    <td class="cat-actions">
+                        <button class="btn-edit" onclick="startEdit('${cat.id}', '${escapeHtml(cat.nom)}', '${cat.icone}')">✏️ Modifier</button>
+                        <button class="btn-delete" onclick="deleteCategory('${cat.id}', '${escapeHtml(cat.nom)}')">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function startEdit(id, name, icon) {
+            const row = document.getElementById(`row-${id}`);
+            row.innerHTML = `
+                <td><input type="text" class="edit-input edit-icon-input" id="edit-icon-${id}" value="${icon}" maxlength="4"></td>
+                <td><input type="text" class="edit-input" id="edit-name-${id}" value="${name}"></td>
+                <td class="cat-slug">—</td>
+                <td class="cat-actions">
+                    <button class="btn-save" onclick="saveEdit('${id}')">✓ Sauver</button>
+                    <button class="btn-cancel" onclick="loadCategories()">✕</button>
+                </td>
+            `;
+            document.getElementById(`edit-name-${id}`).focus();
+        }
+
+        async function saveEdit(id) {
+            const nom = document.getElementById(`edit-name-${id}`).value.trim();
+            const icone = document.getElementById(`edit-icon-${id}`).value.trim();
+            
+            if (!nom) return showStatus('Le nom est requis', 'error');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/categories/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ nom, icone: icone || '📦' })
+                });
+
+                if (response.ok) {
+                    showStatus(`Catégorie "${nom}" modifiée avec succès`, 'success');
+                    loadCategories();
+                } else {
+                    const err = await response.json();
+                    showStatus(err.detail || 'Erreur de modification', 'error');
+                }
+            } catch (error) {
+                showStatus('Erreur de connexion', 'error');
+            }
+        }
+
+        async function addCategory() {
+            const nom = document.getElementById('newName').value.trim();
+            const icone = document.getElementById('newIcon').value.trim();
+            
+            if (!nom) return showStatus('Le nom est requis', 'error');
+
+            const btn = document.getElementById('addBtn');
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/categories`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ nom, icone: icone || '📦' })
+                });
+
+                if (response.ok) {
+                    showStatus(`Catégorie "${nom}" ajoutée avec succès`, 'success');
+                    document.getElementById('newName').value = '';
+                    document.getElementById('newIcon').value = '📦';
+                    loadCategories();
+                } else {
+                    const err = await response.json();
+                    showStatus(err.detail || 'Erreur de création', 'error');
+                }
+            } catch (error) {
+                showStatus('Erreur de connexion', 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function deleteCategory(id, name) {
+            if (!confirm(`Supprimer la catégorie "${name}" ?\n\nCette action est irréversible.`)) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/categories/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    showStatus(`Catégorie "${name}" supprimée`, 'success');
+                    loadCategories();
+                } else {
+                    const err = await response.json();
+                    showStatus(err.detail || 'Erreur de suppression', 'error');
+                }
+            } catch (error) {
+                showStatus('Erreur de connexion', 'error');
+            }
+        }
+
+        function showStatus(msg, type) {
+            const el = document.getElementById('statusMsg');
+            el.textContent = msg;
+            el.className = `status-msg ${type}`;
+            setTimeout(() => { el.className = 'status-msg'; }, 4000);
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>

@@ -10,6 +10,7 @@ let hasMore = true;
 // Initialisation au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
     updateNavbar();
+    loadCategories();
     loadPremiumVendors();
     loadProducts();
     setupInfiniteScroll();
@@ -57,6 +58,35 @@ async function loadPremiumVendors() {
         if (container) {
             container.innerHTML = '<p style="text-align:center;padding:2rem;">Erreur de chargement</p>';
         }
+    }
+}
+
+// ========================================
+// CATEGORIES DYNAMIQUES
+// ========================================
+
+async function loadCategories() {
+    const container = document.getElementById('categoriesGrid');
+    if (!container) return;
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/categories`);
+        const categories = await response.json();
+        
+        if (!categories || categories.length === 0) {
+            container.innerHTML = '<p style="text-align:center;padding:2rem;">Aucune catégorie disponible</p>';
+            return;
+        }
+        
+        container.innerHTML = categories.map(cat => `
+            <a href="catalogue.html?category=${cat.slug}" class="category-card">
+                <div class="category-icon">${cat.icone}</div>
+                <div class="category-name">${cat.nom}</div>
+            </a>
+        `).join('');
+    } catch (error) {
+        console.error('Erreur chargement catégories:', error);
+        container.innerHTML = '<p style="text-align:center;padding:2rem;">Erreur de chargement</p>';
     }
 }
 
@@ -147,9 +177,10 @@ function createProductCard(product) {
     // Compatibilité: backend renvoie 'nom', frontend utilisait 'titre'
     const productName = product.nom || product.titre || 'Produit';
     
-    // Image par défaut si pas d'image
-    const imageUrl = product.images && product.images.length > 0 
-        ? product.images[0] 
+    // Image par défaut si pas d'image (filtre les chaînes vides)
+    const validImages = (product.images || []).filter(img => img && img.trim());
+    const imageUrl = validImages.length > 0 
+        ? validImages[0] 
         : `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(productName)}`;
     
     return `

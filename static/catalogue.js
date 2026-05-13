@@ -17,6 +17,7 @@ let hasMoreCatalogue = true;
 
 // Initialisation
 document.addEventListener('DOMContentLoaded', () => {
+    loadCategoryFilter();
     loadURLParams();
     loadCatalogueProducts(true);
     setupCatalogueScroll();
@@ -40,6 +41,31 @@ function loadURLParams() {
         if (filterEl) filterEl.value = cat;
     }
 }
+
+// Charger les catégories dans le filtre
+async function loadCategoryFilter() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/categories`);
+        const categories = await response.json();
+        const select = document.getElementById('categoryFilter');
+        if (!select || !categories) return;
+        
+        categories.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat.slug;
+            option.textContent = `${cat.icone} ${cat.nom}`;
+            select.appendChild(option);
+        });
+        
+        // Restore URL param selection if present
+        if (catalogueFilters.category) {
+            select.value = catalogueFilters.category;
+        }
+    } catch (error) {
+        console.error('Erreur chargement catégories filtre:', error);
+    }
+}
+
 
 
 // Charger les produits
@@ -155,8 +181,9 @@ function createProductCard(product) {
     // Compatibilité: backend renvoie 'nom', frontend utilisait 'titre'
     const productName = product.nom || product.titre || 'Produit';
     
-    const imageUrl = product.images && product.images.length > 0 
-        ? product.images[0] 
+    const validImages = (product.images || []).filter(img => img && img.trim());
+    const imageUrl = validImages.length > 0 
+        ? validImages[0] 
         : `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(productName)}`;
     
     return `

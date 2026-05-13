@@ -114,6 +114,35 @@ async def startup_event():
             {"$set": {"actif": True, "est_premium": True}}
         )
         print("Compte démo mis à jour")
+    
+    # Seed default categories if collection is empty
+    cat_count = await db.categories.count_documents({})
+    if cat_count == 0:
+        default_categories = [
+            {"nom": "Mode Femme", "slug": "mode-femme", "icone": "👗", "date_creation": datetime.utcnow()},
+            {"nom": "Mode Homme", "slug": "mode-homme", "icone": "👔", "date_creation": datetime.utcnow()},
+            {"nom": "Électronique", "slug": "electronique", "icone": "📱", "date_creation": datetime.utcnow()},
+            {"nom": "Maison", "slug": "maison", "icone": "🏠", "date_creation": datetime.utcnow()},
+            {"nom": "Enfants", "slug": "enfants", "icone": "👶", "date_creation": datetime.utcnow()},
+            {"nom": "Meubles", "slug": "meubles", "icone": "🛋️", "date_creation": datetime.utcnow()},
+            {"nom": "Beauté", "slug": "beaute", "icone": "💄", "date_creation": datetime.utcnow()},
+            {"nom": "Sport", "slug": "sport", "icone": "⚽", "date_creation": datetime.utcnow()},
+            {"nom": "Alimentation", "slug": "alimentation", "icone": "🍎", "date_creation": datetime.utcnow()},
+            {"nom": "Quincaillerie", "slug": "quincaillerie", "icone": "🔧", "date_creation": datetime.utcnow()},
+            {"nom": "Plomberie", "slug": "plomberie", "icone": "🚿", "date_creation": datetime.utcnow()},
+            {"nom": "Électricité", "slug": "electricite", "icone": "⚡", "date_creation": datetime.utcnow()},
+            {"nom": "Agriculture", "slug": "agriculture", "icone": "🌾", "date_creation": datetime.utcnow()},
+            {"nom": "Santé & Pharmacie", "slug": "sante-pharmacie", "icone": "💊", "date_creation": datetime.utcnow()},
+            {"nom": "Téléphonie", "slug": "telephonie", "icone": "📞", "date_creation": datetime.utcnow()},
+            {"nom": "Informatique", "slug": "informatique", "icone": "💻", "date_creation": datetime.utcnow()},
+            {"nom": "Véhicules", "slug": "vehicules", "icone": "🚗", "date_creation": datetime.utcnow()},
+            {"nom": "Moto & Pièces", "slug": "moto-pieces", "icone": "🏍️", "date_creation": datetime.utcnow()},
+            {"nom": "Bâtiment & Construction", "slug": "batiment-construction", "icone": "🏗️", "date_creation": datetime.utcnow()},
+            {"nom": "Services", "slug": "services", "icone": "🤝", "date_creation": datetime.utcnow()},
+            {"nom": "Livres & Fournitures", "slug": "livres-fournitures", "icone": "📚", "date_creation": datetime.utcnow()},
+        ]
+        await db.categories.insert_many(default_categories)
+        print(f"{len(default_categories)} catégories par défaut créées")
 
 
 # Security
@@ -145,6 +174,10 @@ class ProduitCreate(BaseModel):
     images: List[str] = []
     stock: int = 1
     est_premium: bool = False
+
+class CategoryCreate(BaseModel):
+    nom: str
+    icone: str = "📦"
 
 class VendeurCreate(BaseModel):
     nom: str
@@ -213,6 +246,12 @@ async def upload_image_to_cloudinary(file_or_base64):
         if "Upload preset not found" in str(e):
             raise HTTPException(status_code=400, detail="Upload preset not configured correctly")
         raise HTTPException(status_code=400, detail=f"Cloudinary upload failed: {str(e)}")
+
+def filter_images(images):
+    """Filter out empty/null strings from image arrays"""
+    if not images:
+        return []
+    return [img for img in images if img and isinstance(img, str) and img.strip()]
 
 
 
@@ -798,7 +837,7 @@ async def lister_produits(
                 "description": p["description"],
                 "prix": p["prix"],
                 "categorie": p["categorie"],
-                "images": p.get("images", []),
+                "images": filter_images(p.get("images", [])),
                 "est_premium": p.get("est_premium", False),
                 "vendeur_id": p["vendeur_id"],
                 "date_creation": p["date_creation"]
@@ -824,7 +863,7 @@ async def detail_produit(produit_id: str):
         "description": produit["description"],
         "prix": produit["prix"],
         "categorie": produit["categorie"],
-        "images": produit.get("images", []),
+        "images": filter_images(produit.get("images", [])),
         "vendeur": {
             "id": str(vendeur["_id"]),
             "nom_boutique": vendeur["nom_boutique"]
@@ -931,7 +970,7 @@ async def produits_vendeur(vendeur_id: str):
             "id": str(p["_id"]),
             "nom": p["nom"],
             "prix": p["prix"],
-            "images": p.get("images", [])
+            "images": filter_images(p.get("images", []))
         }
         for p in produits
     ]
@@ -1005,6 +1044,66 @@ async def abonnements_en_attente():
             for a in abonnements
         ]
     }
+
+# ==================== CATEGORIES ====================
+
+@app.get("/api/categories")
+async def lister_categories():
+    """Lister toutes les catégories (public)"""
+    categories = await db.categories.find().sort("nom", 1).to_list(200)
+    return [
+        {
+            "id": str(c["_id"]),
+            "nom": c["nom"],
+            "slug": c.get("slug", c["nom"].lower().replace(" ", "-")),
+            "icone": c.get("icone", "📦"),
+            "date_creation": c.get("date_creation")
+        }
+        for c in categories
+    ]
+
+@app.post("/api/categories")
+async def creer_categorie(cat: CategoryCreate, current_user = Depends(get_current_user)):
+    """Créer une catégorie (admin)"""
+    # Generate slug from name
+    import re
+    slug = re.sub(r'[^a-z0-9]+', '-', cat.nom.lower().strip()).strip('-')
+    
+    # Check for duplicate slug
+    existing = await db.categories.find_one({"slug": slug})
+    if existing:
+        raise HTTPException(status_code=400, detail="Une catégorie avec ce nom existe déjà")
+    
+    cat_data = {
+        "nom": cat.nom,
+        "slug": slug,
+        "icone": cat.icone,
+        "date_creation": datetime.utcnow()
+    }
+    result = await db.categories.insert_one(cat_data)
+    return {"message": "Catégorie créée", "id": str(result.inserted_id), "slug": slug}
+
+@app.put("/api/categories/{cat_id}")
+async def modifier_categorie(cat_id: str, cat: CategoryCreate, current_user = Depends(get_current_user)):
+    """Modifier une catégorie (admin)"""
+    import re
+    slug = re.sub(r'[^a-z0-9]+', '-', cat.nom.lower().strip()).strip('-')
+    
+    result = await db.categories.update_one(
+        {"_id": ObjectId(cat_id)},
+        {"$set": {"nom": cat.nom, "slug": slug, "icone": cat.icone}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Catégorie non trouvée")
+    return {"message": "Catégorie modifiée", "slug": slug}
+
+@app.delete("/api/categories/{cat_id}")
+async def supprimer_categorie(cat_id: str, current_user = Depends(get_current_user)):
+    """Supprimer une catégorie (admin)"""
+    result = await db.categories.delete_one({"_id": ObjectId(cat_id)})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Catégorie non trouvée")
+    return {"message": "Catégorie supprimée"}
 
 
 if __name__ == "__main__":

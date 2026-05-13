@@ -407,16 +407,11 @@
                 <div class="form-group">
                     <label for="prodCategory">Catégorie</label>
                     <select id="prodCategory" required>
-                        <option value="mode-femme">Mode Femme</option>
-                        <option value="mode-homme">Mode Homme</option>
-                        <option value="electronique">Électronique</option>
-                        <option value="maison">Maison</option>
-                        <option value="enfants">Enfants</option>
-                        <option value="meubles">Meubles</option>
-                        <option value="beaute">Beauté</option>
-                        <option value="sport">Sport</option>
+                        <option value="">Choisir une catégorie...</option>
+                        <!-- Populated dynamically from API -->
                     </select>
                 </div>
+
                 <div class="form-group">
                     <label for="prodStock">Stock initial</label>
                     <input type="number" id="prodStock" value="1" min="1">
@@ -468,6 +463,7 @@
 
 
             document.getElementById('vendor-name-header').textContent = currentUser.nom;
+            loadDashboardCategories();
             loadVendorProfile();
             loadProducts();
         });
@@ -510,6 +506,25 @@
                     preview.querySelector('img').src = base64Image;
                 };
                 reader.readAsDataURL(file);
+            }
+        }
+
+        // Charger les catégories dynamiquement
+        async function loadDashboardCategories() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/categories`);
+                const categories = await response.json();
+                const select = document.getElementById('prodCategory');
+                if (!select || !categories) return;
+                
+                categories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.slug;
+                    option.textContent = `${cat.icone} ${cat.nom}`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erreur chargement catégories:', error);
             }
         }
 
@@ -563,7 +578,8 @@
             tbody.innerHTML = '';
             
             products.forEach(p => {
-                const imageUrl = (p.images && p.images.length > 0) ? p.images[0] : 'https://placehold.co/150x150?text=No+Image';
+                const validImages = (p.images || []).filter(img => img && img.trim());
+                const imageUrl = validImages.length > 0 ? validImages[0] : 'https://placehold.co/150x150?text=No+Image';
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><img src="${imageUrl}" class="prod-img" onerror="this.src='https://placehold.co/150x150?text=Error'"></td>
