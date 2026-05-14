@@ -59,41 +59,66 @@ function displayVendorProfile(vendor) {
     const vendorDisplayName = vendor.nom_boutique || vendor.nom || 'Vendeur';
     const initial = vendorDisplayName.charAt(0).toUpperCase();
     
+    const bannerHtml = vendor.banniere 
+        ? `<div style="height: 200px; width: 100%; background: url('${vendor.banniere}') center/cover; position: absolute; top: 0; left: 0; z-index: 0; border-radius: 12px 12px 0 0;"></div>` 
+        : '';
+        
+    const avatarHtml = vendor.logo
+        ? `<img src="${vendor.logo}" class="vendor-avatar-large" style="object-fit: cover; z-index: 1; border: 4px solid white; background: white;">`
+        : `<div class="vendor-avatar-large" style="z-index: 1; border: 4px solid white;">${initial}</div>`;
+
+    const contactActions = [];
+    if (vendor.whatsapp) {
+        contactActions.push(`<a href="https://wa.me/${vendor.whatsapp.replace(/\+/g, '')}" target="_blank" class="contact-vendor" style="background: #25D366; text-decoration: none;">📱 WhatsApp</a>`);
+    } else {
+        contactActions.push(`<button class="contact-vendor" onclick="contactVendor()">💬 Contacter le Vendeur</button>`);
+    }
+
     const html = `
-        <div class="vendor-avatar-large">${initial}</div>
-        <div class="vendor-info">
-            <div class="vendor-name-large">
-                ${vendorDisplayName}
-                ${premiumBadge}
+        ${bannerHtml}
+        <div style="position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; width: 100%; ${vendor.banniere ? 'margin-top: 150px;' : ''}">
+            ${avatarHtml}
+            <div class="vendor-info" style="text-align: center;">
+                <div class="vendor-name-large">
+                    ${vendorDisplayName}
+                    ${premiumBadge}
+                </div>
+                <div class="vendor-bio" style="max-width: 600px; margin: 1rem auto;">
+                    ${vendor.description_boutique || vendor.bio || 'Vendeur sur APHRIKE JULA'}
+                </div>
+                ${vendor.adresse ? `<div style="color: var(--text-gray); margin-bottom: 1rem;">📍 ${vendor.adresse}</div>` : ''}
+                
+                <div class="vendor-stats-large" style="justify-content: center;">
+                    <div class="stat-large">
+                        <span class="stat-large-value">${vendor.total_ventes || 0}</span>
+                        <span class="stat-large-label">Ventes</span>
+                    </div>
+                    <div class="stat-large">
+                        <span class="stat-large-value">${vendor.note || '5.0'}</span>
+                        <span class="stat-large-label">⭐ Note</span>
+                    </div>
+                    <div class="stat-large">
+                        <span class="stat-large-value">${vendor.total_produits || 0}</span>
+                        <span class="stat-large-label">Produits</span>
+                    </div>
+                    <div class="stat-large">
+                        <span class="stat-large-value">${formatMemberDate(vendor.date_creation || vendor.date_inscription)}</span>
+                        <span class="stat-large-label">Membre depuis</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
+                    ${contactActions.join('')}
+                </div>
             </div>
-            <div class="vendor-bio">
-                ${vendor.bio || 'Vendeur sur APHRIKE JULA'}
-            </div>
-            <div class="vendor-stats-large">
-                <div class="stat-large">
-                    <span class="stat-large-value">${vendor.total_ventes || 0}</span>
-                    <span class="stat-large-label">Ventes</span>
-                </div>
-                <div class="stat-large">
-                    <span class="stat-large-value">${vendor.note || '5.0'}</span>
-                    <span class="stat-large-label">⭐ Note</span>
-                </div>
-                <div class="stat-large">
-                    <span class="stat-large-value">${vendor.total_produits || 0}</span>
-                    <span class="stat-large-label">Produits</span>
-                </div>
-                <div class="stat-large">
-                    <span class="stat-large-value">${formatMemberDate(vendor.date_creation || vendor.date_inscription)}</span>
-                    <span class="stat-large-label">Membre depuis</span>
-                </div>
-            </div>
-            <button class="contact-vendor" onclick="contactVendor()">
-                💬 Contacter le Vendeur
-            </button>
         </div>
     `;
     
-    document.getElementById('vendorProfile').innerHTML = html;
+    // Assurez-vous que vendorProfile a position relative
+    const vendorProfileDiv = document.getElementById('vendorProfile');
+    vendorProfileDiv.style.position = 'relative';
+    vendorProfileDiv.style.padding = vendor.banniere ? '0 0 2rem 0' : '2rem';
+    vendorProfileDiv.innerHTML = html;
+    
     document.getElementById('productsCount').textContent = vendor.total_produits || 0;
     document.getElementById('reviewsCount').textContent = vendor.total_avis || 0;
 }

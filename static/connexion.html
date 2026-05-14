@@ -247,21 +247,7 @@
             
             <!-- Formulaire Inscription -->
             <form id="registerForm" class="auth-form" onsubmit="handleRegister(event)">
-                <div class="form-group">
-                    <label>Type de compte</label>
-                    <div class="account-type">
-                        <label class="type-option selected">
-                            <input type="radio" name="accountType" value="acheteur" checked>
-                            <div class="type-icon">🛒</div>
-                            <div class="type-label">Acheteur</div>
-                        </label>
-                        <label class="type-option">
-                            <input type="radio" name="accountType" value="vendeur">
-                            <div class="type-icon">🏪</div>
-                            <div class="type-label">Vendeur</div>
-                        </label>
-                    </div>
-                </div>
+                <!-- Account type strictly client (buyer) for this form -->
                 
                 <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div>
@@ -466,8 +452,6 @@
             btn.disabled = true;
             btn.textContent = 'Inscription...';
             
-            const accountType = document.querySelector('input[name="accountType"]:checked').value;
-            
             try {
                 const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
                     method: 'POST',
@@ -480,9 +464,8 @@
                         telephone: document.getElementById('registerTelephone').value,
                         email: document.getElementById('registerEmail').value || null,
                         mot_de_passe: password,
-                        role: accountType
+                        role: 'client'
                     })
-
                 });
                 
                 const data = await response.json();

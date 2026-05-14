@@ -201,6 +201,16 @@ class VendeurLogin(BaseModel):
     telephone: str
     mot_de_passe: str
 
+class VendeurUpdate(BaseModel):
+    nom_boutique: Optional[str] = None
+    description_boutique: Optional[str] = None
+    logo: Optional[str] = None
+    banniere: Optional[str] = None
+    whatsapp: Optional[str] = None
+    orange_money: Optional[str] = None
+    email_contact: Optional[str] = None
+    adresse: Optional[str] = None
+
 
 class AbonnementCreate(BaseModel):
     plan: str  # "basic" (5000 FCFA) ou "premium" (10000 FCFA)
@@ -974,6 +984,23 @@ async def supprimer_produit(produit_id: str, current_user = Depends(get_current_
     await db.produits.delete_one({"_id": ObjectId(produit_id)})
     return {"message": "Produit supprimé avec succès"}
 
+class BulkDeleteRequest(BaseModel):
+    product_ids: List[str]
+
+@app.delete("/api/admin/produits/bulk")
+async def bulk_delete_produits(request: BulkDeleteRequest, current_user = Depends(get_current_user)):
+    """Supprimer plusieurs produits en masse (Admin uniquement)"""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Accès refusé. Réservé aux administrateurs.")
+        
+    object_ids = [ObjectId(pid) for pid in request.product_ids]
+    
+    result = await db.produits.delete_many({"_id": {"$in": object_ids}})
+    
+    return {
+        "message": f"{result.deleted_count} produits supprimés avec succès"
+    }
+
 @app.post("/api/media/upload")
 async def upload_media(file: UploadFile = File(...), current_user = Depends(get_current_user)):
     """Uploader une image directement sur Cloudinary"""
@@ -1008,15 +1035,75 @@ async def detail_vendeur(vendeur_id: str):
     vendeur = await db.vendeurs.find_one({"_id": ObjectId(vendeur_id)})
     if not vendeur:
         raise HTTPException(status_code=404, detail="Vendeur non trouvé")
+        
+    total_produits = await db.produits.count_documents({"vendeur_id": str(vendeur["_id"])})
     
     return {
         "id": str(vendeur["_id"]),
         "nom_boutique": vendeur["nom_boutique"],
         "description": vendeur.get("description_boutique"),
+        "logo": vendeur.get("logo"),
+        "banniere": vendeur.get("banniere"),
+        "whatsapp": vendeur.get("whatsapp"),
+        "orange_money": vendeur.get("orange_money"),
+        "email_contact": vendeur.get("email_contact"),
+        "adresse": vendeur.get("adresse"),
         "est_premium": vendeur["est_premium"],
+        "score": vendeur.get("score", 0),
+        "total_produits": total_produits,
+        "date_creation": vendeur["date_creation"]
+    }
+
+@app.get("/api/vendeurs/me")
+async def get_my_vendor_profile(current_user = Depends(get_current_user)):
+    """Récupérer le profil du vendeur connecté"""
+    if current_user.get("role") != "vendeur":
+        raise HTTPException(status_code=403, detail="Réservé aux vendeurs")
+        
+    vendeur = await db.vendeurs.find_one({"user_id": str(current_user["_id"])})
+    if not vendeur:
+        raise HTTPException(status_code=404, detail="Profil vendeur non trouvé")
+        
+    return {
+        "id": str(vendeur["_id"]),
+        "nom_boutique": vendeur["nom_boutique"],
+        "description_boutique": vendeur.get("description_boutique"),
+        "logo": vendeur.get("logo"),
+        "banniere": vendeur.get("banniere"),
+        "whatsapp": vendeur.get("whatsapp"),
+        "orange_money": vendeur.get("orange_money"),
+        "email_contact": vendeur.get("email_contact"),
+        "adresse": vendeur.get("adresse"),
+        "est_premium": vendeur.get("est_premium", False),
         "score": vendeur.get("score", 0),
         "date_creation": vendeur["date_creation"]
     }
+
+@app.put("/api/vendeurs/profil")
+async def update_vendeur_profil(profil_data: VendeurUpdate, current_user = Depends(get_current_user)):
+    """Mettre à jour le profil du vendeur (personnalisation boutique)"""
+    if current_user.get("role") != "vendeur":
+        raise HTTPException(status_code=403, detail="Réservé aux vendeurs")
+        
+    vendeur = await db.vendeurs.find_one({"user_id": str(current_user["_id"])})
+    if not vendeur:
+        raise HTTPException(status_code=404, detail="Vendeur non trouvé")
+        
+    update_data = {k: v for k, v in profil_data.dict(exclude_unset=True).items() if v is not None}
+    
+    # Gérer l'upload des images si c'est du base64
+    for img_field in ["logo", "banniere"]:
+        if img_field in update_data and update_data[img_field] and update_data[img_field].startswith("data:image/"):
+            url = await upload_image_to_cloudinary(update_data[img_field])
+            update_data[img_field] = url
+            
+    if update_data:
+        await db.vendeurs.update_one(
+            {"_id": vendeur["_id"]},
+            {"$set": update_data}
+        )
+        
+    return {"message": "Profil mis à jour avec succès", "updated": update_data}
 
 @app.get("/api/vendeurs/{vendeur_id}/produits")
 async def produits_vendeur(vendeur_id: str):
@@ -1024,15 +1111,17 @@ async def produits_vendeur(vendeur_id: str):
     
     produits = await db.produits.find({"vendeur_id": vendeur_id}).to_list(100)
     
-    return [
-        {
-            "id": str(p["_id"]),
-            "nom": p["nom"],
-            "prix": p["prix"],
-            "images": filter_images(p.get("images", []))
-        }
-        for p in produits
-    ]
+    return {
+        "produits": [
+            {
+                "id": str(p["_id"]),
+                "nom": p["nom"],
+                "prix": p["prix"],
+                "images": filter_images(p.get("images", []))
+            }
+            for p in produits
+        ]
+    }
 
 @app.get("/api/vendeurs/{vendeur_id}/avis")
 async def avis_vendeur(vendeur_id: str):

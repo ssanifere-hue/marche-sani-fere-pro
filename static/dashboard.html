@@ -357,8 +357,9 @@
 
             <!-- Profile Section -->
             <section id="section-profile" class="hidden">
-                <div class="page-header">
+                <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
                     <h1>Informations de la Boutique</h1>
+                    <button class="nav-btn primary" onclick="openProfileModal()">✏️ Modifier</button>
                 </div>
                 <div class="content-card">
                     <div class="profile-info">
@@ -435,6 +436,61 @@
                     </label>
                 </div>
                 <button type="submit" class="submit-btn" id="submitProdBtn">Publier le Produit</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Modifier Profil -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Modifier la Boutique</h2>
+                <button class="close-btn" onclick="closeProfileModal()">&times;</button>
+            </div>
+            <form id="profileForm" onsubmit="handleProfileSubmit(event)">
+                <div class="form-group">
+                    <label>Nom de la Boutique</label>
+                    <input type="text" id="editShopName" required>
+                </div>
+                <div class="form-group">
+                    <label>Description (Bio)</label>
+                    <textarea id="editShopDesc" rows="3"></textarea>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Numéro WhatsApp</label>
+                        <input type="tel" id="editWhatsapp" placeholder="Ex: 70123456">
+                    </div>
+                    <div class="form-group">
+                        <label>Numéro Orange Money</label>
+                        <input type="tel" id="editOrangeMoney" placeholder="Ex: 70123456">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Email de Contact</label>
+                        <input type="email" id="editEmailContact" placeholder="contact@maboutique.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Adresse Physique</label>
+                        <input type="text" id="editAdresse" placeholder="Bamako, Mali">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Logo de la Boutique</label>
+                    <input type="file" id="editLogo" accept="image/*" onchange="previewProfileImage(event, 'logoPreview')">
+                    <div id="logoPreviewWrapper" style="margin-top: 0.5rem; display: none;">
+                        <img id="logoPreview" src="" alt="Preview" style="max-width: 100px; max-height: 100px; border-radius: 8px;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Bannière de la Boutique</label>
+                    <input type="file" id="editBanniere" accept="image/*" onchange="previewProfileImage(event, 'bannerPreview')">
+                    <div id="bannerPreviewWrapper" style="margin-top: 0.5rem; display: none;">
+                        <img id="bannerPreview" src="" alt="Preview" style="max-width: 100%; height: 100px; object-fit: cover; border-radius: 8px;">
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn" id="submitProfileBtn">Enregistrer les modifications</button>
             </form>
         </div>
     </div>
@@ -541,27 +597,93 @@
 
         // Charger Profil
         async function loadVendorProfile() {
-            // Dans un vrai cas, on appellerait un endpoint /api/vendeurs/me
-            // Ici on utilise les données du localStorage et on simule
             document.getElementById('profile-full-name').textContent = currentUser.prenom + ' ' + currentUser.nom;
-            document.getElementById('profile-phone').textContent = currentUser.telephone;
-            document.getElementById('profile-email').textContent = currentUser.email || 'Non renseigné';
             
             try {
-                // Essayer de récupérer les infos boutique
-                const response = await fetch(`${API_BASE_URL}/api/vendeurs/premium`);
-                const vendors = await response.json();
-                // Simulation d'une recherche par nom (à améliorer avec un endpoint dédié)
-                const myShop = vendors.find(v => v.nom_boutique.includes(currentUser.nom));
-                if (myShop) {
-                    document.getElementById('profile-shop-name').textContent = myShop.nom_boutique;
-                    document.getElementById('profile-desc').textContent = myShop.description || 'Pas de description';
-                } else {
-                    document.getElementById('profile-shop-name').textContent = 'Ma Boutique APHRIKE JULA';
-                    document.getElementById('profile-desc').textContent = 'Boutique enregistrée sur APHRIKE JULA';
+                const response = await fetch(`${API_BASE_URL}/api/vendeurs/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const myShop = await response.json();
+                    document.getElementById('profile-shop-name').textContent = myShop.nom_boutique || 'Ma Boutique';
+                    document.getElementById('profile-desc').textContent = myShop.description_boutique || 'Pas de description';
+                    document.getElementById('profile-phone').textContent = myShop.whatsapp || currentUser.telephone;
+                    document.getElementById('profile-email').textContent = myShop.email_contact || currentUser.email || 'Non renseigné';
+                    
+                    // Populate modal form
+                    document.getElementById('editShopName').value = myShop.nom_boutique || '';
+                    document.getElementById('editShopDesc').value = myShop.description_boutique || '';
+                    document.getElementById('editWhatsapp').value = myShop.whatsapp || '';
+                    document.getElementById('editOrangeMoney').value = myShop.orange_money || '';
+                    document.getElementById('editEmailContact').value = myShop.email_contact || '';
+                    document.getElementById('editAdresse').value = myShop.adresse || '';
                 }
             } catch (e) {
-                console.error(e);
+                console.error('Erreur chargement profil vendeur:', e);
+            }
+        }
+
+        let profileImages = { logo: null, banniere: null };
+
+        function openProfileModal() { document.getElementById('profileModal').style.display = 'flex'; }
+        function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
+
+        function previewProfileImage(event, previewId) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64 = e.target.result;
+                    if (previewId === 'logoPreview') profileImages.logo = base64;
+                    if (previewId === 'bannerPreview') profileImages.banniere = base64;
+                    const preview = document.getElementById(previewId);
+                    preview.src = base64;
+                    document.getElementById(previewId + 'Wrapper').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function handleProfileSubmit(event) {
+            event.preventDefault();
+            const btn = document.getElementById('submitProfileBtn');
+            btn.disabled = true;
+            btn.textContent = 'Enregistrement en cours...';
+
+            const payload = {
+                nom_boutique: document.getElementById('editShopName').value,
+                description_boutique: document.getElementById('editShopDesc').value,
+                whatsapp: document.getElementById('editWhatsapp').value,
+                orange_money: document.getElementById('editOrangeMoney').value,
+                email_contact: document.getElementById('editEmailContact').value,
+                adresse: document.getElementById('editAdresse').value
+            };
+            if (profileImages.logo) payload.logo = profileImages.logo;
+            if (profileImages.banniere) payload.banniere = profileImages.banniere;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/vendeurs/profil`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    alert('Profil mis à jour avec succès !');
+                    closeProfileModal();
+                    loadVendorProfile();
+                } else {
+                    const err = await response.json();
+                    alert('Erreur: ' + (err.detail || 'Impossible d\'enregistrer'));
+                }
+            } catch (error) {
+                alert('Erreur de connexion');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Enregistrer les modifications';
             }
         }
 

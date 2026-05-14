@@ -220,7 +220,7 @@
         </a>
 
         <div style="display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;">
-            <a href="connexion.html" style="padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;border:none;cursor:pointer;background:#FFD700;color:#1565C0;text-decoration:none;transition:background 0.2s;">Devenir Vendeur</a>
+            <a href="#inscription-vendeur" style="padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;border:none;cursor:pointer;background:#FFD700;color:#1565C0;text-decoration:none;transition:background 0.2s;">Devenir Vendeur</a>
             <a href="index.html" style="padding:7px 16px;border-radius:100px;font-size:14px;font-weight:500;cursor:pointer;background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.5);text-decoration:none;transition:background 0.2s;">← Retour</a>
         </div>
     </nav>
@@ -298,7 +298,7 @@
                         <li>✅ Statistiques de base</li>
                         <li>✅ 1 000 FCFA bonus inscription</li>
                     </ul>
-                    <a href="connexion.html" class="nav-btn primary" style="width: 100%; text-align: center; display: block;">
+                    <a href="#inscription-vendeur" class="nav-btn primary" style="width: 100%; text-align: center; display: block;">
                         Commencer
                     </a>
                 </div>
@@ -320,7 +320,7 @@
                         <li>⭐ <strong>Support prioritaire 24/7</strong></li>
                         <li>✅ 1 000 FCFA bonus inscription</li>
                     </ul>
-                    <a href="connexion.html" class="nav-btn primary" style="width: 100%; text-align: center; display: block; background: var(--primary-orange);">
+                    <a href="#inscription-vendeur" class="nav-btn primary" style="width: 100%; text-align: center; display: block; background: var(--primary-orange);">
                         Devenir Premium
                     </a>
                 </div>
@@ -361,20 +361,97 @@
         </div>
     </section>
 
-    <!-- CTA Final -->
-    <section class="cta-section">
-        <div class="container">
-            <h2 style="font-size: 2rem; margin-bottom: var(--spacing-md); color: var(--text-dark);">
-                Prêt à Développer Votre Business ? 🚀
-            </h2>
-            <p style="font-size: 1.25rem; color: var(--text-gray); margin-bottom: var(--spacing-lg); max-width: 600px; margin-left: auto; margin-right: auto;">
-                Rejoignez les centaines de vendeurs qui font confiance à APHRIKE JULA pour vendre au Mali
-            </p>
-            <a href="connexion.html" class="cta-btn">
-                Créer Mon Compte Vendeur Maintenant
-            </a>
+    <!-- Seller Auth Section -->
+    <section id="inscription-vendeur" class="auth-section" style="padding: var(--spacing-xl) 0; background: #f8f9fa;">
+        <div class="container" style="max-width: 800px; margin: 0 auto; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #1565C0;">Rejoignez APHRIKE JULA en tant que Vendeur</h2>
+            
+            <div id="vendorErrorMessage" class="error-message" style="display:none; color: white; background: #dc3545; padding: 10px; border-radius: 5px; margin-bottom: 15px;"></div>
+            <div id="vendorSuccessMessage" class="success-message" style="display:none; color: white; background: #28a745; padding: 10px; border-radius: 5px; margin-bottom: 15px;"></div>
+            
+            <form id="vendorRegisterForm" onsubmit="handleVendorRegister(event)">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <label>Nom</label>
+                        <input type="text" id="vNom" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    <div>
+                        <label>Prénom</label>
+                        <input type="text" id="vPrenom" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <label>Nom de la Boutique</label>
+                    <input type="text" id="vBoutique" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <label>Téléphone (8 chiffres)</label>
+                        <input type="tel" id="vTelephone" pattern="[0-9]{8}" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    <div>
+                        <label>Mot de passe</label>
+                        <input type="password" id="vPassword" required minlength="6" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                </div>
+
+                <button type="submit" id="vendorRegisterBtn" style="width: 100%; padding: 12px; background: #FFD700; color: #1565C0; font-weight: bold; border: none; border-radius: 5px; cursor: pointer;">Créer mon Compte Vendeur</button>
+                <p style="text-align: center; margin-top: 1rem;">Déjà vendeur ? <a href="connexion.html">Connectez-vous ici</a></p>
+            </form>
         </div>
     </section>
+
+    <script>
+        const API_BASE_URL = 'https://web-production-8f94.up.railway.app';
+        
+        async function handleVendorRegister(event) {
+            event.preventDefault();
+            const btn = document.getElementById('vendorRegisterBtn');
+            const errDiv = document.getElementById('vendorErrorMessage');
+            const succDiv = document.getElementById('vendorSuccessMessage');
+            
+            errDiv.style.display = 'none';
+            succDiv.style.display = 'none';
+            btn.disabled = true;
+            btn.textContent = 'Inscription en cours...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nom: document.getElementById('vNom').value,
+                        prenom: document.getElementById('vPrenom').value,
+                        telephone: document.getElementById('vTelephone').value,
+                        mot_de_passe: document.getElementById('vPassword').value,
+                        nom_boutique: document.getElementById('vBoutique').value,
+                        role: 'vendeur'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    succDiv.textContent = 'Inscription réussie ! Redirection vers le dashboard...';
+                    succDiv.style.display = 'block';
+                    setTimeout(() => window.location.href = '/dashboard', 1500);
+                } else {
+                    errDiv.textContent = data.detail || "Erreur d'inscription";
+                    errDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errDiv.textContent = "Erreur de connexion.";
+                errDiv.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Créer mon Compte Vendeur';
+            }
+        }
+    </script>
 
     <!-- Footer -->
     <footer class="footer">

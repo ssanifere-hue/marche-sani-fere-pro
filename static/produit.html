@@ -323,7 +323,17 @@
         }
 
         function acheterProduit() {
-            alert('🚧 Fonctionnalité en développement\\n\\nBientôt : Paiement sécurisé Orange Money !');
+            // Generate order reference
+            const ref = 'REF-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+            document.getElementById('omRef').textContent = ref;
+            document.getElementById('omAmount').textContent = formatPrice(productData.prix) + ' FCFA';
+            
+            // Show modal
+            document.getElementById('omModal').style.display = 'flex';
+        }
+
+        function closeOmModal() {
+            document.getElementById('omModal').style.display = 'none';
         }
 
         function formatPrice(price) {
@@ -335,5 +345,34 @@
             return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
         }
     </script>
+    <!-- Modal Orange Money -->
+    <div id="omModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:2000; justify-content:center; align-items:center;">
+        <div style="background:white; padding:2rem; border-radius:12px; max-width:400px; width:90%; position:relative;">
+            <button onclick="closeOmModal()" style="position:absolute; top:10px; right:15px; background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+            <div style="text-align:center; margin-bottom:1.5rem;">
+                <h2 style="color:#FF6600; margin-bottom:0.5rem;">Paiement Orange Money</h2>
+                <p style="color:var(--text-gray); font-size:0.9rem;">Suivez les instructions pour finaliser votre commande</p>
+            </div>
+            
+            <div style="background:#f8f9fa; padding:1rem; border-radius:8px; margin-bottom:1.5rem; text-align:center;">
+                <p style="margin-bottom:0.5rem; font-weight:600;">Montant exact à payer :</p>
+                <div id="omAmount" style="font-size:1.5rem; font-weight:700; color:#1565C0; margin-bottom:1rem;"></div>
+                
+                <p style="margin-bottom:0.5rem; font-weight:600;">Référence de commande :</p>
+                <div id="omRef" style="font-size:1.2rem; font-family:monospace; background:#e3f2fd; padding:0.5rem; border-radius:4px; display:inline-block; font-weight:700; color:#1565C0;"></div>
+            </div>
+            
+            <div style="margin-bottom:1.5rem;">
+                <p style="margin-bottom:0.5rem;"><strong>1.</strong> Effectuez le transfert Orange Money au numéro suivant :</p>
+                <div style="font-size:1.2rem; font-weight:700; text-align:center; padding:0.5rem; border:2px dashed #FF6600; border-radius:8px; margin-bottom:1rem;">+223 70 70 05 20</div>
+                <p style="margin-bottom:0.5rem;"><strong>2.</strong> Prenez une capture d'écran du SMS de confirmation.</p>
+                <p><strong>3.</strong> Envoyez la capture d'écran sur WhatsApp avec votre référence de commande.</p>
+            </div>
+            
+            <a href="https://wa.me/22370700520?text=Bonjour,%20j'ai%20effectué%20le%20paiement%20pour%20ma%20commande." target="_blank" style="display:block; text-align:center; background:#25D366; color:white; padding:12px; border-radius:100px; text-decoration:none; font-weight:600; font-size:1.1rem;">
+                📱 Envoyer la preuve sur WhatsApp
+            </a>
+        </div>
+    </div>
 </body>
 </html>
