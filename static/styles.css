@@ -1,26 +1,30 @@
 /* ========================================
-   SANI-FÉRÉ PRO - MARKETPLACE PUBLIQUE
-   Design System - Couleurs Vives Africaines
+   APHRIKE JULA - MARKETPLACE PUBLIQUE
+   Design System - Bleu Roi & Or
    ======================================== */
 
 :root {
-  /* Couleurs principales - Palette africaine vibrante */
-  --primary-green: #00B074;
-  --primary-orange: #FF6B35;
-  --primary-gold: #FFB800;
+  /* Couleurs principales - Palette Bleu Roi & Or */
+  --primary-blue: #1565C0;
+  --primary-blue-dark: #0D47A1;
+  --primary-blue-light: #1E88E5;
+  --primary-gold: #FFD700;
+  --primary-gold-dark: #FFC200;
+  --primary-green: #1565C0;
+  --primary-orange: #FFD700;
   --primary-red: #E63946;
-  --primary-purple: #7209B7;
+  --primary-purple: #0D47A1;
   
   /* Couleurs secondaires */
-  --secondary-teal: #06D6A0;
+  --secondary-teal: #1E88E5;
   --secondary-coral: #FF9E80;
   --secondary-yellow: #FFD60A;
   --secondary-pink: #FF006E;
-  --secondary-blue: #4361EE;
+  --secondary-blue: #1565C0;
   
   /* Couleurs neutres */
   --white: #FFFFFF;
-  --bg-light: #F8F9FA;
+  --bg-light: #F0F4F8;
   --bg-gray: #E9ECEF;
   --text-dark: #212529;
   --text-gray: #6C757D;
@@ -80,9 +84,127 @@ body {
   padding: 0 var(--spacing-sm);
 }
 
-/* Header/Navigation */
+/* ══════════════════════════════════════════
+   APHRIKE JULA — Navbar Bleu Roi & Or
+   ══════════════════════════════════════════ */
+
+.aj-navbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 24px;
+  height: 56px;
+  background: #1565C0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(21, 101, 192, 0.3);
+}
+
+.aj-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.aj-logo svg {
+  display: block;
+}
+
+.aj-name {
+  font-size: 17px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.aj-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 100px;
+  padding: 7px 16px;
+  flex: 1;
+  max-width: 420px;
+  margin: 0 auto;
+  transition: background 0.2s;
+}
+
+.aj-search:focus-within {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.aj-search-icon {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.aj-search input {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: #ffffff;
+  width: 100%;
+}
+
+.aj-search input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.aj-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.aj-btn-sell {
+  padding: 8px 18px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  background: #FFD700;
+  color: #1565C0;
+  transition: background 0.2s, transform 0.1s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.aj-btn-sell:hover {
+  background: #FFC200;
+  transform: scale(1.02);
+}
+
+.aj-btn-login {
+  padding: 7px 16px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  background: transparent;
+  color: #ffffff;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  transition: background 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.aj-btn-login:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ── Legacy navbar (kept for dashboard compatibility) ── */
 .navbar {
-  background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-teal) 100%);
+  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
   color: var(--white);
   padding: var(--spacing-sm) 0;
   box-shadow: var(--shadow-md);
@@ -139,8 +261,8 @@ body {
   right: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
-  background: var(--primary-orange);
-  color: var(--white);
+  background: var(--primary-gold);
+  color: var(--primary-blue);
   border: none;
   padding: 0.5rem 1rem;
   border-radius: var(--radius-full);
@@ -150,7 +272,7 @@ body {
 }
 
 .search-btn:hover {
-  background: var(--primary-red);
+  background: var(--primary-gold-dark);
   transform: translateY(-50%) scale(1.05);
 }
 
@@ -175,24 +297,25 @@ body {
 
 .nav-btn:hover {
   background: var(--white);
-  color: var(--primary-green);
+  color: var(--primary-blue);
   transform: translateY(-2px);
 }
 
 .nav-btn.primary {
-  background: var(--primary-orange);
-  border-color: var(--primary-orange);
+  background: var(--primary-gold);
+  border-color: var(--primary-gold);
+  color: var(--primary-blue);
 }
 
 .nav-btn.primary:hover {
-  background: var(--primary-red);
-  border-color: var(--primary-red);
-  color: var(--white);
+  background: var(--primary-gold-dark);
+  border-color: var(--primary-gold-dark);
+  color: var(--primary-blue);
 }
 
 /* Hero Section */
 .hero {
-  background: linear-gradient(135deg, var(--primary-purple) 0%, var(--primary-red) 100%);
+  background: linear-gradient(135deg, var(--primary-blue-dark) 0%, var(--primary-blue-light) 100%);
   color: var(--white);
   padding: var(--spacing-xl) 0;
   text-align: center;
@@ -258,7 +381,7 @@ body {
 
 /* Premium Vendors Section */
 .premium-vendors {
-  background: linear-gradient(135deg, #FFF5E6 0%, #FFE8CC 100%);
+  background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
   padding: var(--spacing-xl) 0;
   margin-bottom: var(--spacing-xl);
 }
@@ -269,7 +392,7 @@ body {
   overflow-x: auto;
   padding: var(--spacing-sm) 0;
   scrollbar-width: thin;
-  scrollbar-color: var(--premium-gold) transparent;
+  scrollbar-color: var(--primary-gold) transparent;
 }
 
 .vendors-scroll::-webkit-scrollbar {
@@ -277,7 +400,7 @@ body {
 }
 
 .vendors-scroll::-webkit-scrollbar-thumb {
-  background: var(--premium-gold);
+  background: var(--primary-gold);
   border-radius: var(--radius-full);
 }
 
@@ -290,7 +413,7 @@ body {
   cursor: pointer;
   transition: var(--transition-normal);
   box-shadow: var(--shadow-md);
-  border: 3px solid var(--premium-gold);
+  border: 3px solid var(--primary-gold);
   position: relative;
   text-decoration: none;
   color: var(--text-dark);
@@ -319,7 +442,7 @@ body {
   height: 80px;
   border-radius: 50%;
   margin: 0 auto var(--spacing-sm);
-  background: linear-gradient(135deg, var(--primary-green), var(--secondary-teal));
+  background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-light));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -351,7 +474,7 @@ body {
 
 .stat-value {
   font-weight: 700;
-  color: var(--primary-green);
+  color: var(--primary-blue);
 }
 
 /* Products Grid */
@@ -379,9 +502,9 @@ body {
 
 .filter-btn:hover,
 .filter-btn.active {
-  background: var(--primary-green);
+  background: var(--primary-blue);
   color: var(--white);
-  border-color: var(--primary-green);
+  border-color: var(--primary-blue);
 }
 
 .products-grid {
@@ -444,7 +567,7 @@ body {
 .product-price {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--primary-green);
+  color: var(--primary-blue);
   margin-bottom: 0.5rem;
 }
 
@@ -467,7 +590,7 @@ body {
 }
 
 .load-more-btn {
-  background: var(--primary-orange);
+  background: var(--primary-blue);
   color: var(--white);
   border: none;
   padding: 1rem 2rem;
@@ -480,7 +603,7 @@ body {
 }
 
 .load-more-btn:hover {
-  background: var(--primary-red);
+  background: var(--primary-blue-dark);
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }
@@ -500,7 +623,7 @@ body {
 
 .spinner {
   border: 4px solid var(--bg-gray);
-  border-top: 4px solid var(--primary-green);
+  border-top: 4px solid var(--primary-blue);
   border-radius: 50%;
   width: 50px;
   height: 50px;
@@ -510,7 +633,7 @@ body {
 
 /* Footer */
 .footer {
-  background: linear-gradient(135deg, var(--text-dark) 0%, #343A40 100%);
+  background: linear-gradient(135deg, #0D1B2A 0%, #1B2838 100%);
   color: var(--white);
   padding: var(--spacing-xl) 0 var(--spacing-md);
   margin-top: var(--spacing-xl);
@@ -576,7 +699,16 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* Responsive */
+/* Responsive — Navbar */
+@media (max-width: 600px) {
+  .aj-navbar { padding: 0 14px; gap: 8px; }
+  .aj-name { font-size: 15px; }
+  .aj-search { max-width: 100%; }
+  .aj-btn-login { display: none; }
+  .aj-btn-sell { padding: 7px 14px; font-size: 13px; }
+}
+
+/* Responsive — General */
 @media (max-width: 768px) {
   .navbar-content {
     flex-direction: column;
