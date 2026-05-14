@@ -134,6 +134,15 @@ body {
   transform: scale(1.02);
 }
 
+/* APHRIKE JULA Navbar Search Input */
+.aj-navbar input {
+  color: #ffffff !important;
+}
+.aj-navbar input::placeholder {
+  color: rgba(255, 255, 255, 0.8) !important;
+  opacity: 1; /* override firefox default opacity */
+}
+
 .search-btn {
   position: absolute;
   right: 0.5rem;
