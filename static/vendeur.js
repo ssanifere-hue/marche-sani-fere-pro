@@ -67,7 +67,7 @@ function displayVendorProfile(vendor) {
                 ${premiumBadge}
             </div>
             <div class="vendor-bio">
-                ${vendor.bio || 'Vendeur sur APHRIKE JULA'}
+                ${vendor.bio || 'Vendeur sur SANI-FÉRÉ PRO'}
             </div>
             <div class="vendor-stats-large">
                 <div class="stat-large">
@@ -277,7 +277,7 @@ function contactVendor() {
     const nom = vendorData.nom || 'le vendeur';
     
     if (telephone) {
-        const message = encodeURIComponent(`Bonjour ${nom}, je vous contacte depuis APHRIKE JULA à propos de vos produits.`);
+        const message = encodeURIComponent(`Bonjour ${nom}, je vous contacte depuis SANI-FÉRÉ PRO à propos de vos produits.`);
         window.open(`https://wa.me/${telephone}?text=${message}`, '_blank');
     } else {
         alert('Ce vendeur n\'a pas renseigné de numéro de téléphone. Essayez de le contacter via le chatbot.');
