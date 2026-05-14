@@ -3,33 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SANI-FÉRÉ PRO - Marché de Confiance du Mali 🇲🇱</title>
+    <title>APHRIKE JULA - Marché de Confiance du Mali 🇲🇱</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="container navbar-content">
-            <a href="index.html" class="logo">
-                <span class="logo-icon">🛍️</span>
-                <span>SANI-FÉRÉ PRO</span>
-            </a>
-            
-            <div class="search-bar">
-                <input 
-                    type="text" 
-                    class="search-input" 
-                    id="searchInput"
-                    placeholder="Chercher un produit, un vendeur..." 
-                    autocomplete="off"
-                >
-                <button class="search-btn" onclick="searchProducts()">🔍 Chercher</button>
+    <!-- Navigation APHRIKE JULA -->
+    <nav class="aj-navbar" style="display:flex;align-items:center;gap:12px;padding:0 24px;height:56px;background:#1565C0;position:sticky;top:0;z-index:1000;box-shadow:0 2px 8px rgba(21,101,192,0.3);">
+        <a href="index.html" class="aj-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;">
+            <div class="aj-logo">
+                <svg width="36" height="36" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="17" cy="17" r="15" fill="rgba(255,255,255,0.1)"/>
+                    <polygon points="17,4 20.5,13 30,13 22.5,19 25.5,29 17,23 8.5,29 11.5,19 4,13 13.5,13" fill="rgba(255,215,0,0.25)"/>
+                    <polygon points="17,7 20,14.5 28,14.5 21.5,19.5 24,27 17,22.5 10,27 12.5,19.5 6,14.5 14,14.5" fill="#FFD700"/>
+                </svg>
             </div>
-            
-            <div class="nav-actions">
-                <a href="vendre.html" class="nav-btn primary">Vendre</a>
-                <a href="connexion.html" class="nav-btn">Connexion</a>
-            </div>
+            <span style="font-size:17px;font-weight:600;color:#fff;letter-spacing:-0.01em;white-space:nowrap;">APHRIKE JULA</span>
+        </a>
+
+        <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border-radius:100px;padding:7px 16px;flex:1;max-width:420px;margin:0 auto;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchInput" placeholder="Chercher un produit, un vendeur..." autocomplete="off" style="background:transparent;border:none;outline:none;font-size:14px;color:#fff;width:100%;" onkeydown="if(event.key==='Enter') searchProducts()">
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;">
+            <a href="vendre.html" style="padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;border:none;cursor:pointer;background:#FFD700;color:#1565C0;text-decoration:none;transition:background 0.2s;">Vendre</a>
+            <a href="connexion.html" style="padding:7px 16px;border-radius:100px;font-size:14px;font-weight:500;cursor:pointer;background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.5);text-decoration:none;transition:background 0.2s;">Connexion</a>
         </div>
     </nav>
 
@@ -97,7 +95,7 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
-                    <h3>🛍️ SANI-FÉRÉ PRO</h3>
+                    <h3>⭐ APHRIKE JULA</h3>
                     <p>La marketplace de confiance du Mali. Achetez et vendez en toute sécurité avec Orange Money.</p>
                 </div>
                 
@@ -124,7 +122,7 @@
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; 2026 SANI-FÉRÉ PRO - Alliance Sahel Services. Tous droits réservés. 🇲🇱</p>
+                <p>&copy; 2026 APHRIKE JULA. Tous droits réservés. 🇲🇱</p>
             </div>
         </div>
     </footer>

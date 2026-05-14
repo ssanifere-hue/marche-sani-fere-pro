@@ -1,39 +1,39 @@
 /* ========================================
-   SANI-FÉRÉ PRO - MARKETPLACE PUBLIQUE
-   Design System - Couleurs Vives Africaines
+   APHRIKE JULA - MARKETPLACE PUBLIQUE
+   Design System - Bleu Roi & Or
    ======================================== */
 
 :root {
-  /* Couleurs principales - Palette africaine vibrante */
-  --primary-green: #00B074;
-  --primary-orange: #FF6B35;
-  --primary-gold: #FFB800;
-  --primary-red: #E63946;
-  --primary-purple: #7209B7;
+  /* Couleurs principales - Bleu Roi & Or */
+  --primary-green: #1565C0;
+  --primary-orange: #FFD700;
+  --primary-gold: #FFD700;
+  --primary-red: #0D47A1;
+  --primary-purple: #0D47A1;
   
   /* Couleurs secondaires */
-  --secondary-teal: #06D6A0;
-  --secondary-coral: #FF9E80;
-  --secondary-yellow: #FFD60A;
-  --secondary-pink: #FF006E;
-  --secondary-blue: #4361EE;
+  --secondary-teal: #1976D2;
+  --secondary-coral: #FFC200;
+  --secondary-yellow: #FFD700;
+  --secondary-pink: #FF6F00;
+  --secondary-blue: #1565C0;
   
   /* Couleurs neutres */
   --white: #FFFFFF;
-  --bg-light: #F8F9FA;
-  --bg-gray: #E9ECEF;
-  --text-dark: #212529;
-  --text-gray: #6C757D;
-  --border-gray: #DEE2E6;
+  --bg-light: #F0F4F8;
+  --bg-gray: #E3E8EF;
+  --text-dark: #1A1A2E;
+  --text-gray: #5A6172;
+  --border-gray: #D1D9E6;
   
   /* Premium */
   --premium-gold: #FFD700;
   --premium-gradient: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
   
   /* Ombres */
-  --shadow-sm: 0 2px 4px rgba(0,0,0,0.08);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.15);
+  --shadow-sm: 0 2px 4px rgba(21, 101, 192, 0.08);
+  --shadow-md: 0 4px 12px rgba(21, 101, 192, 0.12);
+  --shadow-lg: 0 8px 24px rgba(21, 101, 192, 0.15);
   
   /* Espacements */
   --spacing-xs: 0.5rem;
@@ -82,10 +82,10 @@ body {
 
 /* Header/Navigation */
 .navbar {
-  background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-teal) 100%);
+  background: #1565C0;
   color: var(--white);
   padding: var(--spacing-sm) 0;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 2px 8px rgba(21, 101, 192, 0.3);
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -139,8 +139,8 @@ body {
   right: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
-  background: var(--primary-orange);
-  color: var(--white);
+  background: #FFD700;
+  color: #1565C0;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: var(--radius-full);
@@ -150,7 +150,7 @@ body {
 }
 
 .search-btn:hover {
-  background: var(--primary-red);
+  background: #FFC200;
   transform: translateY(-50%) scale(1.05);
 }
 
@@ -180,19 +180,20 @@ body {
 }
 
 .nav-btn.primary {
-  background: var(--primary-orange);
-  border-color: var(--primary-orange);
+  background: #FFD700;
+  border-color: #FFD700;
+  color: #1565C0;
 }
 
 .nav-btn.primary:hover {
-  background: var(--primary-red);
-  border-color: var(--primary-red);
-  color: var(--white);
+  background: #FFC200;
+  border-color: #FFC200;
+  color: #1565C0;
 }
 
 /* Hero Section */
 .hero {
-  background: linear-gradient(135deg, var(--primary-purple) 0%, var(--primary-red) 100%);
+  background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
   color: var(--white);
   padding: var(--spacing-xl) 0;
   text-align: center;
@@ -258,7 +259,7 @@ body {
 
 /* Premium Vendors Section */
 .premium-vendors {
-  background: linear-gradient(135deg, #FFF5E6 0%, #FFE8CC 100%);
+  background: linear-gradient(135deg, #E3F0FF 0%, #D0E4FF 100%);
   padding: var(--spacing-xl) 0;
   margin-bottom: var(--spacing-xl);
 }
@@ -319,7 +320,7 @@ body {
   height: 80px;
   border-radius: 50%;
   margin: 0 auto var(--spacing-sm);
-  background: linear-gradient(135deg, var(--primary-green), var(--secondary-teal));
+  background: linear-gradient(135deg, #1565C0, #1976D2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -467,8 +468,8 @@ body {
 }
 
 .load-more-btn {
-  background: var(--primary-orange);
-  color: var(--white);
+  background: #FFD700;
+  color: #1565C0;
   border: none;
   padding: 1rem 2rem;
   border-radius: var(--radius-full);
@@ -480,7 +481,7 @@ body {
 }
 
 .load-more-btn:hover {
-  background: var(--primary-red);
+  background: #FFC200;
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }
@@ -510,7 +511,7 @@ body {
 
 /* Footer */
 .footer {
-  background: linear-gradient(135deg, var(--text-dark) 0%, #343A40 100%);
+  background: linear-gradient(135deg, #0D47A1 0%, #1A1A2E 100%);
   color: var(--white);
   padding: var(--spacing-xl) 0 var(--spacing-md);
   margin-top: var(--spacing-xl);
