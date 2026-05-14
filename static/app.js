@@ -296,7 +296,8 @@ function updateLoadMoreButton(loading) {
 function updateNavbar() {
     const token = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
-    const navActions = document.querySelector('.nav-actions');
+    // Target the new APHRIKE JULA navbar actions container or legacy
+    const navActions = document.querySelector('.aj-navbar > div:last-child') || document.querySelector('.nav-actions');
 
     if (token && userStr && navActions) {
         try {
@@ -305,11 +306,11 @@ function updateNavbar() {
             
             navActions.innerHTML = `
                 ${user.role === 'vendeur' 
-                    ? '<a href="/dashboard" class="nav-btn primary">Dashboard</a>' 
-                    : '<a href="vendre.html" class="nav-btn primary">Vendre</a>'}
+                    ? '<a href="/dashboard" style="padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;border:none;cursor:pointer;background:#FFD700;color:#1565C0;text-decoration:none;transition:background 0.2s;">Dashboard</a>' 
+                    : '<a href="vendre.html" style="padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;border:none;cursor:pointer;background:#FFD700;color:#1565C0;text-decoration:none;transition:background 0.2s;">Vendre</a>'}
                 <div style="display: flex; align-items: center; gap: 1rem;">
-                    <span style="font-weight: 600; color: var(--text-dark);">👤 ${firstName}</span>
-                    <a href="#" class="nav-btn" onclick="handleLogout(event)">Déconnexion</a>
+                    <span style="font-weight: 600; color: #fff;">👤 ${firstName}</span>
+                    <a href="#" style="padding:7px 16px;border-radius:100px;font-size:14px;font-weight:500;cursor:pointer;background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.5);text-decoration:none;transition:background 0.2s;" onclick="handleLogout(event)">Déconnexion</a>
                 </div>
             `;
         } catch (e) {
