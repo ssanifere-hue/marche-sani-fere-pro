@@ -79,6 +79,50 @@
             margin-bottom: var(--spacing-xl);
         }
 
+        /* Dashboard Welcome Banner */
+        .dashboard-header-banner {
+            background: linear-gradient(135deg, #1a3c8f 0%, #1565C0 60%, #1976D2 100%);
+            border-radius: var(--radius-lg);
+            padding: 2rem 2.5rem;
+            margin-bottom: var(--spacing-xl);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            box-shadow: 0 4px 20px rgba(26, 60, 143, 0.25);
+        }
+        .dashboard-header-banner h1 {
+            color: #fff;
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        .dashboard-header-banner h1 .wave-emoji {
+            font-size: 1.5rem;
+        }
+        .dashboard-header-banner p {
+            color: rgba(255,255,255,0.75);
+            font-size: 0.95rem;
+            margin: 0.35rem 0 0;
+        }
+        .dashboard-header-banner .add-product-btn {
+            padding: 0.7rem 1.5rem;
+            border-radius: 100px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            background: #FFD700;
+            color: #1a3c8f;
+            transition: background 0.2s, transform 0.15s;
+            white-space: nowrap;
+        }
+        .dashboard-header-banner .add-product-btn:hover {
+            background: #ffca00;
+            transform: translateY(-1px);
+        }
+
         /* Stats Cards */
         .stats-grid {
             display: grid;
@@ -89,21 +133,52 @@
 
         .stat-card {
             background: white;
-            padding: var(--spacing-md);
+            padding: 1.25rem 1.5rem;
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-left: 4px solid #1565C0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        }
+        .stat-card:nth-child(2) { border-left-color: #FFD700; }
+        .stat-card:nth-child(3) { border-left-color: #FF6B35; }
+        .stat-card:nth-child(4) { border-left-color: #00B074; }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+        .stat-card:nth-child(1) .stat-icon { background: rgba(21,101,192,0.1); }
+        .stat-card:nth-child(2) .stat-icon { background: rgba(255,215,0,0.15); }
+        .stat-card:nth-child(3) .stat-icon { background: rgba(255,107,53,0.1); }
+        .stat-card:nth-child(4) .stat-icon { background: rgba(0,176,116,0.1); }
+
+        .stat-text {
             display: flex;
             flex-direction: column;
         }
 
         .stat-label {
             color: var(--text-gray);
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
         }
 
         .stat-number {
-            font-size: 1.75rem;
+            font-size: 1.65rem;
             font-weight: 700;
             color: var(--text-dark);
         }
@@ -236,8 +311,12 @@
 
         @media (max-width: 768px) {
             .sidebar { display: none; }
-            .main-content { margin-left: 0; }
+            .main-content { margin-left: 0; padding: var(--spacing-md); }
             .profile-info { grid-template-columns: 1fr; }
+            .dashboard-header-banner { padding: 1.5rem; flex-direction: column; align-items: flex-start; }
+            .dashboard-header-banner h1 { font-size: 1.3rem; }
+            .stat-card { padding: 1rem; }
+            .stat-number { font-size: 1.35rem; }
         }
     </style>
 </head>
@@ -283,27 +362,42 @@
         <main class="main-content">
             <!-- Overview Section -->
             <section id="section-overview">
-                <div class="page-header">
-                    <h1>Bonjour, <span id="vendor-name-header">Vendeur</span> 👋</h1>
-                    <button class="nav-btn primary" onclick="openModal()">+ Ajouter un Produit</button>
+                <div class="dashboard-header-banner">
+                    <div>
+                        <h1>Bonjour, <span id="vendor-name-header">Vendeur</span> <span class="wave-emoji">👋</span></h1>
+                        <p>Bienvenue sur votre espace vendeur APHRIKE JULA</p>
+                    </div>
+                    <button class="add-product-btn" onclick="openModal()">+ Ajouter un Produit</button>
                 </div>
 
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <span class="stat-label">Total Produits</span>
-                        <span class="stat-number" id="stat-total-products">0</span>
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-text">
+                            <span class="stat-label">Total Produits</span>
+                            <span class="stat-number" id="stat-total-products">0</span>
+                        </div>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-label">Ventes (Ce mois)</span>
-                        <span class="stat-number">0 FCFA</span>
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-text">
+                            <span class="stat-label">Ventes (Ce mois)</span>
+                            <span class="stat-number">0 FCFA</span>
+                        </div>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-label">Note Vendeur</span>
-                        <span class="stat-number">⭐ 5.0</span>
+                        <div class="stat-icon">⭐</div>
+                        <div class="stat-text">
+                            <span class="stat-label">Note Vendeur</span>
+                            <span class="stat-number">5.0</span>
+                        </div>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-label">Statut Compte</span>
-                        <span class="badge badge-success" id="vendor-status" style="width: fit-content; margin-top: 0.5rem;">Actif</span>
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-text">
+                            <span class="stat-label">Statut Compte</span>
+                            <span class="badge badge-success" id="vendor-status" style="width: fit-content; margin-top: 0.25rem;">Actif</span>
+                        </div>
                     </div>
                 </div>
 

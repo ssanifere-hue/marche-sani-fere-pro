@@ -1,225 +1,86 @@
-# 🛍️ SANI-FÉRÉ PRO - MARKETPLACE PUBLIQUE
+# ⭐ APHRIKE JULA - PUBLIC MARKETPLACE
 
-Marketplace publique complète pour SANI-FÉRÉ Pro avec design moderne, couleurs vives africaines et scroll infini.
+Complete public marketplace for APHRIKE JULA (formerly SANI-FÉRÉ Pro) featuring a modern design, vibrant African colors, and multiple features for both sellers and buyers.
 
-## 🎨 DESIGN & FONCTIONNALITÉS
+## 🎨 DESIGN & FEATURES
 
-### Couleurs
-- **Palette africaine vibrante** : Vert `#00B074`, Orange `#FF6B35`, Or `#FFB800`, Rouge `#E63946`, Violet `#7209B7`
-- **Premium** : Dégradé doré `#FFD700` → `#FFA500`
-- **Fond** : Blanc cassé `#F8F9FA` pour le confort visuel
+### Visual Theme
+- **Palette**: Royal Blue `#1565C0`, Gold `#FFD700`, Green `#00B074`, Orange `#FF6B35`
+- **Premium**: Golden Gradient
+- **Background**: Off-white `#F8F9FA` for visual comfort
 
-### Pages Principales
-1. **index.html** - Page d'accueil
-   - Hero avec slogan
-   - Catégories populaires
-   - Vendeurs Premium en carrousel
-   - Produits récents avec scroll infini
+### Main Features Implemented
+- **Buyer/Seller Separation**: Separate registration processes for buyers (clients) and sellers. Buyers do not have access to the seller dashboard.
+- **Orange Money Payment**: Integrated payment modal for products, including transfer instructions and a direct WhatsApp link to send payment proof.
+- **Store Customization**: Sellers can update their logo, banner, WhatsApp number, physical address, and contact email directly from their dashboard.
+- **Administration**: Dedicated interface (`admin-produits.html`) allowing administrators to delete products in bulk.
 
-2. **catalogue.html** - Catalogue complet
-   - Filtres avancés (catégorie, vendeur, localisation, prix)
-   - Tri (récent, prix, popularité)
-   - Recherche
-   - Scroll infini
+### Main Pages
+1. **`index.html`** - Homepage (Hero, popular categories, premium carousel, recent products)
+2. **`catalogue.html`** - Full Catalog (Advanced filters, search, sorting, infinite scrolling)
+3. **`vendeur.html`** - Vendor Profile/Store (Banner, logo, direct WhatsApp contact, product list)
+4. **`produit.html`** - Detailed Product Page (Image gallery, description, Orange Money payment)
+5. **`connexion.html`** - Login and Registration for buyers
+6. **`vendre.html`** - Specific Registration page to become a seller
+7. **`dashboard.html`** - Seller Dashboard (Product management, store customization)
+8. **`admin-produits.html`** - Administration interface for product moderation
 
-3. **vendeur.html** - Profil/Boutique vendeur
-   - Profil complet avec stats
-   - Tous les produits du vendeur
-   - Onglets : Produits, Avis, À Propos
-   - Contact WhatsApp direct
-
-4. **produit.html** - Page produit individuelle
-   - Galerie photos avec thumbnails
-   - Description complète
-   - Informations vendeur
-   - Bouton achat Orange Money
-
-## 📁 STRUCTURE DES FICHIERS
+## 📁 FILE STRUCTURE
 
 ```
-marketplace-sanifere-pro/
-├── index.html           # Page d'accueil
-├── catalogue.html       # Page catalogue avec filtres
-├── vendeur.html         # Page profil vendeur
-├── produit.html         # Page produit individuelle
-├── styles.css           # CSS global avec design system
-├── app.js              # JavaScript principal (accueil)
-├── catalogue.js        # JavaScript catalogue
-├── vendeur.js          # JavaScript vendeur
-└── README.md           # Ce fichier
+marche-sani-fere-pro/
+├── backend/
+│   └── main.py          # FastAPI Backend (Full marketplace API)
+├── static/              # Static Frontend (Served by FastAPI)
+│   ├── index.html
+│   ├── catalogue.html
+│   ├── vendeur.html
+│   ├── produit.html
+│   ├── connexion.html
+│   ├── vendre.html
+│   ├── dashboard.html
+│   ├── admin-produits.html
+│   ├── styles.css       # Global Design System
+│   ├── app.js           # Homepage JS and navbar logic
+│   ├── catalogue.js     # Catalog page JS
+│   └── vendeur.js       # Public vendor store JS
+└── README.md            # Project documentation
 ```
 
-## 🚀 DÉPLOIEMENT SUR RAILWAY
+## 🚀 DEPLOYMENT
 
-### Option 1 : Intégration au backend existant (RECOMMANDÉ)
+The project is fully configured for continuous deployment via **Railway**.
+- Backend: FastAPI (Python)
+- Frontend: Static files served via FastAPI (`app.mount("/"...)`)
+- Database: MongoDB Atlas
 
-1. **Copier les fichiers dans ton repo GitHub**
-   ```
-   ssanifere-hue/marche-sani-fere-pro/
-   ├── static/              ← CRÉER CE DOSSIER
-   │   ├── index.html
-   │   ├── catalogue.html
-   │   ├── vendeur.html
-   │   ├── produit.html
-   │   ├── styles.css
-   │   ├── app.js
-   │   ├── catalogue.js
-   │   └── vendeur.js
-   └── main.py              ← Ton backend existant
-   ```
+1. **Commit & Push**: `git push` to the GitHub repository.
+2. **Railway**: Automatically rebuilds and deploys the application (Backend + Frontend).
 
-2. **Modifier main.py pour servir les fichiers statiques**
-   
-   Ajoute cette ligne après `app = FastAPI()` :
-   ```python
-   from fastapi.staticfiles import StaticFiles
-   
-   # Servir les fichiers statiques
-   app.mount("/", StaticFiles(directory="static", html=True), name="static")
-   ```
+## ⚙️ KEY API ENDPOINTS
 
-3. **Commit sur GitHub** (via web editor)
-   - Va sur ton repo
-   - Upload tous les fichiers dans `static/`
-   - Commit
+### Vendors
+- `POST /api/auth/register`: Registration (`role: "vendeur"` or `"client"`)
+- `GET /api/vendeurs/me`: Fetch the logged-in vendor's profile
+- `PUT /api/vendeurs/profil`: Store customization (logo, banner, contacts)
+- `GET /api/vendeurs/{id}`: Public profile containing `total_produits` (total products count)
+- `GET /api/vendeurs/{id}/produits`: List of vendor products returned as `{"produits": [...]}`
 
-4. **Railway redéploie automatiquement** ✅
+### Administration
+- `DELETE /api/admin/produits/bulk`: Bulk deletion of products
 
-### Option 2 : Déploiement séparé sur Vercel/Netlify
+## 📞 HOW TO ACCESS THE PAGES (Routing)
 
-1. **Créer un nouveau repo GitHub**
-   - `sanifere-marketplace-public`
-   - Upload tous les fichiers HTML/CSS/JS
+The application is served via FastAPI from the root of the site. Below are the paths you can use to access the pages on your Railway deployment or locally:
 
-2. **Connecter à Vercel**
-   - vercel.com
-   - Import project
-   - Sélectionner le repo
-   - Deploy
-
-3. **Mettre à jour l'URL de l'API**
-   
-   Dans tous les fichiers JS, remplace :
-   ```javascript
-   const API_BASE_URL = 'https://web-production-8f94.up.railway.app';
-   ```
-
-## 🔌 ENDPOINTS API NÉCESSAIRES
-
-Le frontend attend ces endpoints dans ton backend FastAPI :
-
-### Produits
-- `GET /api/produits?page=1&limit=20&categorie=&premium=&search=&sort=`
-- `GET /api/produits/{id}`
-
-### Vendeurs
-- `GET /api/vendeurs/premium`
-- `GET /api/vendeurs/{id}`
-- `GET /api/vendeurs/{id}/produits?page=1&limit=24`
-- `GET /api/vendeurs/{id}/avis`
-
-### Réponses attendues
-
-**GET /api/produits**
-```json
-{
-  "produits": [
-    {
-      "id": "prod123",
-      "titre": "Samsung Galaxy A32",
-      "prix": 65000,
-      "images": ["url1.jpg", "url2.jpg"],
-      "vendeur_id": "vend456",
-      "vendeur_nom": "AGI 2000",
-      "vendeur_premium": true,
-      "categorie": "electronique",
-      "description": "...",
-      "localisation": "Bamako",
-      "date_creation": "2026-05-01"
-    }
-  ],
-  "total": 150
-}
-```
-
-**GET /api/vendeurs/premium**
-```json
-{
-  "vendeurs": [
-    {
-      "id": "vend456",
-      "nom": "AGI 2000",
-      "abonnement": "premium",
-      "ventes": 245,
-      "note": 4.8,
-      "total_produits": 87
-    }
-  ]
-}
-```
-
-## ⚙️ CONFIGURATION
-
-### Modifier l'URL de l'API
-
-Si ton API n'est pas sur `web-production-8f94.up.railway.app`, modifie dans :
-- `app.js` ligne 2
-- `catalogue.js` ligne 2
-- `vendeur.js` ligne 2
-
-### Personnalisation des couleurs
-
-Tout se passe dans `styles.css` lignes 1-30 (variables CSS) :
-```css
-:root {
-  --primary-green: #00B074;   /* Change cette couleur */
-  --primary-orange: #FF6B35;  /* Change cette couleur */
-  /* etc. */
-}
-```
-
-## 📱 RESPONSIVE
-
-- **Mobile-first** : optimisé pour écrans 360px+
-- **Tablette** : s'adapte automatiquement
-- **Desktop** : max-width 1200px centré
-
-## 🎯 PROCHAINES ÉTAPES
-
-1. ✅ Déployer la marketplace publique
-2. ⏳ Créer les endpoints API manquants dans `main.py`
-3. ⏳ Intégrer le vrai paiement Orange Money
-4. ⏳ Ajouter le chatbot IA sur toutes les pages
-5. ⏳ Système de notifications temps réel
-6. ⏳ Application mobile (React Native ou PWA)
-
-## 🐛 DÉBOGAGE
-
-Si ça ne marche pas :
-
-1. **Vérifier la console navigateur** (F12)
-2. **Vérifier les URLs d'API** (sont-elles correctes ?)
-3. **Vérifier CORS** dans `main.py` :
-   ```python
-   from fastapi.middleware.cors import CORSMiddleware
-   
-   app.add_middleware(
-       CORSMiddleware,
-       allow_origins=["*"],
-       allow_credentials=True,
-       allow_methods=["*"],
-       allow_headers=["*"],
-   )
-   ```
-
-## 📞 SUPPORT
-
-Pour toute question, contacter l'équipe technique SANI-FÉRÉ Pro.
+- **Homepage**: `https://[RAILWAY-URL]/index.html` (or simply `https://[RAILWAY-URL]/`)
+- **Catalog**: `https://[RAILWAY-URL]/catalogue.html`
+- **Become a Seller**: `https://[RAILWAY-URL]/vendre.html`
+- **Buyer Area (Login/Register)**: `https://[RAILWAY-URL]/connexion.html`
+- **Seller Dashboard**: `https://[RAILWAY-URL]/dashboard`
+- **Admin Products**: `https://[RAILWAY-URL]/admin-produits.html`
 
 ---
 
-**Créé le** : 10 mai 2026  
-**Dernière mise à jour** : 10 mai 2026  
-**Version** : 1.0.0  
-
-🇲🇱 **SANI-FÉRÉ PRO** - Alliance Sahel Services
+**Version**: 1.1.0  
+⭐ **APHRIKE JULA** (Formerly SANI-FÉRÉ PRO)
