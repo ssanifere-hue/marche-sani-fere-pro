@@ -21,7 +21,36 @@ document.addEventListener('DOMContentLoaded', () => {
     
     loadVendorProfile();
     loadVendorProducts();
+    updateNavbar();
 });
+
+// Session navbar (même logique que app.js)
+function updateNavbar() {
+    const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
+    const navActions = document.getElementById('navActions');
+    if (token && userStr && navActions) {
+        try {
+            const user = JSON.parse(userStr);
+            const firstName = user.prenom || user.nom || 'Compte';
+            navActions.innerHTML = `
+                ${user.role === 'vendeur'
+                    ? '<a href="/dashboard" style="padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;border:none;cursor:pointer;background:#FFD700;color:#1565C0;text-decoration:none;transition:background 0.2s;">Dashboard</a><a href="vendre.html" style="padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;border:none;cursor:pointer;background:#FFD700;color:#1565C0;text-decoration:none;transition:background 0.2s;margin-left:8px;">Vendre</a>'
+                    : ''}
+                <div style="display:flex;align-items:center;gap:1rem;">
+                    <span style="font-weight:600;color:var(--text-dark);">👤 ${firstName}</span>
+                    <a href="#" style="padding:7px 16px;border-radius:100px;font-size:14px;font-weight:500;cursor:pointer;background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.5);text-decoration:none;transition:background 0.2s;" onclick="handleLogout(event)">Déconnexion</a>
+                </div>
+            `;
+        } catch(e) {}
+    }
+}
+function handleLogout(e) {
+    if(e) e.preventDefault();
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.reload();
+}
 
 // Charger le profil vendeur
 async function loadVendorProfile() {

@@ -199,8 +199,8 @@
                     const firstName = user.prenom || user.nom || 'Compte';
                     navActions.innerHTML = `
                         ${user.role === 'vendeur'
-                            ? '<a href="/dashboard" class="nav-btn primary">Dashboard</a>'
-                            : '<a href="vendre.html" class="nav-btn primary">Vendre</a>'}
+                            ? '<a href="/dashboard" class="nav-btn primary">Dashboard</a><a href="vendre.html" class="nav-btn primary" style="margin-left:8px;">Vendre</a>'
+                            : ''}
                         <div style="display:flex;align-items:center;gap:1rem;">
                             <span style="font-weight:600;color:var(--text-dark);">👤 ${firstName}</span>
                             <a href="#" class="nav-btn" onclick="handleLogout(event)">Déconnexion</a>
