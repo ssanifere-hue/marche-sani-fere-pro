@@ -1,37 +1,38 @@
-# ⭐ APHRIKE JULA - PUBLIC MARKETPLACE
+# ⭐ APHRIKE JULA - MARKETPLACE PUBLIQUE
 
-Complete public marketplace for APHRIKE JULA (formerly SANI-FÉRÉ Pro) featuring a modern design, vibrant African colors, and multiple features for both sellers and buyers.
+Marketplace publique complète pour APHRIKE JULA (anciennement SANI-FÉRÉ Pro) avec un design moderne, des couleurs africaines vibrantes et de nombreuses fonctionnalités pour les vendeurs et les acheteurs.
 
-## 🎨 DESIGN & FEATURES
+## 🎨 DESIGN & FONCTIONNALITÉS
 
-### Visual Theme
-- **Palette**: Royal Blue `#1565C0`, Gold `#FFD700`, Green `#00B074`, Orange `#FF6B35`
-- **Premium**: Golden Gradient
-- **Background**: Off-white `#F8F9FA` for visual comfort
+### Thème Visuel
+- **Palette** : Bleu Royal `#1565C0`, Or `#FFD700`, Vert `#00B074`, Orange `#FF6B35`
+- **Premium** : Dégradé doré
+- **Fond** : Blanc cassé `#F8F9FA` pour le confort visuel
 
-### Main Features Implemented
-- **Buyer/Seller Separation**: Separate registration processes for buyers (clients) and sellers. Buyers do not have access to the seller dashboard.
-- **Orange Money Payment**: Integrated payment modal for products, including transfer instructions and a direct WhatsApp link to send payment proof.
-- **Store Customization**: Sellers can update their logo, banner, WhatsApp number, physical address, and contact email directly from their dashboard.
-- **Administration**: Dedicated interface (`admin-produits.html`) allowing administrators to delete products in bulk.
+### Fonctionnalités Principales
+- **Séparation Acheteur / Vendeur** : Processus d'inscription séparés pour les acheteurs (clients) et les vendeurs. Les acheteurs n'ont pas accès au tableau de bord vendeur.
+- **Paiement Orange Money** : Modale de paiement intégrée avec instructions de transfert et lien WhatsApp direct pour envoyer la preuve de paiement.
+- **Personnalisation de Boutique** : Les vendeurs peuvent modifier leur logo, bannière, numéro WhatsApp, adresse physique et email de contact depuis leur tableau de bord.
+- **Administration** : Interface dédiée (`admin-produits.html`) permettant aux administrateurs de supprimer des produits en masse.
+- **Tableau de Bord Vendeur** : En-tête bleu professionnel avec message de bienvenue, cartes KPI améliorées avec bordures colorées et icônes.
 
-### Main Pages
-1. **`index.html`** - Homepage (Hero, popular categories, premium carousel, recent products)
-2. **`catalogue.html`** - Full Catalog (Advanced filters, search, sorting, infinite scrolling)
-3. **`vendeur.html`** - Vendor Profile/Store (Banner, logo, direct WhatsApp contact, product list)
-4. **`produit.html`** - Detailed Product Page (Image gallery, description, Orange Money payment)
-5. **`connexion.html`** - Login and Registration for buyers
-6. **`vendre.html`** - Specific Registration page to become a seller
-7. **`dashboard.html`** - Seller Dashboard (Product management, store customization)
-8. **`admin-produits.html`** - Administration interface for product moderation
+### Pages Principales
+1. **`index.html`** — Page d'accueil (Hero, catégories populaires, carrousel premium, produits récents)
+2. **`catalogue.html`** — Catalogue complet (Filtres avancés, recherche, tri, scroll infini)
+3. **`vendeur.html`** — Profil / Boutique du vendeur (Bannière, logo, contact WhatsApp direct, liste des produits)
+4. **`produit.html`** — Page produit détaillée (Galerie d'images, description, paiement Orange Money)
+5. **`connexion.html`** — Connexion et inscription pour les acheteurs
+6. **`vendre.html`** — Inscription spécifique pour devenir vendeur
+7. **`dashboard.html`** — Tableau de bord vendeur (Gestion des produits, personnalisation de la boutique)
+8. **`admin-produits.html`** — Interface d'administration pour la modération des produits
 
-## 📁 FILE STRUCTURE
+## 📁 STRUCTURE DES FICHIERS
 
 ```
 marche-sani-fere-pro/
 ├── backend/
-│   └── main.py          # FastAPI Backend (Full marketplace API)
-├── static/              # Static Frontend (Served by FastAPI)
+│   └── main.py              # Backend FastAPI (API complète de la marketplace)
+├── static/                  # Frontend statique (servi par FastAPI)
 │   ├── index.html
 │   ├── catalogue.html
 │   ├── vendeur.html
@@ -40,47 +41,55 @@ marche-sani-fere-pro/
 │   ├── vendre.html
 │   ├── dashboard.html
 │   ├── admin-produits.html
-│   ├── styles.css       # Global Design System
-│   ├── app.js           # Homepage JS and navbar logic
-│   ├── catalogue.js     # Catalog page JS
-│   └── vendeur.js       # Public vendor store JS
-└── README.md            # Project documentation
+│   ├── styles.css           # Design System global
+│   ├── app.js               # JS de la page d'accueil et navbar
+│   ├── catalogue.js         # JS de la page catalogue
+│   └── vendeur.js           # JS de la boutique publique du vendeur
+└── README.md                # Documentation du projet
 ```
 
-## 🚀 DEPLOYMENT
+## 🚀 DÉPLOIEMENT
 
-The project is fully configured for continuous deployment via **Railway**.
-- Backend: FastAPI (Python)
-- Frontend: Static files served via FastAPI (`app.mount("/"...)`)
-- Database: MongoDB Atlas
+Le projet est configuré pour un déploiement continu via **Railway**.
+- **Backend** : FastAPI (Python)
+- **Frontend** : Fichiers statiques servis par FastAPI (`app.mount("/"...)`)
+- **Base de données** : MongoDB Atlas
 
-1. **Commit & Push**: `git push` to the GitHub repository.
-2. **Railway**: Automatically rebuilds and deploys the application (Backend + Frontend).
+1. **Commit & Push** : `git push` vers le dépôt GitHub.
+2. **Railway** : Reconstruit et déploie automatiquement l'application.
 
-## ⚙️ KEY API ENDPOINTS
+## ⚙️ ENDPOINTS API CLÉS
 
-### Vendors
-- `POST /api/auth/register`: Registration (`role: "vendeur"` or `"client"`)
-- `GET /api/vendeurs/me`: Fetch the logged-in vendor's profile
-- `PUT /api/vendeurs/profil`: Store customization (logo, banner, contacts)
-- `GET /api/vendeurs/{id}`: Public profile containing `total_produits` (total products count)
-- `GET /api/vendeurs/{id}/produits`: List of vendor products returned as `{"produits": [...]}`
+### Vendeurs
+- `POST /api/auth/register` — Inscription (`role: "vendeur"` ou `"client"`)
+- `GET /api/vendeurs/me` — Récupérer le profil du vendeur connecté
+- `PUT /api/vendeurs/profil` — Personnalisation de la boutique (logo, bannière, contacts)
+- `GET /api/vendeurs/{id}` — Profil public avec `total_produits`
+- `GET /api/vendeurs/{id}/produits` — Liste des produits au format `{"produits": [...]}`
 
 ### Administration
-- `DELETE /api/admin/produits/bulk`: Bulk deletion of products
+- `DELETE /api/admin/produits/bulk` — Suppression groupée de produits
 
-## 📞 HOW TO ACCESS THE PAGES (Routing)
+## 📞 ACCÈS AUX PAGES
 
-The application is served via FastAPI from the root of the site. Below are the paths you can use to access the pages on your Railway deployment or locally:
+L'application est servie via FastAPI depuis la racine du site :
 
-- **Homepage**: `https://[RAILWAY-URL]/index.html` (or simply `https://[RAILWAY-URL]/`)
-- **Catalog**: `https://[RAILWAY-URL]/catalogue.html`
-- **Become a Seller**: `https://[RAILWAY-URL]/vendre.html`
-- **Buyer Area (Login/Register)**: `https://[RAILWAY-URL]/connexion.html`
-- **Seller Dashboard**: `https://[RAILWAY-URL]/dashboard`
-- **Admin Products**: `https://[RAILWAY-URL]/admin-produits.html`
+| Page | URL |
+|------|-----|
+| Accueil | `https://[URL-RAILWAY]/index.html` |
+| Catalogue | `https://[URL-RAILWAY]/catalogue.html` |
+| Devenir Vendeur | `https://[URL-RAILWAY]/vendre.html` |
+| Connexion Acheteur | `https://[URL-RAILWAY]/connexion.html` |
+| Tableau de Bord Vendeur | `https://[URL-RAILWAY]/dashboard` |
+| Administration Produits | `https://[URL-RAILWAY]/admin-produits.html` |
+
+## 📧 CONTACT
+
+- **Email** : aphrikejula@gmail.com
+- **WhatsApp** : +223 70 70 05 20
+- **Adresse** : Bamako, Mali
 
 ---
 
-**Version**: 1.1.0  
-⭐ **APHRIKE JULA** (Formerly SANI-FÉRÉ PRO)
+**Version** : 1.2.0
+⭐ **APHRIKE JULA** (Anciennement SANI-FÉRÉ PRO)
