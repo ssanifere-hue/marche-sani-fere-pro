@@ -257,6 +257,26 @@
             
             const isPremium = product.est_premium || product.vendeur_premium || false;
             
+            let deliveryHtml = '';
+            if (product.options_livraison && product.options_livraison.length > 0) {
+                deliveryHtml = `
+                    <div style="margin-bottom: 1rem; text-align: left;">
+                        <p style="font-weight: 600; font-size: 0.9rem; color: var(--text-dark); margin-bottom: 0.5rem;">🚚 Options de livraison :</p>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            ${product.options_livraison.map((opt, idx) => `
+                                <label style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: white; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <input type="radio" name="deliveryOption" value="${idx}" ${idx === 0 ? 'checked' : ''} onchange="updateTotal()">
+                                        <span>${opt.methode} <small style="color:gray;">(${opt.zone})</small></span>
+                                    </div>
+                                    <span style="font-weight: 600;">+${formatPrice(opt.prix)} FCFA</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
             const html = `
                 <div class="product-gallery">
                     <img src="${images[0]}" id="mainImage" class="main-image" alt="${productName}" onerror="this.src='https://via.placeholder.com/600x600/E9ECEF/6C757D?text=Image'">
@@ -266,11 +286,12 @@
                 
                 <div class="product-details">
                     <h1 class="product-title-large">${productName}</h1>
-                    <div class="product-price-large">${formatPrice(product.prix)} FCFA</div>
+                    <div class="product-price-large" id="displayTotal">${formatPrice(product.prix)} FCFA</div>
                     
                     <div class="buy-section">
-                        <p style="margin-bottom: 0.5rem; font-weight: 600;">💳 Paiement sécurisé Orange Money</p>
-                        <button class="buy-btn" onclick="acheterProduit()">
+                        ${deliveryHtml}
+                        <p style="margin-bottom: 0.5rem; font-weight: 600; text-align: center;">💳 Paiement sécurisé Orange Money</p>
+                        <button class="buy-btn" id="btnAcheter" onclick="acheterProduit()">
                             🛒 Acheter Maintenant
                         </button>
                     </div>
@@ -322,13 +343,68 @@
             });
         }
 
-        function acheterProduit() {
-            // Generate order reference
+        function updateTotal() {
+            let total = productData.prix;
+            const selectedOpt = document.querySelector('input[name="deliveryOption"]:checked');
+            if (selectedOpt && productData.options_livraison) {
+                const optIdx = parseInt(selectedOpt.value);
+                const opt = productData.options_livraison[optIdx];
+                if (opt) total += opt.prix;
+            }
+            document.getElementById('displayTotal').textContent = formatPrice(total) + ' FCFA';
+            return total;
+        }
+
+        async function acheterProduit() {
+            const btn = document.getElementById('btnAcheter');
+            btn.disabled = true;
+            btn.textContent = 'Traitement...';
+
+            let selectedOpt = null;
+            const selectedInput = document.querySelector('input[name="deliveryOption"]:checked');
+            if (selectedInput && productData.options_livraison) {
+                selectedOpt = productData.options_livraison[parseInt(selectedInput.value)];
+            }
+
+            const total = updateTotal();
             const ref = 'REF-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-            document.getElementById('omRef').textContent = ref;
-            document.getElementById('omAmount').textContent = formatPrice(productData.prix) + ' FCFA';
             
-            // Show modal
+            // Save order to backend
+            try {
+                const payload = {
+                    produit_id: productId,
+                    vendeur_id: productData.vendeur_id || productData.vendeur?.id || '',
+                    produit_nom: productData.nom || productData.titre || 'Produit',
+                    montant_total: total,
+                    reference: ref,
+                    details_livraison: selectedOpt ? { methode: selectedOpt.methode, zone: selectedOpt.zone, prix: selectedOpt.prix } : null
+                };
+
+                const response = await fetch(`${API_BASE_URL}/api/commandes`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) {
+                    console.error("Erreur enregistrement commande", await response.text());
+                }
+            } catch (error) {
+                console.error("Erreur réseau", error);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '🛒 Acheter Maintenant';
+            }
+
+            document.getElementById('omRef').textContent = ref;
+            document.getElementById('omAmount').textContent = formatPrice(total) + ' FCFA';
+            
+            // Update whatsapp link with ref
+            const waBtn = document.getElementById('waBtn');
+            if (waBtn) {
+                waBtn.href = `https://wa.me/22370700520?text=Bonjour,%20j'ai%20effectué%20le%20paiement%20pour%20ma%20commande%20${ref}.`;
+            }
+
             document.getElementById('omModal').style.display = 'flex';
         }
 
@@ -369,7 +445,7 @@
                 <p><strong>3.</strong> Envoyez la capture d'écran sur WhatsApp avec votre référence de commande.</p>
             </div>
             
-            <a href="https://wa.me/22370700520?text=Bonjour,%20j'ai%20effectué%20le%20paiement%20pour%20ma%20commande." target="_blank" style="display:block; text-align:center; background:#25D366; color:white; padding:12px; border-radius:100px; text-decoration:none; font-weight:600; font-size:1.1rem;">
+            <a id="waBtn" href="https://wa.me/22370700520?text=Bonjour,%20j'ai%20effectué%20le%20paiement%20pour%20ma%20commande." target="_blank" style="display:block; text-align:center; background:#25D366; color:white; padding:12px; border-radius:100px; text-decoration:none; font-weight:600; font-size:1.1rem;">
                 📱 Envoyer la preuve sur WhatsApp
             </a>
         </div>

@@ -166,6 +166,11 @@ class UserLogin(BaseModel):
     telephone: str
     mot_de_passe: str
 
+class LivraisonOption(BaseModel):
+    methode: str
+    zone: str
+    prix: int
+
 class ProduitCreate(BaseModel):
     nom: str
     description: str
@@ -174,6 +179,7 @@ class ProduitCreate(BaseModel):
     images: List[str] = []
     stock: int = 1
     est_premium: bool = False
+    options_livraison: Optional[List[LivraisonOption]] = []
 
 class ProduitUpdate(BaseModel):
     nom: Optional[str] = None
@@ -183,6 +189,7 @@ class ProduitUpdate(BaseModel):
     images: Optional[List[str]] = None
     stock: Optional[int] = None
     est_premium: Optional[bool] = None
+    options_livraison: Optional[List[LivraisonOption]] = None
 
 class CategoryCreate(BaseModel):
     nom: str
@@ -229,6 +236,17 @@ class VenteCreate(BaseModel):
 
 class CodeParrainage(BaseModel):
     code: str
+
+class CommandeCreate(BaseModel):
+    produit_id: str
+    vendeur_id: str
+    produit_nom: str
+    montant_total: int
+    reference: str
+    details_livraison: Optional[dict] = None
+
+class CommandeStatusUpdate(BaseModel):
+    statut: str  # "En attente", "En cours", "Livré"
 
 # ==================== HELPER FUNCTIONS ====================
 
@@ -683,6 +701,66 @@ async def mes_boosts(vendeur = Depends(get_current_vendeur)):
         ]
     }
 
+# ==================== COMMANDES (LIVRAISONS) ====================
+
+@app.post("/api/commandes")
+async def creer_commande(commande: CommandeCreate):
+    """Enregistrer une commande avant paiement OM"""
+    
+    # Vérifier que le produit existe
+    produit = await db.produits.find_one({"_id": ObjectId(commande.produit_id)})
+    if not produit:
+        raise HTTPException(status_code=404, detail="Produit non trouvé")
+        
+    commande_data = commande.dict()
+    commande_data["statut"] = "En attente"
+    commande_data["date_creation"] = datetime.utcnow()
+    
+    result = await db.commandes.insert_one(commande_data)
+    
+    return {
+        "message": "Commande enregistrée",
+        "commande_id": str(result.inserted_id)
+    }
+
+@app.get("/api/vendeurs/me/commandes")
+async def lister_mes_commandes(vendeur = Depends(get_current_vendeur)):
+    """Lister les commandes/livraisons du vendeur"""
+    
+    commandes = await db.commandes.find({"vendeur_id": str(vendeur["_id"])}).sort("date_creation", -1).to_list(100)
+    
+    return [
+        {
+            "id": str(c["_id"]),
+            "produit_id": c["produit_id"],
+            "produit_nom": c["produit_nom"],
+            "montant_total": c["montant_total"],
+            "reference": c["reference"],
+            "statut": c["statut"],
+            "details_livraison": c.get("details_livraison"),
+            "date_creation": c["date_creation"]
+        }
+        for c in commandes
+    ]
+
+@app.put("/api/commandes/{commande_id}/statut")
+async def modifier_statut_commande(commande_id: str, status_update: CommandeStatusUpdate, vendeur = Depends(get_current_vendeur)):
+    """Mettre à jour le statut d'une commande"""
+    
+    commande = await db.commandes.find_one({"_id": ObjectId(commande_id)})
+    if not commande:
+        raise HTTPException(status_code=404, detail="Commande non trouvée")
+        
+    if commande["vendeur_id"] != str(vendeur["_id"]):
+        raise HTTPException(status_code=403, detail="Non autorisé")
+        
+    await db.commandes.update_one(
+        {"_id": ObjectId(commande_id)},
+        {"$set": {"statut": status_update.statut}}
+    )
+    
+    return {"message": "Statut mis à jour"}
+
 # ==================== VENTES & COMMISSIONS ====================
 
 @app.post("/api/ventes/enregistrer")
@@ -922,6 +1000,7 @@ async def creer_produit(produit: ProduitCreate, current_user = Depends(get_curre
         "images": final_images,
         "stock": produit.stock,
         "est_premium": produit.est_premium,
+        "options_livraison": [opt.dict() for opt in (produit.options_livraison or [])],
         "vendeur_id": str(vendeur["_id"]),
         "date_creation": datetime.utcnow()
     }
@@ -960,6 +1039,9 @@ async def modifier_produit(produit_id: str, produit: ProduitUpdate, current_user
             else:
                 final_images.append(img)
         update_data["images"] = final_images
+        
+    if "options_livraison" in update_data and update_data["options_livraison"] is not None:
+        update_data["options_livraison"] = [opt.dict() for opt in update_data["options_livraison"]]
 
     if update_data:
         await db.produits.update_one({"_id": ObjectId(produit_id)}, {"$set": update_data})
