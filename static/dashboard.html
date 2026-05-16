@@ -344,14 +344,10 @@
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a href="#" class="nav-link" onclick="showSection(event, 'livraisons')">
-                        <span>🚚</span> <span>Mes Livraisons</span>
-                    </a>
-                </div>
-                <div class="nav-item">
                     <a href="#" class="nav-link" onclick="showSection(event, 'profile')">
                         <span>👤</span> <span>Mon Profil</span>
                     </a>
+
                 </div>
             </nav>
 
@@ -453,31 +449,6 @@
                 </div>
             </section>
 
-            <!-- Livraisons Section -->
-            <section id="section-livraisons" class="hidden">
-                <div class="page-header">
-                    <h1>Gestion des Livraisons</h1>
-                </div>
-                <div class="content-card">
-                    <div class="table-responsive">
-                        <table id="all-livraisons-table">
-                            <thead>
-                                <tr>
-                                    <th>Référence</th>
-                                    <th>Produit</th>
-                                    <th>Total</th>
-                                    <th>Méthode (Zone)</th>
-                                    <th>Statut</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Chargé dynamiquement -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
             <!-- Profile Section -->
             <section id="section-profile" class="hidden">
                 <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
@@ -544,14 +515,6 @@
                 <div class="form-group">
                     <label for="prodDesc">Description</label>
                     <textarea id="prodDesc" rows="3" required placeholder="Détails du produit..."></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label>Options de Livraison</label>
-                    <div id="deliveryOptionsContainer" style="display: grid; gap: 0.5rem;">
-                        <!-- Options injectées ici -->
-                    </div>
-                    <button type="button" class="nav-btn" style="margin-top: 0.5rem; padding: 0.5rem; font-size: 0.9rem;" onclick="addDeliveryOption()">+ Ajouter une méthode de livraison</button>
                 </div>
                 <div class="form-group">
                     <label for="prodImage">Image du produit</label>
@@ -881,19 +844,8 @@
                 prix: parseInt(document.getElementById('prodPrice').value),
                 categorie: document.getElementById('prodCategory').value,
                 stock: parseInt(document.getElementById('prodStock').value),
-                est_premium: document.getElementById('prodPremium').checked,
-                options_livraison: []
+                est_premium: document.getElementById('prodPremium').checked
             };
-
-            const optionRows = document.querySelectorAll('.delivery-option-row');
-            optionRows.forEach(row => {
-                const method = row.querySelector('.del-method').value;
-                const zone = row.querySelector('.del-zone').value;
-                const price = parseInt(row.querySelector('.del-price').value) || 0;
-                if (method && zone) {
-                    payload.options_livraison.push({ methode: method, zone: zone, prix: price });
-                }
-            });
 
             if (base64Image) {
                 payload.images = [base64Image];
@@ -917,7 +869,6 @@
                     closeModal();
                     document.getElementById('productForm').reset();
                     document.getElementById('imagePreview').style.display = 'none';
-                    document.getElementById('deliveryOptionsContainer').innerHTML = '';
                     base64Image = null;
                     loadProducts();
                 } else {
@@ -943,12 +894,6 @@
             document.getElementById('prodStock').value = product.stock || 1;
             document.getElementById('prodDesc').value = product.description || '';
             document.getElementById('prodPremium').checked = product.est_premium || false;
-
-            const container = document.getElementById('deliveryOptionsContainer');
-            container.innerHTML = '';
-            if (product.options_livraison && product.options_livraison.length > 0) {
-                product.options_livraison.forEach(opt => addDeliveryOption(opt.methode, opt.zone, opt.prix));
-            }
 
             document.getElementById('prodImage').required = false;
 
@@ -991,96 +936,6 @@
                 alert('Erreur de connexion au serveur');
             }
         }
-
-        // --- DELIVERY OPTIONS UI ---
-        function addDeliveryOption(method = '', zone = '', price = '') {
-            const container = document.getElementById('deliveryOptionsContainer');
-            const row = document.createElement('div');
-            row.className = 'delivery-option-row';
-            row.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 0.5rem; align-items: center; background: #f8f9fa; padding: 0.5rem; border-radius: 4px; border: 1px solid #dee2e6;';
-            row.innerHTML = `
-                <select class="del-method" required>
-                    <option value="" disabled ${!method ? 'selected' : ''}>Méthode</option>
-                    <option value="Main propre" ${method === 'Main propre' ? 'selected' : ''}>Main propre</option>
-                    <option value="Moto-taxi" ${method === 'Moto-taxi' ? 'selected' : ''}>Moto-taxi</option>
-                    <option value="Taxi" ${method === 'Taxi' ? 'selected' : ''}>Taxi</option>
-                    <option value="Expédition" ${method === 'Expédition' ? 'selected' : ''}>Expédition</option>
-                </select>
-                <input type="text" class="del-zone" placeholder="Zone (ex: Bamako)" value="${zone}" required>
-                <input type="number" class="del-price" placeholder="Prix (FCFA)" value="${price}" required min="0">
-                <button type="button" class="nav-btn" style="background: #ffebee; color: #c62828; border: none; padding: 0.5rem;" onclick="this.parentElement.remove()">❌</button>
-            `;
-            container.appendChild(row);
-        }
-
-        // --- COMMANDES / LIVRAISONS ---
-        async function loadLivraisons() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/vendeurs/me/commandes`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!response.ok) return;
-                const commandes = await response.json();
-                renderLivraisonsTable(commandes);
-            } catch (error) {
-                console.error('Erreur chargement commandes:', error);
-            }
-        }
-
-        function renderLivraisonsTable(commandes) {
-            const tbody = document.querySelector('#all-livraisons-table tbody');
-            tbody.innerHTML = '';
-            
-            commandes.forEach(c => {
-                const tr = document.createElement('tr');
-                let delMethod = c.details_livraison ? `${c.details_livraison.methode} (${c.details_livraison.zone})` : 'Non spécifié';
-                let price = c.montant_total ? c.montant_total.toLocaleString() + ' FCFA' : '-';
-                
-                tr.innerHTML = `
-                    <td><strong>${c.reference || '-'}</strong><br><small style="color:gray;">${new Date(c.date_creation).toLocaleDateString()}</small></td>
-                    <td>${c.produit_nom || '-'}</td>
-                    <td class="text-success"><strong>${price}</strong></td>
-                    <td>${delMethod}</td>
-                    <td>
-                        <select class="status-select ${c.statut === 'Livré' ? 'badge-success' : (c.statut === 'En cours' ? 'badge-warning' : '')}" style="padding:4px; border-radius:4px; border:1px solid #ccc; font-weight:600;" onchange="updateOrderStatus('${c.id}', this.value)">
-                            <option value="En attente" ${c.statut === 'En attente' ? 'selected' : ''}>En attente</option>
-                            <option value="En cours" ${c.statut === 'En cours' ? 'selected' : ''}>En cours</option>
-                            <option value="Livré" ${c.statut === 'Livré' ? 'selected' : ''}>Livré</option>
-                        </select>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        async function updateOrderStatus(id, newStatus) {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/commandes/${id}/statut`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ statut: newStatus })
-                });
-                
-                if (response.ok) {
-                    // Mettre à jour la couleur du select en fonction du statut
-                    loadLivraisons(); 
-                } else {
-                    alert('Erreur lors de la mise à jour du statut');
-                }
-            } catch (error) {
-                console.error(error);
-                alert('Erreur réseau');
-            }
-        }
-
-        // Appeler loadLivraisons au chargement initial
-        if (token) {
-            loadLivraisons();
-        }
-
     </script>
 </body>
 </html>
