@@ -588,7 +588,6 @@ body {
 
 /* Responsive */
 @media (max-width: 768px) {
-  /* Navbar */
   .navbar-content {
     flex-direction: column;
     gap: var(--spacing-sm);
@@ -603,7 +602,6 @@ body {
     justify-content: space-between;
   }
   
-  /* Hero */
   .hero h1 {
     font-size: 1.75rem;
   }
@@ -612,54 +610,21 @@ body {
     font-size: 1rem;
   }
   
-  /* Grids */
   .categories-grid {
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   }
   
   .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* Slightly smaller for mobile */
-    gap: var(--spacing-sm);
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
   
   .product-image {
-    height: 150px; /* Reduced for better screen fit */
+    height: 180px;
   }
   
-  /* Footer */
   .footer-content {
     grid-template-columns: 1fr;
   }
-  
-  /* Forms & Buttons - Touch Targets */
-  input, select, textarea, button, .btn {
-    font-size: 1rem !important; /* Prevent iOS zoom */
-  }
-  
-  .btn {
-    padding: 0.75rem 1rem;
-    width: 100%; /* Full width buttons on mobile are often better */
-  }
-}
-
-/* Base Responsive Utilities */
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-  margin-bottom: var(--spacing-md);
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 600px; /* Force scroll on small screens */
-}
-
-th, td {
-  padding: 0.75rem;
-  text-align: left;
-  border-bottom: 1px solid var(--border-color);
 }
 
 /* Utilities */
