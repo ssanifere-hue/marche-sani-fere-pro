@@ -305,18 +305,58 @@
 
         @media (max-width: 1024px) {
             .sidebar { width: 80px; padding: var(--spacing-sm); }
-            .sidebar-brand span, .nav-link span, .sidebar-footer span { display: none; }
+            .sidebar-brand span.logo-text, .nav-link span.nav-text, .sidebar-footer span { display: none; }
             .main-content { margin-left: 80px; }
         }
 
         @media (max-width: 768px) {
-            .sidebar { display: none; }
-            .main-content { margin-left: 0; padding: var(--spacing-md); }
+            .sidebar {
+                width: 100%;
+                height: 60px;
+                position: fixed;
+                bottom: 0;
+                top: auto;
+                left: 0;
+                display: flex;
+                flex-direction: row;
+                padding: 0;
+                border-right: none;
+                border-top: 1px solid var(--border-gray);
+                z-index: 1000;
+                background: white;
+            }
+            .sidebar-brand, .sidebar-footer { display: none; }
+            .sidebar-nav {
+                display: flex;
+                flex-direction: row;
+                width: 100%;
+                justify-content: space-around;
+                align-items: center;
+            }
+            .nav-item { margin-bottom: 0; flex: 1; display: flex; justify-content: center;}
+            .nav-link {
+                flex-direction: column;
+                padding: 0.5rem;
+                font-size: 0.65rem;
+                text-align: center;
+                gap: 0.1rem;
+                border-radius: 0;
+                background: transparent !important;
+            }
+            .nav-link.active { color: var(--primary-green); }
+            .nav-link span.nav-text { display: block; } /* Show text below icon on mobile */
+            
+            .main-content { margin-left: 0; margin-bottom: 60px; padding: var(--spacing-md); }
             .profile-info { grid-template-columns: 1fr; }
-            .dashboard-header-banner { padding: 1.5rem; flex-direction: column; align-items: flex-start; }
+            .dashboard-header-banner { padding: 1.25rem; flex-direction: column; align-items: stretch; gap: 1rem; }
             .dashboard-header-banner h1 { font-size: 1.3rem; }
+            .dashboard-header-banner .add-product-btn { width: 100%; text-align: center; }
             .stat-card { padding: 1rem; }
             .stat-number { font-size: 1.35rem; }
+            
+            /* Responsive modal fields */
+            .form-group > div[style*="display: flex"] { flex-direction: column; align-items: stretch !important; }
+            .form-group > div[style*="display: flex"] > input { width: 100% !important; margin-top: 0.25rem; }
         }
     </style>
 </head>
@@ -327,7 +367,7 @@
             <div class="sidebar-brand">
                 <a href="/app/index.html" class="logo" style="color: #1565C0;">
                     <span class="logo-icon">⭐</span>
-                    <span>APHRIKE JULA</span>
+                    <span class="logo-text">APHRIKE JULA</span>
                 </a>
 
             </div>
@@ -335,22 +375,22 @@
             <nav class="sidebar-nav">
                 <div class="nav-item">
                     <a href="#" class="nav-link active" onclick="showSection(event, 'overview')">
-                        <span>📊</span> <span>Tableau de bord</span>
+                        <span>📊</span> <span class="nav-text">Tableau de bord</span>
                     </a>
                 </div>
                 <div class="nav-item">
                     <a href="#" class="nav-link" onclick="showSection(event, 'products')">
-                        <span>📦</span> <span>Mes Produits</span>
+                        <span>📦</span> <span class="nav-text">Mes Produits</span>
                     </a>
                 </div>
                 <div class="nav-item">
                     <a href="#" class="nav-link" onclick="showSection(event, 'profile')">
-                        <span>👤</span> <span>Mon Profil</span>
+                        <span>👤</span> <span class="nav-text">Mon Profil</span>
                     </a>
                 </div>
                 <div class="nav-item">
                     <a href="#" class="nav-link" onclick="showSection(event, 'deliveries'); loadDeliveries();">
-                        <span>🚚</span> <span>Mes Livraisons</span>
+                        <span>🚚</span> <span class="nav-text">Mes Livraisons</span>
                     </a>
                 </div>
             </nav>

@@ -203,6 +203,26 @@
         .step-desc {
             color: var(--text-gray);
         }
+
+        @media (max-width: 768px) {
+            .aj-navbar {
+                flex-wrap: wrap;
+                height: auto !important;
+                padding: 12px !important;
+                justify-content: space-between;
+            }
+            
+            .aj-navbar > div:nth-child(2) {
+                width: 100%;
+                margin-top: 10px;
+                justify-content: center;
+                max-width: 100% !important;
+            }
+            
+            #vendorRegisterForm > div[style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+            }
+        }
     </style>
 </head>
 <body>

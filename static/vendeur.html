@@ -131,6 +131,52 @@
         .tab-content.active {
             display: block;
         }
+
+        @media (max-width: 768px) {
+            .vendor-avatar-large {
+                width: 100px;
+                height: 100px;
+                font-size: 2.5rem;
+                margin: 0 auto;
+            }
+            
+            .vendor-profile-content {
+                flex-direction: column;
+                text-align: center;
+                align-items: stretch;
+            }
+            
+            .vendor-info {
+                min-width: 100%;
+            }
+            
+            .vendor-name-large {
+                justify-content: center;
+                font-size: 1.5rem;
+            }
+            
+            .vendor-stats-large {
+                justify-content: center;
+            }
+
+            .aj-navbar {
+                flex-wrap: wrap;
+                height: auto !important;
+                padding: 12px !important;
+                justify-content: space-between;
+            }
+            
+            .aj-navbar > div:nth-child(2) {
+                order: 3;
+                width: 100%;
+                margin-top: 10px;
+                max-width: 100% !important;
+            }
+            
+            .aj-navbar > div:nth-child(3) {
+                order: 2;
+            }
+        }
     </style>
 </head>
 <body>
