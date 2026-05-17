@@ -203,6 +203,25 @@
         .step-desc {
             color: var(--text-gray);
         }
+
+        @media (max-width: 768px) {
+            .seller-hero { padding: 2rem 0; }
+            .seller-hero h1 { font-size: 1.5rem; }
+            .seller-hero p { font-size: 1rem; }
+            .benefits-grid { grid-template-columns: 1fr; gap: var(--spacing-md); }
+            .pricing-cards { grid-template-columns: 1fr; gap: var(--spacing-md); }
+            .pricing-card { padding: var(--spacing-lg); }
+            .pricing-price { font-size: 2rem; }
+            .steps-grid { grid-template-columns: 1fr 1fr; gap: var(--spacing-md); }
+            .cta-btn { width: 100%; padding: 1rem 1.5rem; font-size: 1.1rem; }
+        }
+
+        @media (max-width: 480px) {
+            .seller-hero h1 { font-size: 1.25rem; }
+            .seller-hero p { font-size: 0.9rem; }
+            .steps-grid { grid-template-columns: 1fr; }
+            .pricing-price { font-size: 1.75rem; }
+        }
     </style>
 </head>
 <body>

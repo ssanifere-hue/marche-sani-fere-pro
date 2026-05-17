@@ -310,13 +310,95 @@
         }
 
         @media (max-width: 768px) {
-            .sidebar { display: none; }
-            .main-content { margin-left: 0; padding: var(--spacing-md); }
+            .sidebar { 
+                display: none; 
+                position: fixed;
+                width: 260px;
+                top: 0; left: 0;
+                height: 100vh;
+                z-index: 999;
+                background: white;
+                box-shadow: var(--shadow-lg);
+            }
+            .sidebar.open { display: flex; }
+            .sidebar-brand span, .nav-link span, .sidebar-footer span { display: inline; }
+
+            .main-content { 
+                margin-left: 0; 
+                padding: var(--spacing-sm); 
+                padding-bottom: 80px; /* space for bottom nav */
+            }
+
             .profile-info { grid-template-columns: 1fr; }
-            .dashboard-header-banner { padding: 1.5rem; flex-direction: column; align-items: flex-start; }
-            .dashboard-header-banner h1 { font-size: 1.3rem; }
-            .stat-card { padding: 1rem; }
-            .stat-number { font-size: 1.35rem; }
+
+            .dashboard-header-banner { 
+                padding: 1.25rem; 
+                flex-direction: column; 
+                align-items: flex-start; 
+            }
+            .dashboard-header-banner h1 { font-size: 1.2rem; }
+            .dashboard-header-banner p { font-size: 0.85rem; }
+            .add-product-btn { width: 100%; text-align: center; }
+
+            .stats-grid { 
+                grid-template-columns: repeat(2, 1fr) !important; 
+                gap: 0.75rem !important; 
+            }
+            .stat-card { padding: 0.85rem; }
+            .stat-number { font-size: 1.2rem; }
+            .stat-label { font-size: 0.75rem; }
+            .stat-icon { font-size: 1.2rem; }
+
+            .page-header { flex-direction: column; gap: 0.75rem; align-items: flex-start; }
+
+            .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .table-responsive table { min-width: 550px; }
+
+            /* Modal mobile fixes */
+            .modal-content { 
+                max-height: 90vh; 
+                overflow-y: auto; 
+                margin: 1rem;
+                width: calc(100% - 2rem) !important;
+                max-width: 100% !important;
+            }
+
+            .info-group { min-width: 0; }
+            .info-value { font-size: 0.95rem; word-break: break-word; }
+
+            /* Mobile bottom navigation */
+            .mobile-bottom-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0; left: 0; right: 0;
+                background: white;
+                border-top: 1px solid var(--border-gray);
+                z-index: 100;
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
+            }
+            .mobile-bottom-nav a {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 8px 4px;
+                text-decoration: none;
+                color: var(--text-gray);
+                font-size: 0.65rem;
+                font-weight: 600;
+                gap: 2px;
+                transition: color 0.2s;
+            }
+            .mobile-bottom-nav a.active, .mobile-bottom-nav a:hover {
+                color: var(--primary-green);
+            }
+            .mobile-bottom-nav a span:first-child {
+                font-size: 1.25rem;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .mobile-bottom-nav { display: none !important; }
         }
     </style>
 </head>
@@ -512,6 +594,15 @@
                 </div>
             </section>
         </main>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="mobile-bottom-nav">
+        <a href="#" class="active" onclick="showSection(event, 'overview')"><span>📊</span><span>Accueil</span></a>
+        <a href="#" onclick="showSection(event, 'products')"><span>📦</span><span>Produits</span></a>
+        <a href="#" onclick="showSection(event, 'deliveries'); loadDeliveries();"><span>🚚</span><span>Livraisons</span></a>
+        <a href="#" onclick="showSection(event, 'profile')"><span>👤</span><span>Profil</span></a>
+        <a href="#" onclick="handleLogout()"><span>🚪</span><span>Sortir</span></a>
     </div>
 
     <!-- Modal Ajouter Produit -->
