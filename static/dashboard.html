@@ -347,7 +347,11 @@
                     <a href="#" class="nav-link" onclick="showSection(event, 'profile')">
                         <span>👤</span> <span>Mon Profil</span>
                     </a>
-
+                </div>
+                <div class="nav-item">
+                    <a href="#" class="nav-link" onclick="showSection(event, 'deliveries'); loadDeliveries();">
+                        <span>🚚</span> <span>Mes Livraisons</span>
+                    </a>
                 </div>
             </nav>
 
@@ -449,6 +453,33 @@
                 </div>
             </section>
 
+            <!-- Deliveries Section -->
+            <section id="section-deliveries" class="hidden">
+                <div class="page-header">
+                    <h1>Mes Livraisons</h1>
+                </div>
+                <div class="content-card">
+                    <div class="table-responsive">
+                        <table id="deliveries-table">
+                            <thead>
+                                <tr>
+                                    <th>Réf. Produit</th>
+                                    <th>Acheteur (Tél)</th>
+                                    <th>Montant Net</th>
+                                    <th>Méthode</th>
+                                    <th>Frais</th>
+                                    <th>Date</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Chargé dynamiquement -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
             <!-- Profile Section -->
             <section id="section-profile" class="hidden">
                 <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
@@ -523,7 +554,28 @@
                         <img src="" alt="Preview" style="max-width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius-sm);">
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                    <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Méthodes de livraison proposées</label>
+                    <div style="display: grid; gap: 0.5rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" id="delivHand" style="width: auto;"> Remise en main propre (Gratuit)
+                        </label>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; flex: 1;">
+                                <input type="checkbox" id="delivMoto" style="width: auto;"> Moto-taxi
+                            </label>
+                            <input type="number" id="delivMotoPrice" placeholder="Frais (ex: 1500)" style="width: 150px; padding: 0.25rem 0.5rem;">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; flex: 1;">
+                                <input type="checkbox" id="delivTaxi" style="width: auto;"> Taxi
+                            </label>
+                            <input type="number" id="delivTaxiPrice" placeholder="Frais (ex: 3000)" style="width: 150px; padding: 0.25rem 0.5rem;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 1rem;">
                     <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
                         <input type="checkbox" id="prodPremium" style="width: auto;">
                         Mettre en avant (Premium ⭐)
@@ -617,6 +669,7 @@
             loadDashboardCategories();
             loadVendorProfile();
             loadProducts();
+            loadDeliveries();
         });
 
         // Navigation
@@ -651,6 +704,11 @@
                 document.getElementById('imagePreview').style.display = 'none';
                 base64Image = null;
                 document.getElementById('prodImage').required = true;
+                document.getElementById('delivHand').checked = false;
+                document.getElementById('delivMoto').checked = false;
+                document.getElementById('delivMotoPrice').value = '';
+                document.getElementById('delivTaxi').checked = false;
+                document.getElementById('delivTaxiPrice').value = '';
             }
         }
         function closeModal() { document.getElementById('productModal').style.display = 'none'; }
@@ -838,13 +896,25 @@
             const prodId = document.getElementById('prodId').value;
             const isEdit = !!prodId;
 
+            const methodes_livraison = [];
+            if (document.getElementById('delivHand').checked) {
+                methodes_livraison.push({nom: 'Remise en main propre', prix: 0});
+            }
+            if (document.getElementById('delivMoto').checked) {
+                methodes_livraison.push({nom: 'Moto-taxi', prix: parseInt(document.getElementById('delivMotoPrice').value) || 0});
+            }
+            if (document.getElementById('delivTaxi').checked) {
+                methodes_livraison.push({nom: 'Taxi', prix: parseInt(document.getElementById('delivTaxiPrice').value) || 0});
+            }
+
             const payload = {
                 nom: document.getElementById('prodName').value,
                 description: document.getElementById('prodDesc').value,
                 prix: parseInt(document.getElementById('prodPrice').value),
                 categorie: document.getElementById('prodCategory').value,
                 stock: parseInt(document.getElementById('prodStock').value),
-                est_premium: document.getElementById('prodPremium').checked
+                est_premium: document.getElementById('prodPremium').checked,
+                methodes_livraison: methodes_livraison
             };
 
             if (base64Image) {
@@ -894,6 +964,27 @@
             document.getElementById('prodStock').value = product.stock || 1;
             document.getElementById('prodDesc').value = product.description || '';
             document.getElementById('prodPremium').checked = product.est_premium || false;
+            
+            // Populer methodes livraison
+            document.getElementById('delivHand').checked = false;
+            document.getElementById('delivMoto').checked = false;
+            document.getElementById('delivMotoPrice').value = '';
+            document.getElementById('delivTaxi').checked = false;
+            document.getElementById('delivTaxiPrice').value = '';
+
+            if (product.methodes_livraison) {
+                product.methodes_livraison.forEach(m => {
+                    if (m.nom === 'Remise en main propre') document.getElementById('delivHand').checked = true;
+                    if (m.nom === 'Moto-taxi') {
+                        document.getElementById('delivMoto').checked = true;
+                        document.getElementById('delivMotoPrice').value = m.prix;
+                    }
+                    if (m.nom === 'Taxi') {
+                        document.getElementById('delivTaxi').checked = true;
+                        document.getElementById('delivTaxiPrice').value = m.prix;
+                    }
+                });
+            }
 
             document.getElementById('prodImage').required = false;
 
@@ -934,6 +1025,59 @@
             } catch (error) {
                 console.error(error);
                 alert('Erreur de connexion au serveur');
+            }
+        }
+
+        // Deliveries
+        async function loadDeliveries() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/ventes/historique`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                
+                const tbody = document.querySelector('#deliveries-table tbody');
+                tbody.innerHTML = '';
+                
+                data.ventes.forEach(v => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td title="${v.produit_id}">${v.produit_id.substring(0,8)}...</td>
+                        <td>${v.acheteur_telephone}</td>
+                        <td style="font-weight:600;">${v.montant_net.toLocaleString()} FCFA</td>
+                        <td>${v.methode_livraison || 'Non spécifié'}</td>
+                        <td>${v.frais_livraison > 0 ? v.frais_livraison + ' FCFA' : 'Gratuit'}</td>
+                        <td>${new Date(v.date).toLocaleDateString()}</td>
+                        <td>
+                            <select onchange="updateDeliveryStatus('${v.id}', this.value)" style="padding:4px; border-radius:4px; border:1px solid #ddd;">
+                                <option value="en_attente" ${v.statut_livraison === 'en_attente' ? 'selected' : ''}>En attente</option>
+                                <option value="en_cours" ${v.statut_livraison === 'en_cours' ? 'selected' : ''}>En cours</option>
+                                <option value="livre" ${v.statut_livraison === 'livre' ? 'selected' : ''}>Livré</option>
+                            </select>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error("Erreur chargement livraisons:", e);
+            }
+        }
+
+        async function updateDeliveryStatus(venteId, statut) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/ventes/${venteId}/livraison`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ statut })
+                });
+                if (!response.ok) {
+                    alert("Erreur lors de la mise à jour");
+                }
+            } catch (e) {
+                console.error(e);
             }
         }
     </script>

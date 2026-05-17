@@ -166,6 +166,11 @@ class UserLogin(BaseModel):
     telephone: str
     mot_de_passe: str
 
+class MethodeLivraison(BaseModel):
+    nom: str
+    prix: int
+    zones: Optional[str] = None
+
 class ProduitCreate(BaseModel):
     nom: str
     description: str
@@ -174,6 +179,7 @@ class ProduitCreate(BaseModel):
     images: List[str] = []
     stock: int = 1
     est_premium: bool = False
+    methodes_livraison: Optional[List[MethodeLivraison]] = []
 
 class ProduitUpdate(BaseModel):
     nom: Optional[str] = None
@@ -183,6 +189,7 @@ class ProduitUpdate(BaseModel):
     images: Optional[List[str]] = None
     stock: Optional[int] = None
     est_premium: Optional[bool] = None
+    methodes_livraison: Optional[List[MethodeLivraison]] = None
 
 class CategoryCreate(BaseModel):
     nom: str
@@ -226,6 +233,8 @@ class VenteCreate(BaseModel):
     acheteur_telephone: str
     montant: int
     commission_taux: float = 0.03  # 3% par défaut
+    methode_livraison: Optional[str] = None
+    frais_livraison: Optional[int] = 0
 
 class CodeParrainage(BaseModel):
     code: str
@@ -686,22 +695,33 @@ async def mes_boosts(vendeur = Depends(get_current_vendeur)):
 # ==================== VENTES & COMMISSIONS ====================
 
 @app.post("/api/ventes/enregistrer")
-async def enregistrer_vente(vente: VenteCreate, vendeur = Depends(get_current_vendeur)):
-    """Enregistrer une vente et calculer les commissions"""
+async def enregistrer_vente(vente: VenteCreate):
+    """Enregistrer une vente/commande et calculer les commissions (Appelé par l'acheteur)"""
+    # L'acheteur n'a pas besoin d'être authentifié pour acheter (comme dans le flux actuel)
     
-    # Calculer la commission
-    commission = vente.montant * vente.commission_taux
-    montant_net = vente.montant - commission
+    # Récupérer le vendeur depuis le produit
+    produit = await db.produits.find_one({"_id": ObjectId(vente.produit_id)})
+    if not produit:
+        raise HTTPException(status_code=404, detail="Produit non trouvé")
+        
+    vendeur_id = str(produit["vendeur_id"])
+    
+    # Calculer la commission (uniquement sur le montant du produit, pas la livraison)
+    montant_produit = vente.montant
+    commission = montant_produit * vente.commission_taux
+    montant_net = montant_produit - commission
     
     vente_data = {
-        "vendeur_id": str(vendeur["_id"]),
+        "vendeur_id": vendeur_id,
         "produit_id": vente.produit_id,
         "acheteur_telephone": vente.acheteur_telephone,
-        "montant": vente.montant,
+        "montant": montant_produit,
         "commission_taux": vente.commission_taux,
         "commission_montant": commission,
         "montant_net": montant_net,
-        "statut": "completé",
+        "methode_livraison": vente.methode_livraison,
+        "frais_livraison": vente.frais_livraison,
+        "statut": "en_attente", # 'en_attente', 'en_cours', 'livre'
         "date_vente": datetime.utcnow()
     }
     
@@ -711,7 +731,7 @@ async def enregistrer_vente(vente: VenteCreate, vendeur = Depends(get_current_ve
     commission_data = {
         "type": "vente",
         "vente_id": str(result.inserted_id),
-        "vendeur_id": str(vendeur["_id"]),
+        "vendeur_id": vendeur_id,
         "montant": commission,
         "date": datetime.utcnow()
     }
@@ -725,6 +745,25 @@ async def enregistrer_vente(vente: VenteCreate, vendeur = Depends(get_current_ve
         "montant_net": montant_net
     }
 
+class UpdateLivraisonStatut(BaseModel):
+    statut: str # 'en_attente', 'en_cours', 'livre'
+
+@app.put("/api/ventes/{vente_id}/livraison")
+async def update_livraison_statut(vente_id: str, payload: UpdateLivraisonStatut, vendeur = Depends(get_current_vendeur)):
+    """Mettre à jour le statut de livraison d'une vente"""
+    vente = await db.ventes.find_one({"_id": ObjectId(vente_id)})
+    if not vente:
+        raise HTTPException(status_code=404, detail="Vente non trouvée")
+        
+    if vente["vendeur_id"] != str(vendeur["_id"]):
+        raise HTTPException(status_code=403, detail="Non autorisé")
+        
+    await db.ventes.update_one(
+        {"_id": ObjectId(vente_id)},
+        {"$set": {"statut": payload.statut}}
+    )
+    return {"message": "Statut de livraison mis à jour avec succès"}
+
 @app.get("/api/ventes/historique")
 async def historique_ventes(vendeur = Depends(get_current_vendeur)):
     """Historique des ventes du vendeur"""
@@ -737,9 +776,13 @@ async def historique_ventes(vendeur = Depends(get_current_vendeur)):
             {
                 "id": str(v["_id"]),
                 "produit_id": v["produit_id"],
+                "acheteur_telephone": v.get("acheteur_telephone", ""),
                 "montant": v["montant"],
                 "commission": v["commission_montant"],
                 "montant_net": v["montant_net"],
+                "methode_livraison": v.get("methode_livraison"),
+                "frais_livraison": v.get("frais_livraison", 0),
+                "statut_livraison": v.get("statut", "en_attente"),
                 "date": v["date_vente"]
             }
             for v in ventes
@@ -922,6 +965,7 @@ async def creer_produit(produit: ProduitCreate, current_user = Depends(get_curre
         "images": final_images,
         "stock": produit.stock,
         "est_premium": produit.est_premium,
+        "methodes_livraison": [m.dict() for m in (produit.methodes_livraison or [])],
         "vendeur_id": str(vendeur["_id"]),
         "date_creation": datetime.utcnow()
     }

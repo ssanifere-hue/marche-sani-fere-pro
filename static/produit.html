@@ -268,9 +268,24 @@
                     <h1 class="product-title-large">${productName}</h1>
                     <div class="product-price-large">${formatPrice(product.prix)} FCFA</div>
                     
-                    <div class="buy-section">
+                    <div class="delivery-options-section" style="margin-bottom: 1.5rem;">
+                        <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem;">🚚 Options de livraison</h3>
+                        <div id="deliveryOptionsContainer" style="display: grid; gap: 0.5rem;">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+
+                    <div class="buy-section" style="background: var(--bg-light); padding: 1.5rem; border-radius: var(--radius-md);">
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Votre numéro de téléphone (pour suivi)</label>
+                            <input type="tel" id="buyerPhone" placeholder="Ex: 70000000" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm);" required>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.2rem; margin-bottom: 1rem;">
+                            <span>Total à payer:</span>
+                            <span id="displayTotalPrice">${formatPrice(product.prix)} FCFA</span>
+                        </div>
                         <p style="margin-bottom: 0.5rem; font-weight: 600;">💳 Paiement sécurisé Orange Money</p>
-                        <button class="buy-btn" onclick="acheterProduit()">
+                        <button class="buy-btn" onclick="acheterProduit()" id="buyBtn">
                             🛒 Acheter Maintenant
                         </button>
                     </div>
@@ -310,6 +325,47 @@
             
             document.getElementById('productPage').innerHTML = html;
             document.title = `${productName} - APHRIKE JULA`;
+
+            // Setup delivery options
+            const deliveryContainer = document.getElementById('deliveryOptionsContainer');
+            if (product.methodes_livraison && product.methodes_livraison.length > 0) {
+                let optionsHtml = '';
+                product.methodes_livraison.forEach((method, index) => {
+                    const priceLabel = method.prix > 0 ? `+ ${formatPrice(method.prix)} FCFA` : 'Gratuit';
+                    const isChecked = index === 0 ? 'checked' : '';
+                    if (index === 0) updateTotalPrice(method.prix); // Set default selected price
+                    
+                    optionsHtml += `
+                        <label style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); cursor: pointer; background: white;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="radio" name="deliveryMethod" value='${JSON.stringify(method)}' onchange="handleDeliveryChange(this)" ${isChecked}>
+                                <span>${method.nom}</span>
+                            </div>
+                            <span style="font-weight: 600; color: var(--primary-color);">${priceLabel}</span>
+                        </label>
+                    `;
+                });
+                deliveryContainer.innerHTML = optionsHtml;
+            } else {
+                deliveryContainer.innerHTML = '<p style="color: var(--text-gray);">Contacter le vendeur pour la livraison.</p>';
+                updateTotalPrice(0);
+            }
+        }
+
+        let currentDeliveryPrice = 0;
+        let selectedDeliveryMethod = null;
+
+        function handleDeliveryChange(radio) {
+            const method = JSON.parse(radio.value);
+            selectedDeliveryMethod = method;
+            updateTotalPrice(method.prix);
+        }
+
+        function updateTotalPrice(deliveryPrice) {
+            currentDeliveryPrice = deliveryPrice;
+            const total = (productData.prix || 0) + currentDeliveryPrice;
+            const displayEl = document.getElementById('displayTotalPrice');
+            if (displayEl) displayEl.textContent = `${formatPrice(total)} FCFA`;
         }
 
         function changeImage(index) {
@@ -322,14 +378,55 @@
             });
         }
 
-        function acheterProduit() {
-            // Generate order reference
-            const ref = 'REF-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-            document.getElementById('omRef').textContent = ref;
-            document.getElementById('omAmount').textContent = formatPrice(productData.prix) + ' FCFA';
-            
-            // Show modal
-            document.getElementById('omModal').style.display = 'flex';
+        async function acheterProduit() {
+            const phone = document.getElementById('buyerPhone').value;
+            if (!phone || phone.length < 8) {
+                alert("Veuillez entrer un numéro de téléphone valide.");
+                return;
+            }
+
+            const btn = document.getElementById('buyBtn');
+            btn.disabled = true;
+            btn.textContent = 'Traitement...';
+
+            // Retrieve default selected if not clicked
+            if (!selectedDeliveryMethod && productData.methodes_livraison && productData.methodes_livraison.length > 0) {
+                selectedDeliveryMethod = productData.methodes_livraison[0];
+            }
+
+            const payload = {
+                produit_id: productId,
+                acheteur_telephone: phone,
+                montant: productData.prix,
+                methode_livraison: selectedDeliveryMethod ? selectedDeliveryMethod.nom : null,
+                frais_livraison: selectedDeliveryMethod ? selectedDeliveryMethod.prix : 0
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/ventes/enregistrer`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const totalPayable = productData.prix + payload.frais_livraison;
+                    
+                    // Show OM Modal
+                    document.getElementById('omRef').textContent = 'REF-' + data.vente_id.substring(data.vente_id.length - 6).toUpperCase();
+                    document.getElementById('omAmount').textContent = formatPrice(totalPayable) + ' FCFA';
+                    document.getElementById('omModal').style.display = 'flex';
+                } else {
+                    alert("Erreur lors de la création de la commande.");
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Erreur de connexion.");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🛒 Acheter Maintenant';
+            }
         }
 
         function closeOmModal() {
