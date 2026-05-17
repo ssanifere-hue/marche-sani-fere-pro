@@ -120,6 +120,10 @@
                         <option value="">Tous les vendeurs</option>
                         <option value="premium">⭐ Premium uniquement</option>
                         <option value="verified">✓ Vérifiés</option>
+                        <option value="particulier">Particulier</option>
+                        <option value="boutique">Boutique</option>
+                        <option value="entreprise">Entreprise</option>
+                        <option value="grossiste">Grossiste</option>
                     </select>
                 </div>
                 
@@ -127,12 +131,32 @@
                     <label>Localisation</label>
                     <select id="locationFilter" onchange="applyFilters()">
                         <option value="">Tout le Mali</option>
-                        <option value="bamako">Bamako</option>
-                        <option value="sikasso">Sikasso</option>
-                        <option value="kayes">Kayes</option>
-                        <option value="segou">Ségou</option>
-                        <option value="mopti">Mopti</option>
-                        <option value="gao">Gao</option>
+                        <optgroup label="District">
+                            <option value="bamako">Bamako</option>
+                        </optgroup>
+                        <optgroup label="Régions">
+                            <option value="kayes">Kayes</option>
+                            <option value="koulikoro">Koulikoro</option>
+                            <option value="sikasso">Sikasso</option>
+                            <option value="segou">Ségou</option>
+                            <option value="mopti">Mopti</option>
+                            <option value="tombouctou">Tombouctou</option>
+                            <option value="gao">Gao</option>
+                            <option value="kidal">Kidal</option>
+                            <option value="menaka">Ménaka</option>
+                            <option value="taoudenit">Taoudénit</option>
+                        </optgroup>
+                        <optgroup label="Villes Principales">
+                            <option value="kati">Kati</option>
+                            <option value="koutiala">Koutiala</option>
+                            <option value="san">San</option>
+                            <option value="niono">Niono</option>
+                            <option value="markala">Markala</option>
+                            <option value="bougouni">Bougouni</option>
+                            <option value="kangaba">Kangaba</option>
+                            <option value="djenne">Djenné</option>
+                            <option value="bandiagara">Bandiagara</option>
+                        </optgroup>
                     </select>
                 </div>
                 
