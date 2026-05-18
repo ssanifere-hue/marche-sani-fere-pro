@@ -746,11 +746,15 @@ async def enregistrer_vente(vente: VenteCreate):
     }
 
 class UpdateLivraisonStatut(BaseModel):
-    statut: str # 'en_attente', 'en_cours', 'livre'
+    statut: str # 'en_attente', 'paiement_confirme', 'preparation_colis', 'envoi_colis', 'livre'
 
 @app.put("/api/ventes/{vente_id}/livraison")
 async def update_livraison_statut(vente_id: str, payload: UpdateLivraisonStatut, vendeur = Depends(get_current_vendeur)):
     """Mettre à jour le statut de livraison d'une vente"""
+    statuts_valides = ['en_attente', 'paiement_confirme', 'preparation_colis', 'envoi_colis', 'livre']
+    if payload.statut not in statuts_valides:
+        raise HTTPException(status_code=400, detail=f"Statut invalide. Valides: {statuts_valides}")
+    
     vente = await db.ventes.find_one({"_id": ObjectId(vente_id)})
     if not vente:
         raise HTTPException(status_code=404, detail="Vente non trouvée")
@@ -764,30 +768,84 @@ async def update_livraison_statut(vente_id: str, payload: UpdateLivraisonStatut,
     )
     return {"message": "Statut de livraison mis à jour avec succès"}
 
+@app.get("/api/ventes/suivi/{telephone}")
+async def suivi_commandes(telephone: str):
+    """Suivi des commandes par téléphone acheteur (pas d'auth requise)"""
+    ventes = await db.ventes.find({"acheteur_telephone": telephone}).sort("date_vente", -1).to_list(50)
+    
+    result = []
+    for v in ventes:
+        # Récupérer le nom du produit
+        produit = await db.produits.find_one({"_id": ObjectId(v["produit_id"])})
+        produit_nom = produit["nom"] if produit else "Produit supprimé"
+        produit_image = ""
+        if produit and produit.get("images"):
+            valid_imgs = [i for i in produit["images"] if i and i.strip()]
+            produit_image = valid_imgs[0] if valid_imgs else ""
+        
+        result.append({
+            "id": str(v["_id"]),
+            "produit_id": v["produit_id"],
+            "produit_nom": produit_nom,
+            "produit_image": produit_image,
+            "montant": v["montant"],
+            "frais_livraison": v.get("frais_livraison", 0),
+            "methode_livraison": v.get("methode_livraison"),
+            "statut": v.get("statut", "en_attente"),
+            "date": v["date_vente"]
+        })
+    
+    return {"telephone": telephone, "commandes": result}
+
+class ConfirmerReception(BaseModel):
+    acheteur_telephone: str
+
+@app.put("/api/ventes/{vente_id}/confirmer-reception")
+async def confirmer_reception(vente_id: str, payload: ConfirmerReception):
+    """Acheteur confirme la réception de sa commande"""
+    vente = await db.ventes.find_one({"_id": ObjectId(vente_id)})
+    if not vente:
+        raise HTTPException(status_code=404, detail="Vente non trouvée")
+    
+    if vente.get("acheteur_telephone") != payload.acheteur_telephone:
+        raise HTTPException(status_code=403, detail="Numéro de téléphone non correspondant")
+    
+    if vente.get("statut") not in ["envoi_colis", "en_cours"]:
+        raise HTTPException(status_code=400, detail="La commande n'est pas encore en livraison")
+    
+    await db.ventes.update_one(
+        {"_id": ObjectId(vente_id)},
+        {"$set": {"statut": "livre"}}
+    )
+    return {"message": "Réception confirmée. Merci !"}
+
 @app.get("/api/ventes/historique")
 async def historique_ventes(vendeur = Depends(get_current_vendeur)):
     """Historique des ventes du vendeur"""
     
-    ventes = await db.ventes.find({"vendeur_id": str(vendeur["_id"])}).to_list(100)
+    ventes = await db.ventes.find({"vendeur_id": str(vendeur["_id"])}).sort("date_vente", -1).to_list(100)
     
-    return {
-        "total": len(ventes),
-        "ventes": [
-            {
-                "id": str(v["_id"]),
-                "produit_id": v["produit_id"],
-                "acheteur_telephone": v.get("acheteur_telephone", ""),
-                "montant": v["montant"],
-                "commission": v["commission_montant"],
-                "montant_net": v["montant_net"],
-                "methode_livraison": v.get("methode_livraison"),
-                "frais_livraison": v.get("frais_livraison", 0),
-                "statut_livraison": v.get("statut", "en_attente"),
-                "date": v["date_vente"]
-            }
-            for v in ventes
-        ]
-    }
+    result = []
+    for v in ventes:
+        # Récupérer le nom du produit pour l'affichage
+        produit = await db.produits.find_one({"_id": ObjectId(v["produit_id"])})
+        produit_nom = produit["nom"] if produit else "Produit supprimé"
+        
+        result.append({
+            "id": str(v["_id"]),
+            "produit_id": v["produit_id"],
+            "produit_nom": produit_nom,
+            "acheteur_telephone": v.get("acheteur_telephone", ""),
+            "montant": v["montant"],
+            "commission": v["commission_montant"],
+            "montant_net": v["montant_net"],
+            "methode_livraison": v.get("methode_livraison"),
+            "frais_livraison": v.get("frais_livraison", 0),
+            "statut_livraison": v.get("statut", "en_attente"),
+            "date": v["date_vente"]
+        })
+    
+    return {"total": len(result), "ventes": result}
 
 # ==================== PARRAINAGE ====================
 

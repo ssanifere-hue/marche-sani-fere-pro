@@ -185,6 +185,9 @@
         </div>
 
         <div id="navActions" style="display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;">
+            <a href="#" onclick="toggleCartDrawer(); return false;" style="position:relative;color:#fff;font-size:1.3rem;text-decoration:none;padding:4px 8px;" title="Panier">
+                🛒<span id="cartBadge" style="position:absolute;top:-4px;right:-4px;background:#FFD700;color:#1565C0;font-size:0.65rem;font-weight:700;width:18px;height:18px;border-radius:50%;display:none;align-items:center;justify-content:center;">0</span>
+            </a>
             <a href="vendre.html" style="padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;border:none;cursor:pointer;background:#FFD700;color:#1565C0;text-decoration:none;transition:background 0.2s;">Vendre</a>
             <a href="connexion.html" style="padding:7px 16px;border-radius:100px;font-size:14px;font-weight:500;cursor:pointer;background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.5);text-decoration:none;transition:background 0.2s;">Connexion</a>
         </div>
@@ -323,9 +326,15 @@
                             <span id="displayTotalPrice">${formatPrice(product.prix)} FCFA</span>
                         </div>
                         <p style="margin-bottom: 0.5rem; font-weight: 600;">💳 Paiement sécurisé Orange Money</p>
-                        <button class="buy-btn" onclick="acheterProduit()" id="buyBtn">
-                            🛒 Acheter Maintenant
-                        </button>
+                        <div style="display: grid; gap: 0.5rem;">
+                            <button class="buy-btn" onclick="acheterProduit()" id="buyBtn">
+                                🛒 Acheter Maintenant
+                            </button>
+                            <button class="buy-btn" onclick="ajouterAuPanier()" id="cartBtn" style="background: #1565C0; color: white;">
+                                🛍️ Ajouter au Panier
+                            </button>
+                        </div>
+                        <p style="text-align:center;margin-top:0.75rem;font-size:0.85rem;"><a href="suivi.html" style="color:#1565C0;font-weight:600;">📦 Suivre une commande existante</a></p>
                     </div>
                     
                     <a href="vendeur.html?id=${vendorId}" class="vendor-card-inline">
@@ -479,6 +488,170 @@
             const date = new Date(dateStr);
             return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
         }
+
+        // ===== CART SYSTEM =====
+        function getCart() {
+            try { return JSON.parse(localStorage.getItem('aj_cart') || '[]'); } catch(e) { return []; }
+        }
+        function saveCart(cart) {
+            localStorage.setItem('aj_cart', JSON.stringify(cart));
+            updateCartBadge();
+        }
+        function updateCartBadge() {
+            const cart = getCart();
+            const badge = document.getElementById('cartBadge');
+            if (badge) {
+                if (cart.length > 0) {
+                    badge.style.display = 'flex';
+                    badge.textContent = cart.reduce((s,i) => s + i.qty, 0);
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+
+        function ajouterAuPanier() {
+            if (!productData) return;
+            const cart = getCart();
+            const existing = cart.find(c => c.produit_id === productData.id);
+
+            // Get selected delivery
+            let delivMethod = null;
+            const selected = document.querySelector('input[name="delivery"]:checked');
+            if (selected) {
+                delivMethod = { nom: selected.dataset.name, prix: parseInt(selected.dataset.price) || 0 };
+            }
+
+            if (existing) {
+                existing.qty += 1;
+                if (delivMethod) existing.delivery = delivMethod;
+            } else {
+                const img = productData.images && productData.images.length > 0 ? productData.images[0] : '';
+                cart.push({
+                    produit_id: productData.id,
+                    nom: productData.nom || productData.titre,
+                    prix: productData.prix,
+                    image: img,
+                    qty: 1,
+                    vendeur_id: productData.vendeur_id || (productData.vendeur && productData.vendeur.id),
+                    delivery: delivMethod
+                });
+            }
+            saveCart(cart);
+            alert('Produit ajouté au panier !');
+        }
+
+        function toggleCartDrawer() {
+            const drawer = document.getElementById('cartDrawer');
+            drawer.style.display = drawer.style.display === 'flex' ? 'none' : 'flex';
+            if (drawer.style.display === 'flex') renderCart();
+        }
+
+        function renderCart() {
+            const cart = getCart();
+            const container = document.getElementById('cartItems');
+            const totalEl = document.getElementById('cartTotal');
+            const checkoutBtn = document.getElementById('cartCheckoutBtn');
+
+            if (cart.length === 0) {
+                container.innerHTML = '<p style="text-align:center;color:#999;padding:2rem;">Votre panier est vide</p>';
+                totalEl.textContent = '0 FCFA';
+                checkoutBtn.disabled = true;
+                return;
+            }
+            checkoutBtn.disabled = false;
+
+            let total = 0;
+            container.innerHTML = cart.map((item, idx) => {
+                const itemTotal = item.prix * item.qty + (item.delivery ? item.delivery.prix : 0);
+                total += itemTotal;
+                return `
+                <div style="display:flex;gap:0.75rem;align-items:center;padding:0.75rem 0;border-bottom:1px solid #f0f0f0;">
+                    <img src="${item.image || 'https://placehold.co/50x50?text=📦'}" style="width:50px;height:50px;border-radius:6px;object-fit:cover;" onerror="this.src='https://placehold.co/50x50?text=📦'">
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:600;font-size:0.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.nom}</div>
+                        <div style="font-size:0.8rem;color:#666;">${formatPrice(item.prix)} FCFA × ${item.qty}</div>
+                        ${item.delivery ? '<div style="font-size:0.7rem;color:#999;">🚚 ' + item.delivery.nom + '</div>' : ''}
+                    </div>
+                    <div style="display:flex;align-items:center;gap:4px;">
+                        <button onclick="changeQty(${idx},-1)" style="width:24px;height:24px;border:1px solid #ddd;background:#fff;border-radius:4px;cursor:pointer;font-weight:700;">-</button>
+                        <span style="width:20px;text-align:center;font-size:0.85rem;">${item.qty}</span>
+                        <button onclick="changeQty(${idx},1)" style="width:24px;height:24px;border:1px solid #ddd;background:#fff;border-radius:4px;cursor:pointer;font-weight:700;">+</button>
+                    </div>
+                    <button onclick="removeFromCart(${idx})" style="background:none;border:none;color:#dc3545;cursor:pointer;font-size:1.1rem;" title="Supprimer">🗑️</button>
+                </div>`;
+            }).join('');
+
+            totalEl.textContent = formatPrice(total) + ' FCFA';
+        }
+
+        function changeQty(idx, delta) {
+            const cart = getCart();
+            if (!cart[idx]) return;
+            cart[idx].qty = Math.max(1, cart[idx].qty + delta);
+            saveCart(cart);
+            renderCart();
+        }
+
+        function removeFromCart(idx) {
+            const cart = getCart();
+            cart.splice(idx, 1);
+            saveCart(cart);
+            renderCart();
+        }
+
+        async function checkoutCart() {
+            const phone = prompt('Votre numéro de téléphone (8 chiffres) :');
+            if (!phone || phone.length < 8) { alert('Numéro invalide'); return; }
+
+            const cart = getCart();
+            if (cart.length === 0) { alert('Panier vide'); return; }
+
+            const btn = document.getElementById('cartCheckoutBtn');
+            btn.disabled = true;
+            btn.textContent = 'Traitement...';
+
+            let totalPay = 0;
+            let lastRef = '';
+            let hasError = false;
+
+            for (const item of cart) {
+                try {
+                    const res = await fetch(`${API_BASE_URL}/api/ventes/enregistrer`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            produit_id: item.produit_id,
+                            acheteur_telephone: phone,
+                            montant: item.prix * item.qty,
+                            methode_livraison: item.delivery ? item.delivery.nom : null,
+                            frais_livraison: item.delivery ? item.delivery.prix : 0
+                        })
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        totalPay += (item.prix * item.qty) + (item.delivery ? item.delivery.prix : 0);
+                        lastRef = data.vente_id;
+                    } else { hasError = true; }
+                } catch(e) { hasError = true; }
+            }
+
+            if (!hasError) {
+                saveCart([]);
+                toggleCartDrawer();
+                // Show OM modal with total
+                document.getElementById('omRef').textContent = 'REF-' + lastRef.substring(lastRef.length - 6).toUpperCase();
+                document.getElementById('omAmount').textContent = formatPrice(totalPay) + ' FCFA';
+                document.getElementById('omModal').style.display = 'flex';
+            } else {
+                alert('Certaines commandes ont échoué. Veuillez réessayer.');
+            }
+            btn.disabled = false;
+            btn.textContent = 'Commander tout';
+        }
+
+        // Init badge on page load
+        document.addEventListener('DOMContentLoaded', updateCartBadge);
     </script>
     <!-- Modal Orange Money -->
     <div id="omModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:2000; justify-content:center; align-items:center;">
@@ -509,5 +682,32 @@
             </a>
         </div>
     </div>
+
+    <!-- Cart Drawer -->
+    <div id="cartDrawer" style="display:none;position:fixed;top:0;right:0;width:100%;max-width:380px;height:100%;background:white;z-index:3000;flex-direction:column;box-shadow:-4px 0 20px rgba(0,0,0,0.15);">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;border-bottom:1px solid #eee;background:#1565C0;color:white;">
+            <h3 style="margin:0;font-size:1.1rem;">🛒 Mon Panier</h3>
+            <button onclick="toggleCartDrawer()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">&times;</button>
+        </div>
+        <div id="cartItems" style="flex:1;overflow-y:auto;padding:0 1.25rem;"></div>
+        <div style="border-top:2px solid #eee;padding:1rem 1.25rem;">
+            <div style="display:flex;justify-content:space-between;font-weight:700;font-size:1.15rem;margin-bottom:0.75rem;">
+                <span>Total:</span>
+                <span id="cartTotal" style="color:#1565C0;">0 FCFA</span>
+            </div>
+            <button id="cartCheckoutBtn" onclick="checkoutCart()" disabled style="width:100%;padding:0.85rem;background:#FFD700;color:#1565C0;border:none;border-radius:100px;font-weight:700;font-size:1rem;cursor:pointer;">Commander tout</button>
+            <a href="suivi.html" style="display:block;text-align:center;margin-top:0.5rem;font-size:0.85rem;color:#1565C0;">📦 Suivre une commande</a>
+        </div>
+    </div>
+    <!-- Cart Drawer Overlay -->
+    <div id="cartOverlay" onclick="toggleCartDrawer()" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.3);z-index:2999;"></div>
+    <script>
+        // Sync overlay with drawer
+        const _origToggle = toggleCartDrawer;
+        toggleCartDrawer = function() {
+            _origToggle();
+            document.getElementById('cartOverlay').style.display = document.getElementById('cartDrawer').style.display;
+        };
+    </script>
 </body>
 </html>

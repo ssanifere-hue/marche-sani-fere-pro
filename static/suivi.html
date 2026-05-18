@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivi de Commande - APHRIKE JULA</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .suivi-hero {
+            background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+            color: white;
+            padding: 2.5rem 0;
+            text-align: center;
+        }
+        .suivi-hero h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        .suivi-hero p { opacity: 0.9; }
+
+        .search-box {
+            max-width: 500px;
+            margin: -1.5rem auto 2rem;
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            padding: 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            position: relative;
+            z-index: 10;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 0.85rem 1rem;
+            border: 2px solid var(--border-gray);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+        }
+        .search-box input:focus { outline: none; border-color: #1565C0; }
+        .search-box button {
+            background: #FFD700;
+            color: #1565C0;
+            border: none;
+            padding: 0.85rem 1.5rem;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .search-box button:hover { background: #FFC200; }
+
+        .orders-container { max-width: 700px; margin: 0 auto 3rem; }
+
+        .order-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+            transition: var(--transition-normal);
+        }
+        .order-card:hover { box-shadow: var(--shadow-lg); }
+
+        .order-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .order-img {
+            width: 60px; height: 60px;
+            border-radius: var(--radius-sm);
+            object-fit: cover;
+            background: #f0f0f0;
+        }
+        .order-info { flex: 1; }
+        .order-info h3 { font-size: 1.05rem; margin-bottom: 0.15rem; }
+        .order-meta { font-size: 0.85rem; color: var(--text-gray); }
+        .order-amount { font-weight: 700; color: #1565C0; font-size: 1.1rem; white-space: nowrap; }
+
+        /* 5-step progress */
+        .progress-bar {
+            display: flex;
+            align-items: center;
+            padding: 1.25rem 1.25rem 0.5rem;
+            gap: 0;
+        }
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+        .step-icon {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            color: #999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.35rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            transition: all 0.3s;
+            position: relative;
+            z-index: 2;
+        }
+        .step.active .step-icon {
+            background: #1565C0;
+            color: white;
+            box-shadow: 0 2px 8px rgba(21,101,192,0.3);
+        }
+        .step.done .step-icon {
+            background: #4CAF50;
+            color: white;
+        }
+        .step-label {
+            font-size: 0.65rem;
+            color: #999;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+        .step.active .step-label, .step.done .step-label { color: #333; }
+
+        .step-line {
+            flex: 0.6;
+            height: 3px;
+            background: #e0e0e0;
+            margin-top: -18px;
+            position: relative;
+            z-index: 1;
+        }
+        .step-line.done { background: #4CAF50; }
+
+        .order-footer {
+            padding: 0.75rem 1.25rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .delivery-info { font-size: 0.85rem; color: var(--text-gray); }
+
+        .confirm-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.25rem;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .confirm-btn:hover { background: #388E3C; }
+        .confirm-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-gray);
+        }
+        .empty-state span { font-size: 3rem; display: block; margin-bottom: 1rem; }
+
+        @media (max-width: 768px) {
+            .suivi-hero h1 { font-size: 1.4rem; }
+            .search-box { margin: -1rem 1rem 1.5rem; flex-direction: column; }
+            .search-box button { width: 100%; }
+            .order-header { flex-wrap: wrap; }
+            .step-label { font-size: 0.55rem; }
+            .step-icon { width: 30px; height: 30px; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="aj-navbar" style="display:flex;align-items:center;gap:12px;padding:0 24px;height:56px;background:#1565C0;position:sticky;top:0;z-index:1000;box-shadow:0 2px 8px rgba(21,101,192,0.3);">
+        <a href="index.html" class="aj-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;">
+            <div class="aj-logo">
+                <svg width="36" height="36" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="17" cy="17" r="15" fill="rgba(255,255,255,0.1)"/>
+                    <polygon points="17,4 20.5,13 30,13 22.5,19 25.5,29 17,23 8.5,29 11.5,19 4,13 13.5,13" fill="rgba(255,215,0,0.25)"/>
+                    <polygon points="17,7 20,14.5 28,14.5 21.5,19.5 24,27 17,22.5 10,27 12.5,19.5 6,14.5 14,14.5" fill="#FFD700"/>
+                </svg>
+            </div>
+            <span style="font-size:17px;font-weight:600;color:#fff;letter-spacing:-0.01em;white-space:nowrap;">APHRIKE JULA</span>
+        </a>
+        <div style="flex:1;"></div>
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+            <a href="catalogue.html" style="padding:7px 16px;border-radius:100px;font-size:14px;font-weight:500;cursor:pointer;background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.5);text-decoration:none;">Catalogue</a>
+            <a href="index.html" style="padding:7px 16px;border-radius:100px;font-size:14px;font-weight:500;cursor:pointer;background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.5);text-decoration:none;">Accueil</a>
+        </div>
+    </nav>
+
+    <section class="suivi-hero">
+        <div class="container">
+            <h1>📦 Suivi de Commande</h1>
+            <p>Entrez votre numéro de téléphone pour suivre vos commandes</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="search-box">
+            <input type="tel" id="phoneInput" placeholder="Votre numéro (ex: 70700520)" maxlength="8">
+            <button onclick="trackOrders()">🔍 Rechercher</button>
+        </div>
+
+        <div class="orders-container" id="ordersContainer">
+            <div class="empty-state">
+                <span>📱</span>
+                <h3>Entrez votre numéro</h3>
+                <p>Saisissez le numéro utilisé lors de votre achat pour voir l'état de vos commandes.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 APHRIKE JULA. Tous droits réservés. 🇲🇱</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const API_BASE_URL = 'https://web-production-8f94.up.railway.app';
+
+        const STATUTS = [
+            { key: 'en_attente', label: 'En attente', icon: '⏳' },
+            { key: 'paiement_confirme', label: 'Payé', icon: '💰' },
+            { key: 'preparation_colis', label: 'Préparation', icon: '📦' },
+            { key: 'envoi_colis', label: 'Envoyé', icon: '🚚' },
+            { key: 'livre', label: 'Livré', icon: '✅' }
+        ];
+
+        // Allow Enter key
+        document.getElementById('phoneInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter') trackOrders();
+        });
+
+        async function trackOrders() {
+            const phone = document.getElementById('phoneInput').value.trim();
+            if (!phone || phone.length < 8) {
+                alert('Veuillez entrer un numéro valide (8 chiffres).');
+                return;
+            }
+
+            const container = document.getElementById('ordersContainer');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/ventes/suivi/${phone}`);
+                const data = await res.json();
+
+                if (!data.commandes || data.commandes.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <span>🔍</span>
+                            <h3>Aucune commande trouvée</h3>
+                            <p>Aucune commande n'est associée au numéro <strong>${phone}</strong>.</p>
+                        </div>`;
+                    return;
+                }
+
+                container.innerHTML = `<p style="margin-bottom:1rem;color:var(--text-gray);font-weight:600;">${data.commandes.length} commande(s) trouvée(s)</p>`;
+
+                data.commandes.forEach(order => {
+                    container.innerHTML += renderOrderCard(order, phone);
+                });
+            } catch (e) {
+                console.error(e);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span>⚠️</span>
+                        <h3>Erreur de connexion</h3>
+                        <p>Impossible de contacter le serveur. Réessayez.</p>
+                    </div>`;
+            }
+        }
+
+        function renderOrderCard(order, phone) {
+            const currentIdx = STATUTS.findIndex(s => s.key === order.statut);
+            const imgSrc = order.produit_image || 'https://placehold.co/60x60?text=📦';
+            const total = (order.montant + (order.frais_livraison || 0));
+            const canConfirm = order.statut === 'envoi_colis';
+
+            // Build progress steps
+            let progressHtml = '';
+            STATUTS.forEach((s, i) => {
+                const cls = i < currentIdx ? 'done' : (i === currentIdx ? 'active' : '');
+                progressHtml += `<div class="step ${cls}">
+                    <div class="step-icon">${s.icon}</div>
+                    <div class="step-label">${s.label}</div>
+                </div>`;
+                if (i < STATUTS.length - 1) {
+                    const lineCls = i < currentIdx ? 'done' : '';
+                    progressHtml += `<div class="step-line ${lineCls}"></div>`;
+                }
+            });
+
+            return `
+            <div class="order-card">
+                <div class="order-header">
+                    <img src="${imgSrc}" class="order-img" alt="${order.produit_nom}" onerror="this.src='https://placehold.co/60x60?text=📦'">
+                    <div class="order-info">
+                        <h3>${order.produit_nom}</h3>
+                        <div class="order-meta">${new Date(order.date).toLocaleDateString('fr-FR', {day:'numeric',month:'long',year:'numeric'})}</div>
+                    </div>
+                    <div class="order-amount">${total.toLocaleString()} FCFA</div>
+                </div>
+                <div class="progress-bar">${progressHtml}</div>
+                <div class="order-footer">
+                    <div class="delivery-info">
+                        ${order.methode_livraison ? '🚚 ' + order.methode_livraison : ''}
+                        ${order.frais_livraison > 0 ? ' · ' + order.frais_livraison + ' FCFA' : ''}
+                    </div>
+                    ${canConfirm ? `<button class="confirm-btn" onclick="confirmReception('${order.id}', '${phone}', this)">✓ J'ai reçu</button>` : ''}
+                    ${order.statut === 'livre' ? '<span style="color:#4CAF50;font-weight:700;font-size:0.85rem;">✓ Livré</span>' : ''}
+                </div>
+            </div>`;
+        }
+
+        async function confirmReception(venteId, phone, btn) {
+            if (!confirm('Confirmez-vous avoir reçu votre commande ?')) return;
+            btn.disabled = true;
+            btn.textContent = '...';
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/ventes/${venteId}/confirmer-reception`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ acheteur_telephone: phone })
+                });
+                if (res.ok) {
+                    alert('Réception confirmée ! Merci pour votre achat.');
+                    trackOrders(); // Refresh
+                } else {
+                    const err = await res.json();
+                    alert('Erreur: ' + (err.detail || 'Impossible de confirmer'));
+                    btn.disabled = false;
+                    btn.textContent = '✓ J\'ai reçu';
+                }
+            } catch (e) {
+                alert('Erreur de connexion');
+                btn.disabled = false;
+                btn.textContent = '✓ J\'ai reçu';
+            }
+        }
+    </script>
+</body>
+</html>

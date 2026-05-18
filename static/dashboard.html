@@ -545,7 +545,7 @@
                         <table id="deliveries-table">
                             <thead>
                                 <tr>
-                                    <th>Réf. Produit</th>
+                                    <th>Produit</th>
                                     <th>Acheteur (Tél)</th>
                                     <th>Montant Net</th>
                                     <th>Méthode</th>
@@ -662,6 +662,12 @@
                                 <input type="checkbox" id="delivTaxi" style="width: auto;"> Taxi
                             </label>
                             <input type="number" id="delivTaxiPrice" placeholder="Frais (ex: 3000)" style="width: 150px; padding: 0.25rem 0.5rem;">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; flex: 1;">
+                                <input type="checkbox" id="delivRelais" style="width: auto;"> Point Relais
+                            </label>
+                            <input type="number" id="delivRelaisPrice" placeholder="Frais (ex: 500)" style="width: 150px; padding: 0.25rem 0.5rem;">
                         </div>
                     </div>
                 </div>
@@ -800,6 +806,8 @@
                 document.getElementById('delivMotoPrice').value = '';
                 document.getElementById('delivTaxi').checked = false;
                 document.getElementById('delivTaxiPrice').value = '';
+                document.getElementById('delivRelais').checked = false;
+                document.getElementById('delivRelaisPrice').value = '';
             }
         }
         function closeModal() { document.getElementById('productModal').style.display = 'none'; }
@@ -997,6 +1005,9 @@
             if (document.getElementById('delivTaxi').checked) {
                 methodes_livraison.push({nom: 'Taxi', prix: parseInt(document.getElementById('delivTaxiPrice').value) || 0});
             }
+            if (document.getElementById('delivRelais').checked) {
+                methodes_livraison.push({nom: 'Point Relais', prix: parseInt(document.getElementById('delivRelaisPrice').value) || 0});
+            }
 
             const payload = {
                 nom: document.getElementById('prodName').value,
@@ -1062,6 +1073,8 @@
             document.getElementById('delivMotoPrice').value = '';
             document.getElementById('delivTaxi').checked = false;
             document.getElementById('delivTaxiPrice').value = '';
+            document.getElementById('delivRelais').checked = false;
+            document.getElementById('delivRelaisPrice').value = '';
 
             if (product.methodes_livraison) {
                 product.methodes_livraison.forEach(m => {
@@ -1073,6 +1086,10 @@
                     if (m.nom === 'Taxi') {
                         document.getElementById('delivTaxi').checked = true;
                         document.getElementById('delivTaxiPrice').value = m.prix;
+                    }
+                    if (m.nom === 'Point Relais') {
+                        document.getElementById('delivRelais').checked = true;
+                        document.getElementById('delivRelaisPrice').value = m.prix;
                     }
                 });
             }
@@ -1133,17 +1150,19 @@
                 data.ventes.forEach(v => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td title="${v.produit_id}">${v.produit_id.substring(0,8)}...</td>
+                        <td><strong>${v.produit_nom || v.produit_id.substring(0,8)}</strong></td>
                         <td>${v.acheteur_telephone}</td>
                         <td style="font-weight:600;">${v.montant_net.toLocaleString()} FCFA</td>
                         <td>${v.methode_livraison || 'Non spécifié'}</td>
                         <td>${v.frais_livraison > 0 ? v.frais_livraison + ' FCFA' : 'Gratuit'}</td>
                         <td>${new Date(v.date).toLocaleDateString()}</td>
                         <td>
-                            <select onchange="updateDeliveryStatus('${v.id}', this.value)" style="padding:4px; border-radius:4px; border:1px solid #ddd;">
-                                <option value="en_attente" ${v.statut_livraison === 'en_attente' ? 'selected' : ''}>En attente</option>
-                                <option value="en_cours" ${v.statut_livraison === 'en_cours' ? 'selected' : ''}>En cours</option>
-                                <option value="livre" ${v.statut_livraison === 'livre' ? 'selected' : ''}>Livré</option>
+                            <select onchange="updateDeliveryStatus('${v.id}', this.value)" style="padding:4px 2px; border-radius:4px; border:1px solid #ddd; font-size:0.8rem;">
+                                <option value="en_attente" ${v.statut_livraison === 'en_attente' ? 'selected' : ''}>⏳ En attente</option>
+                                <option value="paiement_confirme" ${v.statut_livraison === 'paiement_confirme' ? 'selected' : ''}>💰 Paiement confirmé</option>
+                                <option value="preparation_colis" ${v.statut_livraison === 'preparation_colis' ? 'selected' : ''}>📦 Préparation</option>
+                                <option value="envoi_colis" ${v.statut_livraison === 'envoi_colis' ? 'selected' : ''}>🚚 Envoi colis</option>
+                                <option value="livre" ${v.statut_livraison === 'livre' ? 'selected' : ''}>✅ Livré</option>
                             </select>
                         </td>
                     `;
