@@ -26,6 +26,9 @@
         </div>
 
         <div style="display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;">
+            <a href="produit.html" onclick="return false;" id="cartLink" style="position:relative;color:#fff;font-size:1.3rem;text-decoration:none;padding:4px 8px;cursor:pointer;" title="Panier">
+                🛒<span id="cartBadge" style="position:absolute;top:-4px;right:-4px;background:#FFD700;color:#1565C0;font-size:0.65rem;font-weight:700;width:18px;height:18px;border-radius:50%;display:none;align-items:center;justify-content:center;">0</span>
+            </a>
             <a href="vendre.html" style="padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;border:none;cursor:pointer;background:#FFD700;color:#1565C0;text-decoration:none;transition:background 0.2s;">Vendre</a>
             <a href="connexion.html" style="padding:7px 16px;border-radius:100px;font-size:14px;font-weight:500;cursor:pointer;background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.5);text-decoration:none;transition:background 0.2s;">Connexion</a>
         </div>
@@ -129,5 +132,18 @@
     </footer>
 
     <script src="app.js"></script>
+    <script>
+        // Cart badge update
+        (function() {
+            try {
+                const cart = JSON.parse(localStorage.getItem('aj_cart') || '[]');
+                const badge = document.getElementById('cartBadge');
+                if (badge && cart.length > 0) {
+                    badge.style.display = 'flex';
+                    badge.textContent = cart.reduce((s,i) => s + (i.qty||1), 0);
+                }
+            } catch(e) {}
+        })();
+    </script>
 </body>
 </html>
