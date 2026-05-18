@@ -1,11 +1,22 @@
 // ===== APHRIKE JULA — Cart System (MongoDB-backed) =====
 const CART_API = 'https://web-production-8f94.up.railway.app/api/panier';
 
-// Get or create a cart ID (only this tiny string in localStorage, NOT cart data)
+// Get cart ID — uses logged-in user's ID for cross-device sync, or a random UUID for anonymous users
 function getCartId() {
+    // If user is logged in, use their account ID so cart syncs across devices
+    try {
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+            const user = JSON.parse(userStr);
+            if (user && user.id) return 'user_' + user.id;
+            if (user && user.telephone) return 'user_' + user.telephone;
+        }
+    } catch(e) {}
+    
+    // Anonymous fallback — random ID per browser
     let id = localStorage.getItem('aj_cart_id');
     if (!id) {
-        id = 'cart_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+        id = 'anon_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
         localStorage.setItem('aj_cart_id', id);
     }
     return id;
