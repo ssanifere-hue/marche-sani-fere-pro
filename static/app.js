@@ -305,7 +305,7 @@ function updateNavbar() {
             const firstName = user.prenom || user.nom || 'Compte';
             
             navActions.innerHTML = `
-                <a href="#" onclick="return false;" style="position:relative;color:#fff;font-size:1.3rem;text-decoration:none;padding:4px 8px;cursor:pointer;" title="Panier" id="cartLinkNav">
+                <a href="#" onclick="toggleCartDrawer(); return false;" style="position:relative;color:#fff;font-size:1.3rem;text-decoration:none;padding:4px 8px;cursor:pointer;" title="Panier" id="cartLinkNav">
                     🛒<span id="cartBadge" style="position:absolute;top:-4px;right:-4px;background:#FFD700;color:#1565C0;font-size:0.65rem;font-weight:700;width:18px;height:18px;border-radius:50%;display:none;align-items:center;justify-content:center;">0</span>
                 </a>
                 ${user.role === 'vendeur' 
@@ -316,15 +316,8 @@ function updateNavbar() {
                     <a href="#" style="padding:7px 16px;border-radius:100px;font-size:14px;font-weight:500;cursor:pointer;background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.5);text-decoration:none;transition:background 0.2s;" onclick="handleLogout(event)">Déconnexion</a>
                 </div>
             `;
-            // Update cart badge after navbar rebuild
-            try {
-                const cart = JSON.parse(localStorage.getItem('aj_cart') || '[]');
-                const badge = document.getElementById('cartBadge');
-                if (badge && cart.length > 0) {
-                    badge.style.display = 'flex';
-                    badge.textContent = cart.reduce((s,i) => s + (i.qty||1), 0);
-                }
-            } catch(e) {}
+            // Update cart badge after navbar rebuild (cart.js handles this)
+            if (typeof updateCartBadge === 'function') updateCartBadge();
         } catch (e) {
             console.error('Erreur parsing user session:', e);
         }

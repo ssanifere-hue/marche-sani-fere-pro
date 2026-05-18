@@ -692,6 +692,127 @@ async def mes_boosts(vendeur = Depends(get_current_vendeur)):
         ]
     }
 
+# ==================== PANIER (CART) ====================
+
+class PanierItemAdd(BaseModel):
+    cart_id: str
+    produit_id: str
+    qty: int = 1
+    delivery_nom: Optional[str] = None
+    delivery_prix: Optional[int] = 0
+
+class PanierItemUpdate(BaseModel):
+    qty: int
+
+@app.post("/api/panier/ajouter")
+async def ajouter_au_panier(item: PanierItemAdd):
+    """Ajouter un produit au panier (stocké en MongoDB)"""
+    produit = await db.produits.find_one({"_id": ObjectId(item.produit_id)})
+    if not produit:
+        raise HTTPException(status_code=404, detail="Produit non trouvé")
+    
+    # Chercher panier existant
+    panier = await db.paniers.find_one({"cart_id": item.cart_id})
+    
+    produit_nom = produit["nom"]
+    valid_imgs = [i for i in (produit.get("images") or []) if i and i.strip()]
+    produit_image = valid_imgs[0] if valid_imgs else ""
+    vendeur_id = str(produit.get("vendeur_id", ""))
+    prix = produit["prix"]
+    
+    cart_item = {
+        "produit_id": item.produit_id,
+        "nom": produit_nom,
+        "prix": prix,
+        "image": produit_image,
+        "qty": item.qty,
+        "vendeur_id": vendeur_id,
+        "delivery_nom": item.delivery_nom,
+        "delivery_prix": item.delivery_prix or 0
+    }
+    
+    if panier:
+        # Check if product already in cart
+        items = panier.get("items", [])
+        found = False
+        for existing in items:
+            if existing["produit_id"] == item.produit_id:
+                existing["qty"] += item.qty
+                if item.delivery_nom:
+                    existing["delivery_nom"] = item.delivery_nom
+                    existing["delivery_prix"] = item.delivery_prix or 0
+                found = True
+                break
+        if not found:
+            items.append(cart_item)
+        
+        await db.paniers.update_one(
+            {"cart_id": item.cart_id},
+            {"$set": {"items": items, "updated_at": datetime.utcnow()}}
+        )
+    else:
+        await db.paniers.insert_one({
+            "cart_id": item.cart_id,
+            "items": [cart_item],
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow()
+        })
+    
+    # Return updated cart
+    panier = await db.paniers.find_one({"cart_id": item.cart_id})
+    return {"message": "Produit ajouté", "items": panier["items"], "count": sum(i["qty"] for i in panier["items"])}
+
+@app.get("/api/panier/{cart_id}")
+async def get_panier(cart_id: str):
+    """Récupérer le contenu du panier"""
+    panier = await db.paniers.find_one({"cart_id": cart_id})
+    if not panier:
+        return {"items": [], "count": 0}
+    return {"items": panier["items"], "count": sum(i["qty"] for i in panier["items"])}
+
+@app.put("/api/panier/{cart_id}/item/{produit_id}")
+async def update_panier_item(cart_id: str, produit_id: str, payload: PanierItemUpdate):
+    """Modifier la quantité d'un article du panier"""
+    panier = await db.paniers.find_one({"cart_id": cart_id})
+    if not panier:
+        raise HTTPException(status_code=404, detail="Panier non trouvé")
+    
+    items = panier.get("items", [])
+    for item in items:
+        if item["produit_id"] == produit_id:
+            if payload.qty <= 0:
+                items.remove(item)
+            else:
+                item["qty"] = payload.qty
+            break
+    
+    await db.paniers.update_one(
+        {"cart_id": cart_id},
+        {"$set": {"items": items, "updated_at": datetime.utcnow()}}
+    )
+    return {"message": "Panier mis à jour", "items": items, "count": sum(i["qty"] for i in items)}
+
+@app.delete("/api/panier/{cart_id}/item/{produit_id}")
+async def supprimer_du_panier(cart_id: str, produit_id: str):
+    """Supprimer un article du panier"""
+    panier = await db.paniers.find_one({"cart_id": cart_id})
+    if not panier:
+        raise HTTPException(status_code=404, detail="Panier non trouvé")
+    
+    items = [i for i in panier.get("items", []) if i["produit_id"] != produit_id]
+    
+    await db.paniers.update_one(
+        {"cart_id": cart_id},
+        {"$set": {"items": items, "updated_at": datetime.utcnow()}}
+    )
+    return {"message": "Article supprimé", "items": items, "count": sum(i["qty"] for i in items)}
+
+@app.delete("/api/panier/{cart_id}")
+async def vider_panier(cart_id: str):
+    """Vider le panier entier"""
+    await db.paniers.delete_one({"cart_id": cart_id})
+    return {"message": "Panier vidé"}
+
 # ==================== VENTES & COMMISSIONS ====================
 
 @app.post("/api/ventes/enregistrer")
