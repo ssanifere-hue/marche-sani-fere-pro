@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - APHRIKE JULA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #2d3748;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            background: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .section {
+            display: none;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .table th, .table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .table th {
+            background: #f7fafc;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .table tr:hover {
+            background: #f7fafc;
+        }
+
+        .table img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .badge-premium {
+            background: #feebc8;
+            color: #7c2d12;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .alert-error {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            .stat-card h3 {
+                font-size: 2rem;
+            }
+            .tabs {
+                flex-direction: column;
+            }
+            .table {
+                font-size: 0.875rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⭐ APHRIKE JULA - Administration</h1>
+            <p>Panneau d'administration complet</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showSection('dashboard')">📊 Dashboard</button>
+            <button class="tab" onclick="showSection('produits')">📦 Tous les Produits</button>
+            <button class="tab" onclick="showSection('categories')">🏷️ Catégories</button>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard-section" class="section active">
+            <h2 style="margin-bottom: 1.5rem; color: #2d3748;">Statistiques</h2>
+            
+            <div id="dashboard-alert" style="display: none;"></div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3 id="stat-products">-</h3>
+                    <p>Total Produits</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="stat-categories">18</h3>
+                    <p>Catégories</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="stat-premium">-</h3>
+                    <p>Produits Premium</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="stat-recent">-</h3>
+                    <p>Ajoutés Aujourd'hui</p>
+                </div>
+            </div>
+
+            <button class="btn" onclick="loadStats()">🔄 Actualiser</button>
+        </div>
+
+        <!-- Produits -->
+        <div id="produits-section" class="section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="color: #2d3748;">Tous les Produits</h2>
+                <button class="btn" onclick="loadProduits()">🔄 Actualiser</button>
+            </div>
+            
+            <div id="produits-alert" style="display: none;"></div>
+
+            <table class="table" id="produits-table">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Nom</th>
+                        <th>Prix</th>
+                        <th>Catégorie</th>
+                        <th>Stock</th>
+                        <th>Premium</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 2rem; color: #718096;">
+                            Chargement...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Catégories -->
+        <div id="categories-section" class="section">
+            <h2 style="margin-bottom: 1.5rem; color: #2d3748;">Catégories APHRIKE JULA</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+                <div class="stat-card">🌾 Agriculture</div>
+                <div class="stat-card">🍎 Alimentation</div>
+                <div class="stat-card">💄 Beauté</div>
+                <div class="stat-card">🏗️ Bâtiment</div>
+                <div class="stat-card">👶 Enfants</div>
+                <div class="stat-card">💻 Informatique</div>
+                <div class="stat-card">📚 Livres</div>
+                <div class="stat-card">🏠 Maison</div>
+                <div class="stat-card">🪑 Meubles</div>
+                <div class="stat-card">👗 Mode Femme</div>
+                <div class="stat-card">👔 Mode Homme</div>
+                <div class="stat-card">🏍️ Moto & Pièces</div>
+                <div class="stat-card">🔧 Plomberie</div>
+                <div class="stat-card">🔩 Quincaillerie</div>
+                <div class="stat-card">💊 Santé</div>
+                <div class="stat-card">⚽ Sport</div>
+                <div class="stat-card">📱 Téléphonie</div>
+                <div class="stat-card">🚗 Véhicules</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = '';
+
+        function showSection(sectionName) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+
+            document.getElementById(sectionName + '-section').classList.add('active');
+            event.target.classList.add('active');
+
+            if (sectionName === 'produits') {
+                loadProduits();
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/produits?limit=1000');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                const totalProducts = data.total || data.produits?.length || 0;
+                const premiumProducts = data.produits?.filter(p => p.est_premium).length || 0;
+                
+                const today = new Date().toISOString().split('T')[0];
+                const recentProducts = data.produits?.filter(p => {
+                    const pDate = new Date(p.date_creation).toISOString().split('T')[0];
+                    return pDate === today;
+                }).length || 0;
+
+                document.getElementById('stat-products').textContent = totalProducts;
+                document.getElementById('stat-premium').textContent = premiumProducts;
+                document.getElementById('stat-recent').textContent = recentProducts;
+
+                showAlert('dashboard', 'success', '✅ Statistiques actualisées');
+            } catch (error) {
+                console.error('Erreur:', error);
+                showAlert('dashboard', 'error', `❌ Erreur: ${error.message}`);
+            }
+        }
+
+        async function loadProduits() {
+            try {
+                const response = await fetch('/api/produits?limit=100');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                const produits = data.produits || [];
+
+                const tbody = document.querySelector('#produits-table tbody');
+                tbody.innerHTML = '';
+
+                if (produits.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #718096;">Aucun produit trouvé</td></tr>';
+                    return;
+                }
+
+                produits.forEach(p => {
+                    const tr = document.createElement('tr');
+                    const date = new Date(p.date_creation).toLocaleDateString('fr-FR');
+                    
+                    tr.innerHTML = `
+                        <td><img src="${p.images[0]}" alt="${p.nom}"></td>
+                        <td><strong>${p.nom}</strong><br><small style="color: #718096;">${p.description?.substring(0, 50)}...</small></td>
+                        <td><strong>${p.prix.toLocaleString()} FCFA</strong></td>
+                        <td>${p.categorie}</td>
+                        <td>${p.stock || 0}</td>
+                        <td>${p.est_premium ? '<span class="badge badge-premium">⭐ Premium</span>' : '<span class="badge badge-success">Standard</span>'}</td>
+                        <td>${date}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                showAlert('produits', 'success', `✅ ${produits.length} produit(s) chargé(s)`);
+            } catch (error) {
+                console.error('Erreur:', error);
+                showAlert('produits', 'error', `❌ Erreur: ${error.message}`);
+            }
+        }
+
+        function showAlert(section, type, message) {
+            const alertDiv = document.getElementById(section + '-alert');
+            if (!alertDiv) return;
+            
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            alertDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStats();
+        });
+    </script>
+</body>
+</html>
