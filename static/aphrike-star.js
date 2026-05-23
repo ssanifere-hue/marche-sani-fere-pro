@@ -6,7 +6,7 @@
     
     // Remplacer l'emoji étoile par carte Afrique + étoile dorée
     function updateBrandIcon() {
-        const navbar = document.querySelector('.navbar-brand');
+        const navbar = document.querySelector('.aj-navbar');
         if (navbar) {
             navbar.innerHTML = navbar.innerHTML.replace('⭐', '🌍⭐');
             console.log('✅ Icône mise à jour');
@@ -51,7 +51,7 @@
                     50% { transform: scale(1.05); box-shadow: 0 4px 20px rgba(255, 215, 0, 0.8); }
                 }
                 
-                .navbar-brand:hover {
+                .aj-navbar:hover {
                     transform: scale(1.05);
                     transition: transform 0.3s;
                 }
