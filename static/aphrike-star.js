@@ -67,16 +67,7 @@
         updateBrandIcon();
         addPremiumBadges();
         
-        // Observer pour les changements dynamiques
-        const observer = new MutationObserver(() => {
-            updateBrandIcon();
-            addPremiumBadges();
-        });
         
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
         
         console.log('🎉 APHRIKE JULA - Prêt !');
     }
