@@ -5,1191 +5,806 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Vendeur - APHRIKE JULA</title>
     <link rel="stylesheet" href="/app/styles.css">
-
     <style>
-        :root {
-            --sidebar-width: 280px;
-        }
-
-        .dashboard-layout {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: var(--sidebar-width);
-            background: white;
-            border-right: 1px solid var(--border-gray);
-            padding: var(--spacing-md);
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            height: 100vh;
-            z-index: 100;
-        }
-
-        .sidebar-brand {
-            margin-bottom: var(--spacing-xl);
-        }
-
-        .sidebar-nav {
-            list-style: none;
-            flex: 1;
-        }
-
-        .nav-item {
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .nav-link {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.875rem 1rem;
-            text-decoration: none;
-            color: var(--text-gray);
-            border-radius: var(--radius-md);
-            font-weight: 600;
-            transition: var(--transition-fast);
-        }
-
-        .nav-link:hover, .nav-link.active {
-            background: rgba(0, 176, 116, 0.1);
-            color: var(--primary-green);
-        }
-
-        .sidebar-footer {
-            padding-top: var(--spacing-md);
-            border-top: 1px solid var(--border-gray);
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            margin-left: var(--sidebar-width);
-            padding: var(--spacing-lg);
-            background: var(--bg-light);
-        }
-
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--spacing-xl);
-        }
-
-        /* Dashboard Welcome Banner */
-        .dashboard-header-banner {
-            background: linear-gradient(135deg, #1a3c8f 0%, #1565C0 60%, #1976D2 100%);
-            border-radius: var(--radius-lg);
-            padding: 2rem 2.5rem;
-            margin-bottom: var(--spacing-xl);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            box-shadow: 0 4px 20px rgba(26, 60, 143, 0.25);
-        }
-        .dashboard-header-banner h1 {
-            color: #fff;
-            font-size: 1.6rem;
-            font-weight: 700;
-            margin: 0;
-        }
-        .dashboard-header-banner h1 .wave-emoji {
-            font-size: 1.5rem;
-        }
-        .dashboard-header-banner p {
-            color: rgba(255,255,255,0.75);
-            font-size: 0.95rem;
-            margin: 0.35rem 0 0;
-        }
-        .dashboard-header-banner .add-product-btn {
-            padding: 0.7rem 1.5rem;
-            border-radius: 100px;
-            font-size: 0.95rem;
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
-            background: #FFD700;
-            color: #1a3c8f;
-            transition: background 0.2s, transform 0.15s;
-            white-space: nowrap;
-        }
-        .dashboard-header-banner .add-product-btn:hover {
-            background: #ffca00;
-            transform: translateY(-1px);
-        }
-
-        /* Stats Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: var(--spacing-md);
-            margin-bottom: var(--spacing-xl);
-        }
-
-        .stat-card {
-            background: white;
-            padding: 1.25rem 1.5rem;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            border-left: 4px solid #1565C0;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-        }
+        :root { --sidebar-width: 280px; }
+        .dashboard-layout { display: flex; min-height: 100vh; }
+        .sidebar { width: var(--sidebar-width); background: white; border-right: 1px solid var(--border-gray); padding: var(--spacing-md); display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 100; }
+        .sidebar-brand { margin-bottom: var(--spacing-xl); }
+        .sidebar-nav { list-style: none; flex: 1; }
+        .nav-item { margin-bottom: var(--spacing-xs); }
+        .nav-link { display: flex; align-items: center; gap: 1rem; padding: 0.875rem 1rem; text-decoration: none; color: var(--text-gray); border-radius: var(--radius-md); font-weight: 600; transition: var(--transition-fast); }
+        .nav-link:hover, .nav-link.active { background: rgba(0,176,116,0.1); color: var(--primary-green); }
+        .sidebar-footer { padding-top: var(--spacing-md); border-top: 1px solid var(--border-gray); }
+        .main-content { flex: 1; margin-left: var(--sidebar-width); padding: var(--spacing-lg); background: var(--bg-light); }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-xl); }
+        .dashboard-header-banner { background: linear-gradient(135deg, #1a3c8f 0%, #1565C0 60%, #1976D2 100%); border-radius: var(--radius-lg); padding: 2rem 2.5rem; margin-bottom: var(--spacing-xl); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; box-shadow: 0 4px 20px rgba(26,60,143,0.25); }
+        .dashboard-header-banner h1 { color: #fff; font-size: 1.6rem; font-weight: 700; margin: 0; }
+        .dashboard-header-banner p { color: rgba(255,255,255,0.75); font-size: 0.95rem; margin: 0.35rem 0 0; }
+        .dashboard-header-banner .add-product-btn { padding: 0.7rem 1.5rem; border-radius: 100px; font-size: 0.95rem; font-weight: 700; border: none; cursor: pointer; background: #FFD700; color: #1a3c8f; transition: background 0.2s, transform 0.15s; white-space: nowrap; }
+        .dashboard-header-banner .add-product-btn:hover { background: #ffca00; transform: translateY(-1px); }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-md); margin-bottom: var(--spacing-xl); }
+        .stat-card { background: white; padding: 1.25rem 1.5rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 1rem; border-left: 4px solid #1565C0; transition: transform 0.2s, box-shadow 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
         .stat-card:nth-child(2) { border-left-color: #FFD700; }
         .stat-card:nth-child(3) { border-left-color: #FF6B35; }
         .stat-card:nth-child(4) { border-left-color: #00B074; }
-
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
-            flex-shrink: 0;
-        }
+        .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
         .stat-card:nth-child(1) .stat-icon { background: rgba(21,101,192,0.1); }
         .stat-card:nth-child(2) .stat-icon { background: rgba(255,215,0,0.15); }
         .stat-card:nth-child(3) .stat-icon { background: rgba(255,107,53,0.1); }
         .stat-card:nth-child(4) .stat-icon { background: rgba(0,176,116,0.1); }
-
-        .stat-text {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .stat-label {
-            color: var(--text-gray);
-            font-size: 0.85rem;
-            margin-bottom: 0.25rem;
-            font-weight: 500;
-        }
-
-        .stat-number {
-            font-size: 1.65rem;
-            font-weight: 700;
-            color: var(--text-dark);
-        }
-
-        /* Product Table */
-        .content-card {
-            background: white;
-            padding: var(--spacing-md);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .table-responsive {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            text-align: left;
-            padding: 1rem;
-            border-bottom: 2px solid var(--border-gray);
-            color: var(--text-gray);
-            font-weight: 600;
-        }
-
-        td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-gray);
-            vertical-align: middle;
-        }
-
-        .prod-img {
-            width: 50px;
-            height: 50px;
-            border-radius: var(--radius-sm);
-            object-fit: cover;
-        }
-
-        .badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: var(--radius-full);
-            font-size: 0.8rem;
-            font-weight: 700;
-        }
-
+        .stat-text { display: flex; flex-direction: column; }
+        .stat-label { color: var(--text-gray); font-size: 0.85rem; margin-bottom: 0.25rem; font-weight: 500; }
+        .stat-number { font-size: 1.65rem; font-weight: 700; color: var(--text-dark); }
+        .content-card { background: white; padding: var(--spacing-md); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 1rem; border-bottom: 2px solid var(--border-gray); color: var(--text-gray); font-weight: 600; }
+        td { padding: 1rem; border-bottom: 1px solid var(--border-gray); vertical-align: middle; }
+        .prod-img { width: 50px; height: 50px; border-radius: var(--radius-sm); object-fit: cover; }
+        .badge { padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: 0.8rem; font-weight: 700; }
         .badge-success { background: #EFE; color: #080; }
         .badge-warning { background: #FFF5E6; color: #D60; }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: white;
-            padding: var(--spacing-xl);
-            border-radius: var(--radius-lg);
-            width: 100%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
+        .badge-info { background: #E3F2FD; color: #1565C0; }
+        .badge-orange { background: #FFF3E0; color: #E65100; }
+        .badge-new { background: #FCE4EC; color: #C62828; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: var(--spacing-xl); border-radius: var(--radius-lg); width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
         .form-group { margin-bottom: var(--spacing-md); }
         .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid var(--border-gray);
-            border-radius: var(--radius-sm);
-            font-size: 1rem;
-        }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.75rem; border: 2px solid var(--border-gray); border-radius: var(--radius-sm); font-size: 1rem; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg); }
+        .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-gray); }
+        .profile-info { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg); }
+        .info-group { padding: var(--spacing-sm); border-bottom: 1px solid var(--border-gray); }
+        .info-label { color: var(--text-gray); font-size: 0.85rem; margin-bottom: 0.25rem; }
+        .info-value { font-weight: 600; font-size: 1.1rem; }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--spacing-lg);
-        }
+        /* Commandes styles */
+        .cmd-statut { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+        .cmd-nouvelle { background: #FCE4EC; color: #C62828; }
+        .cmd-confirmee { background: #E8F5E9; color: #2E7D32; }
+        .cmd-en_preparation { background: #FFF3E0; color: #E65100; }
+        .cmd-expedie { background: #E3F2FD; color: #1565C0; }
+        .cmd-livre { background: #E8F5E9; color: #1B5E20; }
+        .cmd-annulee { background: #EEEEEE; color: #616161; }
 
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-gray);
-        }
-
-        /* Profile Section */
-        .profile-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: var(--spacing-lg);
-        }
-
-        .info-group {
-            padding: var(--spacing-sm);
-            border-bottom: 1px solid var(--border-gray);
-        }
-
-        .info-label {
-            color: var(--text-gray);
-            font-size: 0.85rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .info-value {
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
+        .commande-detail-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
 
         @media (max-width: 1024px) {
             .sidebar { width: 80px; padding: var(--spacing-sm); }
             .sidebar-brand span, .nav-link span, .sidebar-footer span { display: none; }
             .main-content { margin-left: 80px; }
         }
-
         @media (max-width: 768px) {
-            .sidebar { 
-                display: none; 
-                position: fixed;
-                width: 260px;
-                top: 0; left: 0;
-                height: 100vh;
-                z-index: 999;
-                background: white;
-                box-shadow: var(--shadow-lg);
-            }
+            .sidebar { display: none; position: fixed; width: 260px; top: 0; left: 0; height: 100vh; z-index: 999; background: white; box-shadow: var(--shadow-lg); }
             .sidebar.open { display: flex; }
             .sidebar-brand span, .nav-link span, .sidebar-footer span { display: inline; }
-
-            .main-content { 
-                margin-left: 0; 
-                padding: var(--spacing-sm); 
-                padding-bottom: 80px; /* space for bottom nav */
-            }
-
+            .main-content { margin-left: 0; padding: var(--spacing-sm); padding-bottom: 80px; }
             .profile-info { grid-template-columns: 1fr; }
-
-            .dashboard-header-banner { 
-                padding: 1.25rem; 
-                flex-direction: column; 
-                align-items: flex-start; 
-            }
+            .dashboard-header-banner { padding: 1.25rem; flex-direction: column; align-items: flex-start; }
             .dashboard-header-banner h1 { font-size: 1.2rem; }
-            .dashboard-header-banner p { font-size: 0.85rem; }
-            .add-product-btn { width: 100%; text-align: center; }
-
-            .stats-grid { 
-                grid-template-columns: repeat(2, 1fr) !important; 
-                gap: 0.75rem !important; 
-            }
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.75rem !important; }
             .stat-card { padding: 0.85rem; }
             .stat-number { font-size: 1.2rem; }
-            .stat-label { font-size: 0.75rem; }
-            .stat-icon { font-size: 1.2rem; }
-
             .page-header { flex-direction: column; gap: 0.75rem; align-items: flex-start; }
-
             .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
             .table-responsive table { min-width: 550px; }
-
-            /* Modal mobile fixes */
-            .modal-content { 
-                max-height: 90vh; 
-                overflow-y: auto; 
-                margin: 1rem;
-                width: calc(100% - 2rem) !important;
-                max-width: 100% !important;
-            }
-
-            .info-group { min-width: 0; }
-            .info-value { font-size: 0.95rem; word-break: break-word; }
-
-            /* Mobile bottom navigation */
-            .mobile-bottom-nav {
-                display: flex;
-                position: fixed;
-                bottom: 0; left: 0; right: 0;
-                background: white;
-                border-top: 1px solid var(--border-gray);
-                z-index: 100;
-                box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
-            }
-            .mobile-bottom-nav a {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                padding: 8px 4px;
-                text-decoration: none;
-                color: var(--text-gray);
-                font-size: 0.65rem;
-                font-weight: 600;
-                gap: 2px;
-                transition: color 0.2s;
-            }
-            .mobile-bottom-nav a.active, .mobile-bottom-nav a:hover {
-                color: var(--primary-green);
-            }
-            .mobile-bottom-nav a span:first-child {
-                font-size: 1.25rem;
-            }
+            .modal-content { max-height: 90vh; overflow-y: auto; margin: 1rem; width: calc(100% - 2rem) !important; max-width: 100% !important; }
+            .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border-gray); z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.08); }
+            .mobile-bottom-nav a { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px 4px; text-decoration: none; color: var(--text-gray); font-size: 0.65rem; font-weight: 600; gap: 2px; }
+            .mobile-bottom-nav a.active, .mobile-bottom-nav a:hover { color: var(--primary-green); }
+            .mobile-bottom-nav a span:first-child { font-size: 1.25rem; }
         }
-
-        @media (min-width: 769px) {
-            .mobile-bottom-nav { display: none !important; }
-        }
+        @media (min-width: 769px) { .mobile-bottom-nav { display: none !important; } }
     </style>
 </head>
 <body>
-    <div class="dashboard-layout">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-brand">
-                <a href="/app/index.html" class="logo" style="color: #1565C0;">
-                    <span class="logo-icon">⭐</span>
-                    <span>APHRIKE JULA</span>
-                </a>
-
-            </div>
-
-            <nav class="sidebar-nav">
-                <div class="nav-item">
-                    <a href="#" class="nav-link active" onclick="showSection(event, 'overview')">
-                        <span>📊</span> <span>Tableau de bord</span>
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="#" class="nav-link" onclick="showSection(event, 'products')">
-                        <span>📦</span> <span>Mes Produits</span>
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="#" class="nav-link" onclick="showSection(event, 'profile')">
-                        <span>👤</span> <span>Mon Profil</span>
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="#" class="nav-link" onclick="showSection(event, 'deliveries'); loadDeliveries();">
-                        <span>🚚</span> <span>Mes Livraisons</span>
-                    </a>
-                </div>
-            </nav>
-
-            <div class="sidebar-footer">
-                <a href="#" class="nav-link" onclick="handleLogout()">
-                    <span>🚪</span> <span>Déconnexion</span>
+<div class="dashboard-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <a href="/app/index.html" class="logo" style="color:#1565C0;">
+                <span class="logo-icon">⭐</span>
+                <span>APHRIKE JULA</span>
+            </a>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-item">
+                <a href="#" class="nav-link active" onclick="showSection(event,'overview')">
+                    <span>📊</span> <span>Tableau de bord</span>
                 </a>
             </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Overview Section -->
-            <section id="section-overview">
-                <div class="dashboard-header-banner">
-                    <div>
-                        <h1>Bonjour, <span id="vendor-name-header">Vendeur</span> <span class="wave-emoji">👋</span></h1>
-                        <p>Bienvenue sur votre espace vendeur APHRIKE JULA</p>
-                    </div>
-                    <button class="add-product-btn" onclick="openModal()">+ Ajouter un Produit</button>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon">📦</div>
-                        <div class="stat-text">
-                            <span class="stat-label">Total Produits</span>
-                            <span class="stat-number" id="stat-total-products">0</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">💰</div>
-                        <div class="stat-text">
-                            <span class="stat-label">Ventes (Ce mois)</span>
-                            <span class="stat-number">0 FCFA</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">⭐</div>
-                        <div class="stat-text">
-                            <span class="stat-label">Note Vendeur</span>
-                            <span class="stat-number">5.0</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">✅</div>
-                        <div class="stat-text">
-                            <span class="stat-label">Statut Compte</span>
-                            <span class="badge badge-success" id="vendor-status" style="width: fit-content; margin-top: 0.25rem;">Actif</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="content-card">
-                    <h2 class="mb-2">Produits Récents</h2>
-                    <div class="table-responsive">
-                        <table id="recent-products-table">
-                            <thead>
-                                <tr>
-                                    <th>Image</th>
-                                    <th>Produit</th>
-                                    <th>Prix</th>
-                                    <th>Catégorie</th>
-                                    <th>Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Chargé dynamiquement -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Products Section -->
-            <section id="section-products" class="hidden">
-                <div class="page-header">
-                    <h1>Gestion des Produits</h1>
-                    <button class="nav-btn primary" onclick="openModal()">+ Nouveau Produit</button>
-                </div>
-                <div class="content-card">
-                    <div class="table-responsive">
-                        <table id="all-products-table">
-                            <thead>
-                                <tr>
-                                    <th>Image</th>
-                                    <th>Nom</th>
-                                    <th>Prix</th>
-                                    <th>Catégorie</th>
-                                    <th>Stock</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Chargé dynamiquement -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Deliveries Section -->
-            <section id="section-deliveries" class="hidden">
-                <div class="page-header">
-                    <h1>Mes Livraisons</h1>
-                </div>
-                <div class="content-card">
-                    <div class="table-responsive">
-                        <table id="deliveries-table">
-                            <thead>
-                                <tr>
-                                    <th>Produit</th>
-                                    <th>Acheteur (Tél)</th>
-                                    <th>Montant Net</th>
-                                    <th>Méthode</th>
-                                    <th>Frais</th>
-                                    <th>Date</th>
-                                    <th>Statut</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Chargé dynamiquement -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Profile Section -->
-            <section id="section-profile" class="hidden">
-                <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
-                    <h1>Informations de la Boutique</h1>
-                    <button class="nav-btn primary" onclick="openProfileModal()">✏️ Modifier</button>
-                </div>
-                <div class="content-card">
-                    <div class="profile-info">
-                        <div class="info-group">
-                            <div class="info-label">Nom du Vendeur</div>
-                            <div class="info-value" id="profile-full-name">...</div>
-                        </div>
-                        <div class="info-group">
-                            <div class="info-label">Nom de la Boutique</div>
-                            <div class="info-value" id="profile-shop-name">...</div>
-                        </div>
-                        <div class="info-group">
-                            <div class="info-label">Téléphone</div>
-                            <div class="info-value" id="profile-phone">...</div>
-                        </div>
-                        <div class="info-group">
-                            <div class="info-label">Email</div>
-                            <div class="info-value" id="profile-email">...</div>
-                        </div>
-                        <div class="info-group" style="grid-column: span 2;">
-                            <div class="info-label">Description</div>
-                            <div class="info-value" id="profile-desc">...</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <!-- Mobile Bottom Navigation -->
-    <div class="mobile-bottom-nav">
-        <a href="#" class="active" onclick="showSection(event, 'overview')"><span>📊</span><span>Accueil</span></a>
-        <a href="#" onclick="showSection(event, 'products')"><span>📦</span><span>Produits</span></a>
-        <a href="#" onclick="showSection(event, 'deliveries'); loadDeliveries();"><span>🚚</span><span>Livraisons</span></a>
-        <a href="#" onclick="showSection(event, 'profile')"><span>👤</span><span>Profil</span></a>
-        <a href="#" onclick="handleLogout()"><span>🚪</span><span>Sortir</span></a>
-    </div>
-
-    <!-- Modal Ajouter Produit -->
-    <div id="productModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">Ajouter un Nouveau Produit</h2>
-                <button class="close-btn" onclick="closeModal()">&times;</button>
+            <div class="nav-item">
+                <a href="#" class="nav-link" onclick="showSection(event,'products')">
+                    <span>📦</span> <span>Mes Produits</span>
+                </a>
             </div>
-            <form id="productForm" onsubmit="handleProductSubmit(event)">
-                <input type="hidden" id="prodId" value="">
-                <div class="form-group">
-                    <label for="prodName">Nom du produit</label>
-                    <input type="text" id="prodName" required placeholder="Ex: Bazin Riche Getzner">
+            <div class="nav-item">
+                <a href="#" class="nav-link" onclick="showSection(event,'commandes'); loadCommandes();">
+                    <span>🛒</span> <span>Mes Commandes</span>
+                    <span id="badge-commandes" style="display:none;background:#C62828;color:white;border-radius:50%;width:20px;height:20px;font-size:0.7rem;display:flex;align-items:center;justify-content:center;margin-left:auto;">0</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" onclick="showSection(event,'profile')">
+                    <span>👤</span> <span>Mon Profil</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#" class="nav-link" onclick="showSection(event,'deliveries'); loadDeliveries();">
+                    <span>🚚</span> <span>Mes Livraisons</span>
+                </a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#" class="nav-link" onclick="handleLogout()">
+                <span>🚪</span> <span>Déconnexion</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Overview -->
+        <section id="section-overview">
+            <div class="dashboard-header-banner">
+                <div>
+                    <h1>Bonjour, <span id="vendor-name-header">Vendeur</span> 👋</h1>
+                    <p>Bienvenue sur votre espace vendeur APHRIKE JULA</p>
                 </div>
-                <div class="form-group">
-                    <label for="prodPrice">Prix (FCFA)</label>
-                    <input type="number" id="prodPrice" required placeholder="Ex: 25000">
+                <button class="add-product-btn" onclick="openModal()">+ Ajouter un Produit</button>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-text">
+                        <span class="stat-label">Total Produits</span>
+                        <span class="stat-number" id="stat-total-products">0</span>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="prodCategory">Catégorie</label>
-                    <select id="prodCategory" required>
-                        <option value="">Choisir une catégorie...</option>
-                        <!-- Populated dynamically from API -->
+                <div class="stat-card">
+                    <div class="stat-icon">🛒</div>
+                    <div class="stat-text">
+                        <span class="stat-label">Commandes reçues</span>
+                        <span class="stat-number" id="stat-total-commandes">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🔔</div>
+                    <div class="stat-text">
+                        <span class="stat-label">Nouvelles commandes</span>
+                        <span class="stat-number" id="stat-nouvelles-commandes">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-text">
+                        <span class="stat-label">Statut Compte</span>
+                        <span class="badge badge-success" id="vendor-status" style="width:fit-content;margin-top:0.25rem;">Actif</span>
+                    </div>
+                </div>
+            </div>
+            <div class="content-card">
+                <h2 class="mb-2">Produits Récents</h2>
+                <div class="table-responsive">
+                    <table id="recent-products-table">
+                        <thead><tr><th>Image</th><th>Produit</th><th>Prix</th><th>Catégorie</th><th>Date</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products -->
+        <section id="section-products" class="hidden">
+            <div class="page-header">
+                <h1>Gestion des Produits</h1>
+                <button class="nav-btn primary" onclick="openModal()">+ Nouveau Produit</button>
+            </div>
+            <div class="content-card">
+                <div class="table-responsive">
+                    <table id="all-products-table">
+                        <thead><tr><th>Image</th><th>Nom</th><th>Prix</th><th>Catégorie</th><th>Stock</th><th>Actions</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Commandes -->
+        <section id="section-commandes" class="hidden">
+            <div class="page-header">
+                <h1>🛒 Mes Commandes</h1>
+                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                    <select id="filtreStatut" onchange="filterCommandes()" style="padding:0.5rem;border:1px solid var(--border-gray);border-radius:var(--radius-sm);">
+                        <option value="">Tous les statuts</option>
+                        <option value="nouvelle">📦 Nouvelles</option>
+                        <option value="confirmee">✅ Confirmées</option>
+                        <option value="en_preparation">🔧 En préparation</option>
+                        <option value="expedie">🚚 Expédiées</option>
+                        <option value="livre">🎉 Livrées</option>
+                        <option value="annulee">❌ Annulées</option>
                     </select>
+                    <button class="nav-btn primary" onclick="loadCommandes()">🔄 Actualiser</button>
                 </div>
-
-                <div class="form-group">
-                    <label for="prodStock">Stock initial</label>
-                    <input type="number" id="prodStock" value="1" min="1">
-                </div>
-                <div class="form-group">
-                    <label for="prodDesc">Description</label>
-                    <textarea id="prodDesc" rows="3" required placeholder="Détails du produit..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="prodImage">Image du produit</label>
-                    <input type="file" id="prodImage" accept="image/*" onchange="previewImage(event)">
-                    <div id="imagePreview" style="margin-top: 1rem; display: none;">
-                        <img src="" alt="Preview" style="max-width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius-sm);">
-                    </div>
-                </div>
-                <div class="form-group" style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
-                    <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Méthodes de livraison proposées</label>
-                    <div style="display: grid; gap: 0.5rem;">
-                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                            <input type="checkbox" id="delivHand" style="width: auto;"> Remise en main propre (Gratuit)
-                        </label>
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; flex: 1;">
-                                <input type="checkbox" id="delivMoto" style="width: auto;"> Moto-taxi
-                            </label>
-                            <input type="number" id="delivMotoPrice" placeholder="Frais (ex: 1500)" style="width: 150px; padding: 0.25rem 0.5rem;">
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; flex: 1;">
-                                <input type="checkbox" id="delivTaxi" style="width: auto;"> Taxi
-                            </label>
-                            <input type="number" id="delivTaxiPrice" placeholder="Frais (ex: 3000)" style="width: 150px; padding: 0.25rem 0.5rem;">
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; flex: 1;">
-                                <input type="checkbox" id="delivRelais" style="width: auto;"> Point Relais
-                            </label>
-                            <input type="number" id="delivRelaisPrice" placeholder="Frais (ex: 500)" style="width: 150px; padding: 0.25rem 0.5rem;">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin-top: 1rem;">
-                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                        <input type="checkbox" id="prodPremium" style="width: auto;">
-                        Mettre en avant (Premium ⭐)
-                    </label>
-                </div>
-                <button type="submit" class="submit-btn" id="submitProdBtn">Publier le Produit</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal Modifier Profil -->
-    <div id="profileModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Modifier la Boutique</h2>
-                <button class="close-btn" onclick="closeProfileModal()">&times;</button>
             </div>
-            <form id="profileForm" onsubmit="handleProfileSubmit(event)">
-                <div class="form-group">
-                    <label>Nom de la Boutique</label>
-                    <input type="text" id="editShopName" required>
+            <div id="commandes-container">
+                <div class="content-card" style="text-align:center;padding:3rem;">
+                    <div class="spinner"></div>
+                    <p>Chargement des commandes...</p>
                 </div>
-                <div class="form-group">
-                    <label>Description (Bio)</label>
-                    <textarea id="editShopDesc" rows="3"></textarea>
+            </div>
+        </section>
+
+        <!-- Deliveries -->
+        <section id="section-deliveries" class="hidden">
+            <div class="page-header"><h1>Mes Livraisons</h1></div>
+            <div class="content-card">
+                <div class="table-responsive">
+                    <table id="deliveries-table">
+                        <thead><tr><th>Produit</th><th>Acheteur (Tél)</th><th>Montant Net</th><th>Méthode</th><th>Frais</th><th>Date</th><th>Statut</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group">
-                        <label>Numéro WhatsApp</label>
-                        <input type="tel" id="editWhatsapp" placeholder="Ex: 70123456">
-                    </div>
-                    <div class="form-group">
-                        <label>Numéro Orange Money</label>
-                        <input type="tel" id="editOrangeMoney" placeholder="Ex: 70123456">
-                    </div>
+            </div>
+        </section>
+
+        <!-- Profile -->
+        <section id="section-profile" class="hidden">
+            <div class="page-header">
+                <h1>Informations de la Boutique</h1>
+                <button class="nav-btn primary" onclick="openProfileModal()">✏️ Modifier</button>
+            </div>
+            <div class="content-card">
+                <div class="profile-info">
+                    <div class="info-group"><div class="info-label">Nom du Vendeur</div><div class="info-value" id="profile-full-name">...</div></div>
+                    <div class="info-group"><div class="info-label">Nom de la Boutique</div><div class="info-value" id="profile-shop-name">...</div></div>
+                    <div class="info-group"><div class="info-label">Téléphone</div><div class="info-value" id="profile-phone">...</div></div>
+                    <div class="info-group"><div class="info-label">Email</div><div class="info-value" id="profile-email">...</div></div>
+                    <div class="info-group" style="grid-column:span 2;"><div class="info-label">Description</div><div class="info-value" id="profile-desc">...</div></div>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <div class="form-group">
-                        <label>Email de Contact</label>
-                        <input type="email" id="editEmailContact" placeholder="contact@maboutique.com">
-                    </div>
-                    <div class="form-group">
-                        <label>Adresse Physique</label>
-                        <input type="text" id="editAdresse" placeholder="Bamako, Mali">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Logo de la Boutique</label>
-                    <input type="file" id="editLogo" accept="image/*" onchange="previewProfileImage(event, 'logoPreview')">
-                    <div id="logoPreviewWrapper" style="margin-top: 0.5rem; display: none;">
-                        <img id="logoPreview" src="" alt="Preview" style="max-width: 100px; max-height: 100px; border-radius: 8px;">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Bannière de la Boutique</label>
-                    <input type="file" id="editBanniere" accept="image/*" onchange="previewProfileImage(event, 'bannerPreview')">
-                    <div id="bannerPreviewWrapper" style="margin-top: 0.5rem; display: none;">
-                        <img id="bannerPreview" src="" alt="Preview" style="max-width: 100%; height: 100px; object-fit: cover; border-radius: 8px;">
-                    </div>
-                </div>
-                <button type="submit" class="submit-btn" id="submitProfileBtn">Enregistrer les modifications</button>
-            </form>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Mobile Bottom Nav -->
+<div class="mobile-bottom-nav">
+    <a href="#" class="active" onclick="showSection(event,'overview')"><span>📊</span><span>Accueil</span></a>
+    <a href="#" onclick="showSection(event,'products')"><span>📦</span><span>Produits</span></a>
+    <a href="#" onclick="showSection(event,'commandes'); loadCommandes();"><span>🛒</span><span>Commandes</span></a>
+    <a href="#" onclick="showSection(event,'profile')"><span>👤</span><span>Profil</span></a>
+    <a href="#" onclick="handleLogout()"><span>🚪</span><span>Sortir</span></a>
+</div>
+
+<!-- Modal Produit -->
+<div id="productModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Ajouter un Nouveau Produit</h2>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
         </div>
+        <form id="productForm" onsubmit="handleProductSubmit(event)">
+            <input type="hidden" id="prodId" value="">
+            <div class="form-group"><label>Nom du produit</label><input type="text" id="prodName" required placeholder="Ex: Bazin Riche Getzner"></div>
+            <div class="form-group"><label>Prix (FCFA)</label><input type="number" id="prodPrice" required placeholder="Ex: 25000"></div>
+            <div class="form-group">
+                <label>Catégorie</label>
+                <select id="prodCategory" required><option value="">Choisir une catégorie...</option></select>
+            </div>
+            <div class="form-group"><label>Stock initial</label><input type="number" id="prodStock" value="1" min="1"></div>
+            <div class="form-group"><label>Description</label><textarea id="prodDesc" rows="3" required placeholder="Détails du produit..."></textarea></div>
+            <div class="form-group">
+                <label>Image du produit</label>
+                <input type="file" id="prodImage" accept="image/*" onchange="previewImage(event)">
+                <div id="imagePreview" style="margin-top:1rem;display:none;"><img src="" alt="Preview" style="max-width:100%;height:200px;object-fit:cover;border-radius:var(--radius-sm);"></div>
+            </div>
+            <div class="form-group" style="margin-top:1rem;border-top:1px solid var(--border-color);padding-top:1rem;">
+                <label style="font-weight:600;margin-bottom:0.5rem;display:block;">Méthodes de livraison</label>
+                <div style="display:grid;gap:0.5rem;">
+                    <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;"><input type="checkbox" id="delivHand" style="width:auto;"> Remise en main propre (Gratuit)</label>
+                    <div style="display:flex;align-items:center;gap:1rem;"><label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;flex:1;"><input type="checkbox" id="delivMoto" style="width:auto;"> Moto-taxi</label><input type="number" id="delivMotoPrice" placeholder="Frais (ex: 1500)" style="width:150px;padding:0.25rem 0.5rem;"></div>
+                    <div style="display:flex;align-items:center;gap:1rem;"><label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;flex:1;"><input type="checkbox" id="delivTaxi" style="width:auto;"> Taxi</label><input type="number" id="delivTaxiPrice" placeholder="Frais (ex: 3000)" style="width:150px;padding:0.25rem 0.5rem;"></div>
+                    <div style="display:flex;align-items:center;gap:1rem;"><label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;flex:1;"><input type="checkbox" id="delivRelais" style="width:auto;"> Point Relais</label><input type="number" id="delivRelaisPrice" placeholder="Frais (ex: 500)" style="width:150px;padding:0.25rem 0.5rem;"></div>
+                </div>
+            </div>
+            <div class="form-group" style="margin-top:1rem;"><label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;"><input type="checkbox" id="prodPremium" style="width:auto;"> Mettre en avant (Premium ⭐)</label></div>
+            <button type="submit" class="submit-btn" id="submitProdBtn">Publier le Produit</button>
+        </form>
     </div>
+</div>
 
-    <script>
-        const API_BASE_URL = 'https://web-production-8f94.up.railway.app';
-        let currentUser = null;
-        let token = null;
-        let base64Image = null;
+<!-- Modal Profil -->
+<div id="profileModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Modifier la Boutique</h2>
+            <button class="close-btn" onclick="closeProfileModal()">&times;</button>
+        </div>
+        <form id="profileForm" onsubmit="handleProfileSubmit(event)">
+            <div class="form-group"><label>Nom de la Boutique</label><input type="text" id="editShopName" required></div>
+            <div class="form-group"><label>Description (Bio)</label><textarea id="editShopDesc" rows="3"></textarea></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                <div class="form-group"><label>Numéro WhatsApp</label><input type="tel" id="editWhatsapp" placeholder="Ex: 70123456"></div>
+                <div class="form-group"><label>Numéro Orange Money</label><input type="tel" id="editOrangeMoney" placeholder="Ex: 70123456"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                <div class="form-group"><label>Email de Contact</label><input type="email" id="editEmailContact" placeholder="contact@maboutique.com"></div>
+                <div class="form-group"><label>Adresse Physique</label><input type="text" id="editAdresse" placeholder="Bamako, Mali"></div>
+            </div>
+            <div class="form-group">
+                <label>Logo de la Boutique</label>
+                <input type="file" id="editLogo" accept="image/*" onchange="previewProfileImage(event,'logoPreview')">
+                <div id="logoPreviewWrapper" style="margin-top:0.5rem;display:none;"><img id="logoPreview" src="" style="max-width:100px;max-height:100px;border-radius:8px;"></div>
+            </div>
+            <div class="form-group">
+                <label>Bannière de la Boutique</label>
+                <input type="file" id="editBanniere" accept="image/*" onchange="previewProfileImage(event,'bannerPreview')">
+                <div id="bannerPreviewWrapper" style="margin-top:0.5rem;display:none;"><img id="bannerPreview" src="" style="max-width:100%;height:100px;object-fit:cover;border-radius:8px;"></div>
+            </div>
+            <button type="submit" class="submit-btn" id="submitProfileBtn">Enregistrer les modifications</button>
+        </form>
+    </div>
+</div>
 
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', () => {
-            token = localStorage.getItem('token');
-            const userStr = localStorage.getItem('user');
-            
-            if (!token || !userStr) {
-                window.location.href = '/app/connexion.html';
-                return;
-            }
+<!-- Modal Détail Commande -->
+<div id="commandeDetailModal" class="modal">
+    <div class="modal-content" style="max-width:500px;">
+        <div class="modal-header">
+            <h2>📦 Détail Commande</h2>
+            <button class="close-btn" onclick="document.getElementById('commandeDetailModal').style.display='none'">&times;</button>
+        </div>
+        <div id="commandeDetailContent"></div>
+    </div>
+</div>
 
+<script>
+const API_BASE_URL = 'https://web-production-8f94.up.railway.app';
+let currentUser = null;
+let token = null;
+let base64Image = null;
+let allCommandes = [];
 
-            currentUser = JSON.parse(userStr);
-            if (currentUser.role !== 'vendeur') {
-                window.location.href = '/app/index.html';
-                return;
-            }
+document.addEventListener('DOMContentLoaded', () => {
+    token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
+    if (!token || !userStr) { window.location.href = '/app/connexion.html'; return; }
+    currentUser = JSON.parse(userStr);
+    if (currentUser.role !== 'vendeur') { window.location.href = '/app/index.html'; return; }
+    document.getElementById('vendor-name-header').textContent = currentUser.nom;
+    loadDashboardCategories();
+    loadVendorProfile();
+    loadProducts();
+    loadDeliveries();
+    loadCommandes();
+});
 
+function showSection(event, sectionId) {
+    if (event) event.preventDefault();
+    document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
+    const target = document.getElementById(`section-${sectionId}`);
+    if (target) target.classList.remove('hidden');
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    if (event && event.currentTarget) event.currentTarget.classList.add('active');
+}
 
-            document.getElementById('vendor-name-header').textContent = currentUser.nom;
-            loadDashboardCategories();
-            loadVendorProfile();
-            loadProducts();
-            loadDeliveries();
-        });
+function handleLogout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/app/connexion.html';
+}
 
-        // Navigation
-        function showSection(event, sectionId) {
-            if (event) event.preventDefault();
-            document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
-            const target = document.getElementById(`section-${sectionId}`);
-            if (target) target.classList.remove('hidden');
-            
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            if (event && event.currentTarget) {
-                event.currentTarget.classList.add('active');
-            }
-        }
+function openModal(isEdit = false) {
+    document.getElementById('productModal').style.display = 'flex';
+    if (!isEdit) {
+        document.getElementById('modalTitle').textContent = 'Ajouter un Nouveau Produit';
+        document.getElementById('prodId').value = '';
+        document.getElementById('productForm').reset();
+        document.getElementById('imagePreview').style.display = 'none';
+        base64Image = null;
+        document.getElementById('prodImage').required = true;
+    }
+}
+function closeModal() { document.getElementById('productModal').style.display = 'none'; }
+function openProfileModal() { document.getElementById('profileModal').style.display = 'flex'; }
+function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
 
-
-        // Logout
-        function handleLogout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '/app/connexion.html';
-        }
-
-
-        // Modal
-        function openModal(isEdit = false) { 
-            document.getElementById('productModal').style.display = 'flex'; 
-            if (!isEdit) {
-                document.getElementById('modalTitle').textContent = 'Ajouter un Nouveau Produit';
-                document.getElementById('prodId').value = '';
-                document.getElementById('productForm').reset();
-                document.getElementById('imagePreview').style.display = 'none';
-                base64Image = null;
-                document.getElementById('prodImage').required = true;
-                document.getElementById('delivHand').checked = false;
-                document.getElementById('delivMoto').checked = false;
-                document.getElementById('delivMotoPrice').value = '';
-                document.getElementById('delivTaxi').checked = false;
-                document.getElementById('delivTaxiPrice').value = '';
-                document.getElementById('delivRelais').checked = false;
-                document.getElementById('delivRelaisPrice').value = '';
-            }
-        }
-        function closeModal() { document.getElementById('productModal').style.display = 'none'; }
-
-        // Preview Image
-        function previewImage(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    base64Image = e.target.result;
-                    const preview = document.getElementById('imagePreview');
-                    preview.style.display = 'block';
-                    preview.querySelector('img').src = base64Image;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        // Charger les catégories dynamiquement
-        async function loadDashboardCategories() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/categories`);
-                const categories = await response.json();
-                const select = document.getElementById('prodCategory');
-                if (!select || !categories) return;
-                
-                categories.forEach(cat => {
-                    const option = document.createElement('option');
-                    option.value = cat.slug;
-                    option.textContent = `${cat.icone} ${cat.nom}`;
-                    select.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Erreur chargement catégories:', error);
-            }
-        }
-
-        // Charger Profil
-        async function loadVendorProfile() {
-            document.getElementById('profile-full-name').textContent = currentUser.prenom + ' ' + currentUser.nom;
-            
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/vendeurs/me`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (response.ok) {
-                    const myShop = await response.json();
-                    document.getElementById('profile-shop-name').textContent = myShop.nom_boutique || 'Ma Boutique';
-                    document.getElementById('profile-desc').textContent = myShop.description_boutique || 'Pas de description';
-                    document.getElementById('profile-phone').textContent = myShop.whatsapp || currentUser.telephone;
-                    document.getElementById('profile-email').textContent = myShop.email_contact || currentUser.email || 'Non renseigné';
-                    
-                    // Populate modal form
-                    document.getElementById('editShopName').value = myShop.nom_boutique || '';
-                    document.getElementById('editShopDesc').value = myShop.description_boutique || '';
-                    document.getElementById('editWhatsapp').value = myShop.whatsapp || '';
-                    document.getElementById('editOrangeMoney').value = myShop.orange_money || '';
-                    document.getElementById('editEmailContact').value = myShop.email_contact || '';
-                    document.getElementById('editAdresse').value = myShop.adresse || '';
-                }
-            } catch (e) {
-                console.error('Erreur chargement profil vendeur:', e);
-            }
-        }
-
-        let profileImages = { logo: null, banniere: null };
-
-        function openProfileModal() { document.getElementById('profileModal').style.display = 'flex'; }
-        function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
-
-        function previewProfileImage(event, previewId) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const base64 = e.target.result;
-                    if (previewId === 'logoPreview') profileImages.logo = base64;
-                    if (previewId === 'bannerPreview') profileImages.banniere = base64;
-                    const preview = document.getElementById(previewId);
-                    preview.src = base64;
-                    document.getElementById(previewId + 'Wrapper').style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        async function handleProfileSubmit(event) {
-            event.preventDefault();
-            const btn = document.getElementById('submitProfileBtn');
-            btn.disabled = true;
-            btn.textContent = 'Enregistrement en cours...';
-
-            const payload = {
-                nom_boutique: document.getElementById('editShopName').value,
-                description_boutique: document.getElementById('editShopDesc').value,
-                whatsapp: document.getElementById('editWhatsapp').value,
-                orange_money: document.getElementById('editOrangeMoney').value,
-                email_contact: document.getElementById('editEmailContact').value,
-                adresse: document.getElementById('editAdresse').value
-            };
-            if (profileImages.logo) payload.logo = profileImages.logo;
-            if (profileImages.banniere) payload.banniere = profileImages.banniere;
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/vendeurs/profil`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (response.ok) {
-                    alert('Profil mis à jour avec succès !');
-                    closeProfileModal();
-                    loadVendorProfile();
-                } else {
-                    const err = await response.json();
-                    alert('Erreur: ' + (err.detail || 'Impossible d\'enregistrer'));
-                }
-            } catch (error) {
-                alert('Erreur de connexion');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Enregistrer les modifications';
-            }
-        }
-
-        // Charger Produits
-        async function loadProducts() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/produits?limit=100`);
-                const data = await response.json();
-                
-                // On filtre les produits par vendeur si possible
-                // Ici on simule car le backend retourne tous les produits
-                const myProducts = data.produits; 
-                
-                document.getElementById('stat-total-products').textContent = myProducts.length;
-                
-                renderTable('recent-products-table', myProducts.slice(0, 5));
-                renderTable('all-products-table', myProducts);
-            } catch (error) {
-                console.error('Erreur chargement produits:', error);
-            }
-        }
-
-        function renderTable(tableId, products) {
-            const tbody = document.querySelector(`#${tableId} tbody`);
-            tbody.innerHTML = '';
-            
-            products.forEach(p => {
-                const validImages = (p.images || []).filter(img => img && img.trim());
-                const imageUrl = validImages.length > 0 ? validImages[0] : 'https://placehold.co/150x150?text=No+Image';
-                const tr = document.createElement('tr');
-                const isAllTable = tableId.includes('all');
-                tr.innerHTML = `
-                    <td><img src="${imageUrl}" class="prod-img" onerror="this.src='https://placehold.co/150x150?text=Error'"></td>
-
-                    <td><strong>${p.nom}</strong></td>
-                    <td class="text-success"><strong>${p.prix.toLocaleString()} FCFA</strong></td>
-                    <td><span class="badge badge-warning">${p.categorie}</span></td>
-                    <td>${isAllTable ? (p.stock || 1) : new Date(p.date_creation).toLocaleDateString()}</td>
-                    ${isAllTable ? `
-                    <td>
-                        <button class="nav-btn primary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; min-width: auto;" onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&apos;")})'>✏️</button>
-                        <button class="nav-btn" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; background: #ffebee; color: #c62828; min-width: auto; border: none;" onclick="deleteProduct('${p.id}', '${p.nom.replace(/'/g, "\\'")}')">🗑️</button>
-                    </td>
-                    ` : ''}
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-
-        // Submit Produit
-        async function handleProductSubmit(event) {
-            event.preventDefault();
-            const btn = document.getElementById('submitProdBtn');
-            btn.disabled = true;
-            btn.textContent = 'Enregistrement en cours...';
-
-            const prodId = document.getElementById('prodId').value;
-            const isEdit = !!prodId;
-
-            const methodes_livraison = [];
-            if (document.getElementById('delivHand').checked) {
-                methodes_livraison.push({nom: 'Remise en main propre', prix: 0});
-            }
-            if (document.getElementById('delivMoto').checked) {
-                methodes_livraison.push({nom: 'Moto-taxi', prix: parseInt(document.getElementById('delivMotoPrice').value) || 0});
-            }
-            if (document.getElementById('delivTaxi').checked) {
-                methodes_livraison.push({nom: 'Taxi', prix: parseInt(document.getElementById('delivTaxiPrice').value) || 0});
-            }
-            if (document.getElementById('delivRelais').checked) {
-                methodes_livraison.push({nom: 'Point Relais', prix: parseInt(document.getElementById('delivRelaisPrice').value) || 0});
-            }
-
-            const payload = {
-                nom: document.getElementById('prodName').value,
-                description: document.getElementById('prodDesc').value,
-                prix: parseInt(document.getElementById('prodPrice').value),
-                categorie: document.getElementById('prodCategory').value,
-                stock: parseInt(document.getElementById('prodStock').value),
-                est_premium: document.getElementById('prodPremium').checked,
-                methodes_livraison: methodes_livraison
-            };
-
-            if (base64Image) {
-                payload.images = [base64Image];
-            }
-
-            try {
-                const url = isEdit ? `${API_BASE_URL}/api/produits/${prodId}` : `${API_BASE_URL}/api/produits`;
-                const method = isEdit ? 'PUT' : 'POST';
-
-                const response = await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (response.ok) {
-                    alert(isEdit ? 'Produit modifié avec succès !' : 'Produit publié avec succès !');
-                    closeModal();
-                    document.getElementById('productForm').reset();
-                    document.getElementById('imagePreview').style.display = 'none';
-                    base64Image = null;
-                    loadProducts();
-                } else {
-                    const err = await response.json();
-                    alert('Erreur: ' + (err.detail || 'Impossible d\'enregistrer'));
-                }
-            } catch (error) {
-                console.error(error);
-                alert('Erreur de connexion au serveur');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Publier le Produit';
-            }
-        }
-
-        // Edit Product
-        function editProduct(product) {
-            document.getElementById('modalTitle').textContent = 'Modifier le Produit';
-            document.getElementById('prodId').value = product.id;
-            document.getElementById('prodName').value = product.nom;
-            document.getElementById('prodPrice').value = product.prix;
-            document.getElementById('prodCategory').value = product.categorie;
-            document.getElementById('prodStock').value = product.stock || 1;
-            document.getElementById('prodDesc').value = product.description || '';
-            document.getElementById('prodPremium').checked = product.est_premium || false;
-            
-            // Populer methodes livraison
-            document.getElementById('delivHand').checked = false;
-            document.getElementById('delivMoto').checked = false;
-            document.getElementById('delivMotoPrice').value = '';
-            document.getElementById('delivTaxi').checked = false;
-            document.getElementById('delivTaxiPrice').value = '';
-            document.getElementById('delivRelais').checked = false;
-            document.getElementById('delivRelaisPrice').value = '';
-
-            if (product.methodes_livraison) {
-                product.methodes_livraison.forEach(m => {
-                    if (m.nom === 'Remise en main propre') document.getElementById('delivHand').checked = true;
-                    if (m.nom === 'Moto-taxi') {
-                        document.getElementById('delivMoto').checked = true;
-                        document.getElementById('delivMotoPrice').value = m.prix;
-                    }
-                    if (m.nom === 'Taxi') {
-                        document.getElementById('delivTaxi').checked = true;
-                        document.getElementById('delivTaxiPrice').value = m.prix;
-                    }
-                    if (m.nom === 'Point Relais') {
-                        document.getElementById('delivRelais').checked = true;
-                        document.getElementById('delivRelaisPrice').value = m.prix;
-                    }
-                });
-            }
-
-            document.getElementById('prodImage').required = false;
-
+function previewImage(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            base64Image = e.target.result;
             const preview = document.getElementById('imagePreview');
-            base64Image = null; // On ne renvoie pas l'image existante si elle n'est pas modifiée
-            
-            const validImages = (product.images || []).filter(img => img && img.trim());
-            if (validImages.length > 0) {
-                preview.style.display = 'block';
-                preview.querySelector('img').src = validImages[0];
-            } else {
-                preview.style.display = 'none';
-                preview.querySelector('img').src = '';
-            }
+            preview.style.display = 'block';
+            preview.querySelector('img').src = base64Image;
+        };
+        reader.readAsDataURL(file);
+    }
+}
 
-            openModal(true);
+async function loadDashboardCategories() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/categories`);
+        const categories = await response.json();
+        const select = document.getElementById('prodCategory');
+        if (!select || !categories) return;
+        categories.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat.slug;
+            option.textContent = `${cat.icone} ${cat.nom}`;
+            select.appendChild(option);
+        });
+    } catch (e) { console.error(e); }
+}
+
+async function loadVendorProfile() {
+    document.getElementById('profile-full-name').textContent = currentUser.prenom + ' ' + currentUser.nom;
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/vendeurs/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+            const myShop = await response.json();
+            document.getElementById('profile-shop-name').textContent = myShop.nom_boutique || 'Ma Boutique';
+            document.getElementById('profile-desc').textContent = myShop.description_boutique || 'Pas de description';
+            document.getElementById('profile-phone').textContent = myShop.whatsapp || currentUser.telephone;
+            document.getElementById('profile-email').textContent = myShop.email_contact || currentUser.email || 'Non renseigné';
+            document.getElementById('editShopName').value = myShop.nom_boutique || '';
+            document.getElementById('editShopDesc').value = myShop.description_boutique || '';
+            document.getElementById('editWhatsapp').value = myShop.whatsapp || '';
+            document.getElementById('editOrangeMoney').value = myShop.orange_money || '';
+            document.getElementById('editEmailContact').value = myShop.email_contact || '';
+            document.getElementById('editAdresse').value = myShop.adresse || '';
         }
+    } catch (e) { console.error(e); }
+}
 
-        // Delete Product
-        async function deleteProduct(id, nom) {
-            if (!confirm(`Voulez-vous vraiment supprimer le produit "${nom}" ?`)) return;
+let profileImages = { logo: null, banniere: null };
 
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/produits/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
+function previewProfileImage(event, previewId) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const base64 = e.target.result;
+            if (previewId === 'logoPreview') profileImages.logo = base64;
+            if (previewId === 'bannerPreview') profileImages.banniere = base64;
+            document.getElementById(previewId).src = base64;
+            document.getElementById(previewId + 'Wrapper').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+}
 
-                if (response.ok) {
-                    alert('Produit supprimé avec succès');
-                    loadProducts();
-                } else {
-                    const err = await response.json();
-                    alert('Erreur: ' + (err.detail || 'Impossible de supprimer'));
-                }
-            } catch (error) {
-                console.error(error);
-                alert('Erreur de connexion au serveur');
-            }
+async function handleProfileSubmit(event) {
+    event.preventDefault();
+    const btn = document.getElementById('submitProfileBtn');
+    btn.disabled = true; btn.textContent = 'Enregistrement...';
+    const payload = {
+        nom_boutique: document.getElementById('editShopName').value,
+        description_boutique: document.getElementById('editShopDesc').value,
+        whatsapp: document.getElementById('editWhatsapp').value,
+        orange_money: document.getElementById('editOrangeMoney').value,
+        email_contact: document.getElementById('editEmailContact').value,
+        adresse: document.getElementById('editAdresse').value
+    };
+    if (profileImages.logo) payload.logo = profileImages.logo;
+    if (profileImages.banniere) payload.banniere = profileImages.banniere;
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/vendeurs/profil`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(payload)
+        });
+        if (response.ok) { alert('Profil mis à jour !'); closeProfileModal(); loadVendorProfile(); }
+        else { const err = await response.json(); alert('Erreur: ' + (err.detail || 'Impossible')); }
+    } catch (e) { alert('Erreur de connexion'); }
+    finally { btn.disabled = false; btn.textContent = 'Enregistrer les modifications'; }
+}
+
+async function loadProducts() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/produits?limit=100`);
+        const data = await response.json();
+        const myProducts = data.produits;
+        document.getElementById('stat-total-products').textContent = myProducts.length;
+        renderTable('recent-products-table', myProducts.slice(0, 5));
+        renderTable('all-products-table', myProducts);
+    } catch (e) { console.error(e); }
+}
+
+function renderTable(tableId, products) {
+    const tbody = document.querySelector(`#${tableId} tbody`);
+    tbody.innerHTML = '';
+    products.forEach(p => {
+        const validImages = (p.images || []).filter(img => img && img.trim());
+        const imageUrl = validImages.length > 0 ? validImages[0] : 'https://placehold.co/150x150?text=No+Image';
+        const tr = document.createElement('tr');
+        const isAllTable = tableId.includes('all');
+        tr.innerHTML = `
+            <td><img src="${imageUrl}" class="prod-img" onerror="this.src='https://placehold.co/150x150?text=Error'"></td>
+            <td><strong>${p.nom}</strong></td>
+            <td class="text-success"><strong>${p.prix.toLocaleString()} FCFA</strong></td>
+            <td><span class="badge badge-warning">${p.categorie}</span></td>
+            <td>${isAllTable ? (p.stock || 1) : new Date(p.date_creation).toLocaleDateString()}</td>
+            ${isAllTable ? `<td>
+                <button class="nav-btn primary" style="padding:0.3rem 0.6rem;font-size:0.8rem;min-width:auto;" onclick='editProduct(${JSON.stringify(p).replace(/'/g,"&apos;")})'>✏️</button>
+                <button class="nav-btn" style="padding:0.3rem 0.6rem;font-size:0.8rem;background:#ffebee;color:#c62828;min-width:auto;border:none;" onclick="deleteProduct('${p.id}','${p.nom.replace(/'/g,"\\'")}')">🗑️</button>
+            </td>` : ''}
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+async function handleProductSubmit(event) {
+    event.preventDefault();
+    const btn = document.getElementById('submitProdBtn');
+    btn.disabled = true; btn.textContent = 'Enregistrement...';
+    const prodId = document.getElementById('prodId').value;
+    const isEdit = !!prodId;
+    const methodes_livraison = [];
+    if (document.getElementById('delivHand').checked) methodes_livraison.push({nom:'Remise en main propre',prix:0});
+    if (document.getElementById('delivMoto').checked) methodes_livraison.push({nom:'Moto-taxi',prix:parseInt(document.getElementById('delivMotoPrice').value)||0});
+    if (document.getElementById('delivTaxi').checked) methodes_livraison.push({nom:'Taxi',prix:parseInt(document.getElementById('delivTaxiPrice').value)||0});
+    if (document.getElementById('delivRelais').checked) methodes_livraison.push({nom:'Point Relais',prix:parseInt(document.getElementById('delivRelaisPrice').value)||0});
+    const payload = {
+        nom: document.getElementById('prodName').value,
+        description: document.getElementById('prodDesc').value,
+        prix: parseInt(document.getElementById('prodPrice').value),
+        categorie: document.getElementById('prodCategory').value,
+        stock: parseInt(document.getElementById('prodStock').value),
+        est_premium: document.getElementById('prodPremium').checked,
+        methodes_livraison
+    };
+    if (base64Image) payload.images = [base64Image];
+    try {
+        const url = isEdit ? `${API_BASE_URL}/api/produits/${prodId}` : `${API_BASE_URL}/api/produits`;
+        const response = await fetch(url, {
+            method: isEdit ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(payload)
+        });
+        if (response.ok) { alert(isEdit ? 'Produit modifié !' : 'Produit publié !'); closeModal(); loadProducts(); }
+        else { const err = await response.json(); alert('Erreur: ' + (err.detail || 'Impossible')); }
+    } catch (e) { alert('Erreur de connexion'); }
+    finally { btn.disabled = false; btn.textContent = 'Publier le Produit'; }
+}
+
+function editProduct(product) {
+    document.getElementById('modalTitle').textContent = 'Modifier le Produit';
+    document.getElementById('prodId').value = product.id;
+    document.getElementById('prodName').value = product.nom;
+    document.getElementById('prodPrice').value = product.prix;
+    document.getElementById('prodCategory').value = product.categorie;
+    document.getElementById('prodStock').value = product.stock || 1;
+    document.getElementById('prodDesc').value = product.description || '';
+    document.getElementById('prodPremium').checked = product.est_premium || false;
+    ['delivHand','delivMoto','delivTaxi','delivRelais'].forEach(id => document.getElementById(id).checked = false);
+    ['delivMotoPrice','delivTaxiPrice','delivRelaisPrice'].forEach(id => document.getElementById(id).value = '');
+    if (product.methodes_livraison) {
+        product.methodes_livraison.forEach(m => {
+            if (m.nom === 'Remise en main propre') document.getElementById('delivHand').checked = true;
+            if (m.nom === 'Moto-taxi') { document.getElementById('delivMoto').checked = true; document.getElementById('delivMotoPrice').value = m.prix; }
+            if (m.nom === 'Taxi') { document.getElementById('delivTaxi').checked = true; document.getElementById('delivTaxiPrice').value = m.prix; }
+            if (m.nom === 'Point Relais') { document.getElementById('delivRelais').checked = true; document.getElementById('delivRelaisPrice').value = m.prix; }
+        });
+    }
+    document.getElementById('prodImage').required = false;
+    base64Image = null;
+    const validImages = (product.images || []).filter(img => img && img.trim());
+    const preview = document.getElementById('imagePreview');
+    if (validImages.length > 0) { preview.style.display = 'block'; preview.querySelector('img').src = validImages[0]; }
+    else { preview.style.display = 'none'; }
+    openModal(true);
+}
+
+async function deleteProduct(id, nom) {
+    if (!confirm(`Supprimer "${nom}" ?`)) return;
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/produits/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) { alert('Produit supprimé'); loadProducts(); }
+        else { const err = await response.json(); alert('Erreur: ' + (err.detail || 'Impossible')); }
+    } catch (e) { alert('Erreur de connexion'); }
+}
+
+// ==================== COMMANDES ====================
+
+const STATUT_LABELS = {
+    'nouvelle': '📦 Nouvelle',
+    'confirmee': '✅ Confirmée',
+    'en_preparation': '🔧 En préparation',
+    'expedie': '🚚 Expédiée',
+    'livre': '🎉 Livrée',
+    'annulee': '❌ Annulée'
+};
+
+async function loadCommandes() {
+    const container = document.getElementById('commandes-container');
+    container.innerHTML = '<div class="content-card" style="text-align:center;padding:2rem;"><p>Chargement...</p></div>';
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/vendeurs/mes-commandes`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Erreur API');
+        const data = await response.json();
+        allCommandes = data.commandes || [];
+
+        // Mettre à jour stats
+        document.getElementById('stat-total-commandes').textContent = allCommandes.length;
+        const nouvelles = allCommandes.filter(c => c.statut === 'nouvelle').length;
+        document.getElementById('stat-nouvelles-commandes').textContent = nouvelles;
+
+        // Badge sidebar
+        const badge = document.getElementById('badge-commandes');
+        if (nouvelles > 0) { badge.textContent = nouvelles; badge.style.display = 'flex'; }
+        else { badge.style.display = 'none'; }
+
+        renderCommandes(allCommandes);
+    } catch (e) {
+        container.innerHTML = '<div class="content-card" style="text-align:center;padding:2rem;"><p>❌ Erreur de chargement</p></div>';
+    }
+}
+
+function filterCommandes() {
+    const filtre = document.getElementById('filtreStatut').value;
+    const filtered = filtre ? allCommandes.filter(c => c.statut === filtre) : allCommandes;
+    renderCommandes(filtered);
+}
+
+function renderCommandes(commandes) {
+    const container = document.getElementById('commandes-container');
+    if (!commandes.length) {
+        container.innerHTML = '<div class="content-card" style="text-align:center;padding:3rem;"><p>Aucune commande trouvée</p></div>';
+        return;
+    }
+    let html = '<div class="content-card"><div class="table-responsive"><table><thead><tr><th>Référence</th><th>Client</th><th>Produit</th><th>Montant</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead><tbody>';
+    commandes.forEach(c => {
+        const date = new Date(c.date_commande).toLocaleDateString('fr-FR');
+        const statutClass = `cmd-${c.statut}`;
+        html += `
+        <tr>
+            <td><strong style="font-family:monospace;font-size:0.85rem;">${c.reference}</strong></td>
+            <td>
+                <div style="font-weight:600;">${c.client_nom}</div>
+                <div style="font-size:0.8rem;color:var(--text-gray);">📱 ${c.client_telephone}</div>
+            </td>
+            <td>${c.produit_nom}</td>
+            <td style="font-weight:700;color:#1565C0;">${c.montant_total.toLocaleString()} FCFA</td>
+            <td style="font-size:0.85rem;">${date}</td>
+            <td>
+                <select onchange="updateCommandeStatut('${c.id}', this.value)" style="padding:4px;border-radius:4px;border:1px solid #ddd;font-size:0.8rem;">
+                    <option value="nouvelle" ${c.statut==='nouvelle'?'selected':''}>📦 Nouvelle</option>
+                    <option value="confirmee" ${c.statut==='confirmee'?'selected':''}>✅ Confirmée</option>
+                    <option value="en_preparation" ${c.statut==='en_preparation'?'selected':''}>🔧 En préparation</option>
+                    <option value="expedie" ${c.statut==='expedie'?'selected':''}>🚚 Expédiée</option>
+                    <option value="livre" ${c.statut==='livre'?'selected':''}>🎉 Livrée</option>
+                    <option value="annulee" ${c.statut==='annulee'?'selected':''}>❌ Annulée</option>
+                </select>
+            </td>
+            <td>
+                <button onclick="voirDetailCommande('${c.id}')" style="padding:4px 10px;background:#E3F2FD;color:#1565C0;border:none;border-radius:4px;cursor:pointer;font-size:0.8rem;">👁️ Détail</button>
+            </td>
+        </tr>`;
+    });
+    html += '</tbody></table></div></div>';
+    container.innerHTML = html;
+}
+
+async function updateCommandeStatut(commandeId, statut) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/commandes/${commandeId}/statut`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ statut })
+        });
+        if (response.ok) {
+            // Mettre à jour localement
+            const cmd = allCommandes.find(c => c.id === commandeId);
+            if (cmd) cmd.statut = statut;
+            // Recalculer stats
+            const nouvelles = allCommandes.filter(c => c.statut === 'nouvelle').length;
+            document.getElementById('stat-nouvelles-commandes').textContent = nouvelles;
+            const badge = document.getElementById('badge-commandes');
+            if (nouvelles > 0) { badge.textContent = nouvelles; badge.style.display = 'flex'; }
+            else { badge.style.display = 'none'; }
+        } else {
+            alert('Erreur lors de la mise à jour');
+            loadCommandes();
         }
+    } catch (e) { console.error(e); }
+}
 
-        // Deliveries
-        async function loadDeliveries() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/ventes/historique`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await response.json();
-                
-                const tbody = document.querySelector('#deliveries-table tbody');
-                tbody.innerHTML = '';
-                
-                data.ventes.forEach(v => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td><strong>${v.produit_nom || v.produit_id.substring(0,8)}</strong></td>
-                        <td>${v.acheteur_telephone}</td>
-                        <td style="font-weight:600;">${v.montant_net.toLocaleString()} FCFA</td>
-                        <td>${v.methode_livraison || 'Non spécifié'}</td>
-                        <td>${v.frais_livraison > 0 ? v.frais_livraison + ' FCFA' : 'Gratuit'}</td>
-                        <td>${new Date(v.date).toLocaleDateString()}</td>
-                        <td>
-                            <select onchange="updateDeliveryStatus('${v.id}', this.value)" style="padding:4px 2px; border-radius:4px; border:1px solid #ddd; font-size:0.8rem;">
-                                <option value="en_attente" ${v.statut_livraison === 'en_attente' ? 'selected' : ''}>⏳ En attente</option>
-                                <option value="paiement_confirme" ${v.statut_livraison === 'paiement_confirme' ? 'selected' : ''}>💰 Paiement confirmé</option>
-                                <option value="preparation_colis" ${v.statut_livraison === 'preparation_colis' ? 'selected' : ''}>📦 Préparation</option>
-                                <option value="envoi_colis" ${v.statut_livraison === 'envoi_colis' ? 'selected' : ''}>🚚 Envoi colis</option>
-                                <option value="livre" ${v.statut_livraison === 'livre' ? 'selected' : ''}>✅ Livré</option>
-                            </select>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            } catch (e) {
-                console.error("Erreur chargement livraisons:", e);
-            }
-        }
+function voirDetailCommande(commandeId) {
+    const cmd = allCommandes.find(c => c.id === commandeId);
+    if (!cmd) return;
+    const historique = (cmd.historique || []).map(h =>
+        `<div style="display:flex;gap:0.5rem;align-items:center;padding:0.4rem 0;border-bottom:1px solid #f0f0f0;">
+            <span>${h.label || h.statut}</span>
+            <span style="margin-left:auto;font-size:0.8rem;color:var(--text-gray);">${new Date(h.date).toLocaleString('fr-FR')}</span>
+        </div>`
+    ).join('');
 
-        async function updateDeliveryStatus(venteId, statut) {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/ventes/${venteId}/livraison`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ statut })
-                });
-                if (!response.ok) {
-                    alert("Erreur lors de la mise à jour");
-                }
-            } catch (e) {
-                console.error(e);
-            }
-        }
-    </script>
+    document.getElementById('commandeDetailContent').innerHTML = `
+        <div style="display:grid;gap:1rem;">
+            <div style="background:#f8f9fa;padding:1rem;border-radius:8px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+                    <span style="font-weight:600;">Référence</span>
+                    <span style="font-family:monospace;color:#1565C0;font-weight:700;">${cmd.reference}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+                    <span style="font-weight:600;">Produit</span>
+                    <span>${cmd.produit_nom}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+                    <span style="font-weight:600;">Montant</span>
+                    <span style="font-weight:700;color:#1565C0;">${cmd.montant_total.toLocaleString()} FCFA</span>
+                </div>
+            </div>
+            <div style="background:#f8f9fa;padding:1rem;border-radius:8px;">
+                <h4 style="margin-bottom:0.5rem;">👤 Client</h4>
+                <div><strong>Nom :</strong> ${cmd.client_nom}</div>
+                <div><strong>WhatsApp :</strong> <a href="https://wa.me/223${cmd.client_telephone}" target="_blank" style="color:#25D366;">📱 ${cmd.client_telephone}</a></div>
+                <div><strong>Adresse :</strong> ${cmd.adresse_livraison || 'Non précisée'}</div>
+                ${cmd.message ? `<div><strong>Message :</strong> ${cmd.message}</div>` : ''}
+            </div>
+            ${historique ? `<div><h4 style="margin-bottom:0.5rem;">📋 Historique</h4>${historique}</div>` : ''}
+            <a href="https://wa.me/223${cmd.client_telephone}?text=Bonjour%20${cmd.client_nom},%20votre%20commande%20${cmd.reference}%20est%20en%20cours%20de%20traitement%20sur%20APHRIKE%20JULA." target="_blank" style="display:block;text-align:center;background:#25D366;color:white;padding:12px;border-radius:100px;text-decoration:none;font-weight:600;">
+                📱 Contacter le client sur WhatsApp
+            </a>
+        </div>
+    `;
+    document.getElementById('commandeDetailModal').style.display = 'flex';
+}
+
+// ==================== LIVRAISONS ====================
+async function loadDeliveries() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/ventes/historique`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        const tbody = document.querySelector('#deliveries-table tbody');
+        tbody.innerHTML = '';
+        data.ventes.forEach(v => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${v.produit_nom || v.produit_id.substring(0,8)}</strong></td>
+                <td>${v.acheteur_telephone}</td>
+                <td style="font-weight:600;">${v.montant_net.toLocaleString()} FCFA</td>
+                <td>${v.methode_livraison || 'Non spécifié'}</td>
+                <td>${v.frais_livraison > 0 ? v.frais_livraison + ' FCFA' : 'Gratuit'}</td>
+                <td>${new Date(v.date).toLocaleDateString()}</td>
+                <td>
+                    <select onchange="updateDeliveryStatus('${v.id}', this.value)" style="padding:4px 2px;border-radius:4px;border:1px solid #ddd;font-size:0.8rem;">
+                        <option value="en_attente" ${v.statut_livraison==='en_attente'?'selected':''}>⏳ En attente</option>
+                        <option value="paiement_confirme" ${v.statut_livraison==='paiement_confirme'?'selected':''}>💰 Paiement confirmé</option>
+                        <option value="preparation_colis" ${v.statut_livraison==='preparation_colis'?'selected':''}>📦 Préparation</option>
+                        <option value="envoi_colis" ${v.statut_livraison==='envoi_colis'?'selected':''}>🚚 Envoi colis</option>
+                        <option value="livre" ${v.statut_livraison==='livre'?'selected':''}>✅ Livré</option>
+                    </select>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (e) { console.error(e); }
+}
+
+async function updateDeliveryStatus(venteId, statut) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/ventes/${venteId}/livraison`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ statut })
+        });
+        if (!response.ok) alert('Erreur lors de la mise à jour');
+    } catch (e) { console.error(e); }
+}
+</script>
 </body>
 </html>
