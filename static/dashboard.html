@@ -21,10 +21,9 @@
         .dashboard-header-banner h1 { color: #fff; font-size: 1.6rem; font-weight: 700; margin: 0; }
         .dashboard-header-banner p { color: rgba(255,255,255,0.75); font-size: 0.95rem; margin: 0.35rem 0 0; }
         .dashboard-header-banner .add-product-btn { padding: 0.7rem 1.5rem; border-radius: 100px; font-size: 0.95rem; font-weight: 700; border: none; cursor: pointer; background: #FFD700; color: #1a3c8f; transition: background 0.2s, transform 0.15s; white-space: nowrap; }
-        .dashboard-header-banner .add-product-btn:hover { background: #ffca00; transform: translateY(-1px); }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-md); margin-bottom: var(--spacing-xl); }
-        .stat-card { background: white; padding: 1.25rem 1.5rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 1rem; border-left: 4px solid #1565C0; transition: transform 0.2s, box-shadow 0.2s; }
-        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+        .stat-card { background: white; padding: 1.25rem 1.5rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 1rem; border-left: 4px solid #1565C0; transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); }
         .stat-card:nth-child(2) { border-left-color: #FFD700; }
         .stat-card:nth-child(3) { border-left-color: #FF6B35; }
         .stat-card:nth-child(4) { border-left-color: #00B074; }
@@ -45,14 +44,11 @@
         .badge { padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: 0.8rem; font-weight: 700; }
         .badge-success { background: #EFE; color: #080; }
         .badge-warning { background: #FFF5E6; color: #D60; }
-        .badge-info { background: #E3F2FD; color: #1565C0; }
-        .badge-orange { background: #FFF3E0; color: #E65100; }
-        .badge-new { background: #FCE4EC; color: #C62828; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
         .modal-content { background: white; padding: var(--spacing-xl); border-radius: var(--radius-lg); width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
         .form-group { margin-bottom: var(--spacing-md); }
         .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.75rem; border: 2px solid var(--border-gray); border-radius: var(--radius-sm); font-size: 1rem; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.75rem; border: 2px solid var(--border-gray); border-radius: var(--radius-sm); font-size: 1rem; box-sizing: border-box; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg); }
         .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-gray); }
         .profile-info { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg); }
@@ -60,16 +56,70 @@
         .info-label { color: var(--text-gray); font-size: 0.85rem; margin-bottom: 0.25rem; }
         .info-value { font-weight: 600; font-size: 1.1rem; }
 
+        /* Multi-photo styles */
+        .photo-upload-zone {
+            border: 2px dashed #1565C0;
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            background: #f8f9ff;
+            transition: background 0.2s;
+        }
+        .photo-upload-zone:hover { background: #e8f0fe; }
+        .photo-upload-zone input { display: none; }
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .photo-item {
+            position: relative;
+            aspect-ratio: 1;
+        }
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid #e0e0e0;
+        }
+        .photo-item .remove-photo {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #c62828;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        .photo-counter {
+            font-size: 0.85rem;
+            color: var(--text-gray);
+            margin-top: 0.5rem;
+        }
+        .photo-limit-warning {
+            color: #E65100;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
         /* Commandes styles */
-        .cmd-statut { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
         .cmd-nouvelle { background: #FCE4EC; color: #C62828; }
         .cmd-confirmee { background: #E8F5E9; color: #2E7D32; }
         .cmd-en_preparation { background: #FFF3E0; color: #E65100; }
         .cmd-expedie { background: #E3F2FD; color: #1565C0; }
         .cmd-livre { background: #E8F5E9; color: #1B5E20; }
         .cmd-annulee { background: #EEEEEE; color: #616161; }
-
-        .commande-detail-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
 
         @media (max-width: 1024px) {
             .sidebar { width: 80px; padding: var(--spacing-sm); }
@@ -83,15 +133,14 @@
             .main-content { margin-left: 0; padding: var(--spacing-sm); padding-bottom: 80px; }
             .profile-info { grid-template-columns: 1fr; }
             .dashboard-header-banner { padding: 1.25rem; flex-direction: column; align-items: flex-start; }
-            .dashboard-header-banner h1 { font-size: 1.2rem; }
             .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.75rem !important; }
             .stat-card { padding: 0.85rem; }
             .stat-number { font-size: 1.2rem; }
             .page-header { flex-direction: column; gap: 0.75rem; align-items: flex-start; }
-            .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .table-responsive { overflow-x: auto; }
             .table-responsive table { min-width: 550px; }
             .modal-content { max-height: 90vh; overflow-y: auto; margin: 1rem; width: calc(100% - 2rem) !important; max-width: 100% !important; }
-            .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border-gray); z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.08); }
+            .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border-gray); z-index: 100; }
             .mobile-bottom-nav a { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px 4px; text-decoration: none; color: var(--text-gray); font-size: 0.65rem; font-weight: 600; gap: 2px; }
             .mobile-bottom-nav a.active, .mobile-bottom-nav a:hover { color: var(--primary-green); }
             .mobile-bottom-nav a span:first-child { font-size: 1.25rem; }
@@ -101,7 +150,6 @@
 </head>
 <body>
 <div class="dashboard-layout">
-    <!-- Sidebar -->
     <aside class="sidebar">
         <div class="sidebar-brand">
             <a href="/app/index.html" class="logo" style="color:#1565C0;">
@@ -110,43 +158,23 @@
             </a>
         </div>
         <nav class="sidebar-nav">
-            <div class="nav-item">
-                <a href="#" class="nav-link active" onclick="showSection(event,'overview')">
-                    <span>📊</span> <span>Tableau de bord</span>
-                </a>
-            </div>
-            <div class="nav-item">
-                <a href="#" class="nav-link" onclick="showSection(event,'products')">
-                    <span>📦</span> <span>Mes Produits</span>
-                </a>
-            </div>
+            <div class="nav-item"><a href="#" class="nav-link active" onclick="showSection(event,'overview')"><span>📊</span> <span>Tableau de bord</span></a></div>
+            <div class="nav-item"><a href="#" class="nav-link" onclick="showSection(event,'products')"><span>📦</span> <span>Mes Produits</span></a></div>
             <div class="nav-item">
                 <a href="#" class="nav-link" onclick="showSection(event,'commandes'); loadCommandes();">
                     <span>🛒</span> <span>Mes Commandes</span>
-                    <span id="badge-commandes" style="display:none;background:#C62828;color:white;border-radius:50%;width:20px;height:20px;font-size:0.7rem;display:flex;align-items:center;justify-content:center;margin-left:auto;">0</span>
+                    <span id="badge-commandes" style="display:none;background:#C62828;color:white;border-radius:50%;width:20px;height:20px;font-size:0.7rem;margin-left:auto;align-items:center;justify-content:center;">0</span>
                 </a>
             </div>
-            <div class="nav-item">
-                <a href="#" class="nav-link" onclick="showSection(event,'profile')">
-                    <span>👤</span> <span>Mon Profil</span>
-                </a>
-            </div>
-            <div class="nav-item">
-                <a href="#" class="nav-link" onclick="showSection(event,'deliveries'); loadDeliveries();">
-                    <span>🚚</span> <span>Mes Livraisons</span>
-                </a>
-            </div>
+            <div class="nav-item"><a href="#" class="nav-link" onclick="showSection(event,'profile')"><span>👤</span> <span>Mon Profil</span></a></div>
+            <div class="nav-item"><a href="#" class="nav-link" onclick="showSection(event,'deliveries'); loadDeliveries();"><span>🚚</span> <span>Mes Livraisons</span></a></div>
         </nav>
         <div class="sidebar-footer">
-            <a href="#" class="nav-link" onclick="handleLogout()">
-                <span>🚪</span> <span>Déconnexion</span>
-            </a>
+            <a href="#" class="nav-link" onclick="handleLogout()"><span>🚪</span> <span>Déconnexion</span></a>
         </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="main-content">
-
         <!-- Overview -->
         <section id="section-overview">
             <div class="dashboard-header-banner">
@@ -157,34 +185,10 @@
                 <button class="add-product-btn" onclick="openModal()">+ Ajouter un Produit</button>
             </div>
             <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">📦</div>
-                    <div class="stat-text">
-                        <span class="stat-label">Total Produits</span>
-                        <span class="stat-number" id="stat-total-products">0</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">🛒</div>
-                    <div class="stat-text">
-                        <span class="stat-label">Commandes reçues</span>
-                        <span class="stat-number" id="stat-total-commandes">0</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">🔔</div>
-                    <div class="stat-text">
-                        <span class="stat-label">Nouvelles commandes</span>
-                        <span class="stat-number" id="stat-nouvelles-commandes">0</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">✅</div>
-                    <div class="stat-text">
-                        <span class="stat-label">Statut Compte</span>
-                        <span class="badge badge-success" id="vendor-status" style="width:fit-content;margin-top:0.25rem;">Actif</span>
-                    </div>
-                </div>
+                <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-text"><span class="stat-label">Total Produits</span><span class="stat-number" id="stat-total-products">0</span></div></div>
+                <div class="stat-card"><div class="stat-icon">🛒</div><div class="stat-text"><span class="stat-label">Commandes reçues</span><span class="stat-number" id="stat-total-commandes">0</span></div></div>
+                <div class="stat-card"><div class="stat-icon">🔔</div><div class="stat-text"><span class="stat-label">Nouvelles commandes</span><span class="stat-number" id="stat-nouvelles-commandes">0</span></div></div>
+                <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-text"><span class="stat-label">Statut Compte</span><span class="badge badge-success" id="vendor-status" style="width:fit-content;margin-top:0.25rem;">Actif</span></div></div>
             </div>
             <div class="content-card">
                 <h2 class="mb-2">Produits Récents</h2>
@@ -231,10 +235,7 @@
                 </div>
             </div>
             <div id="commandes-container">
-                <div class="content-card" style="text-align:center;padding:3rem;">
-                    <div class="spinner"></div>
-                    <p>Chargement des commandes...</p>
-                </div>
+                <div class="content-card" style="text-align:center;padding:3rem;"><p>Chargement...</p></div>
             </div>
         </section>
 
@@ -288,21 +289,30 @@
         </div>
         <form id="productForm" onsubmit="handleProductSubmit(event)">
             <input type="hidden" id="prodId" value="">
-            <div class="form-group"><label>Nom du produit</label><input type="text" id="prodName" required placeholder="Ex: Bazin Riche Getzner"></div>
-            <div class="form-group"><label>Prix (FCFA)</label><input type="number" id="prodPrice" required placeholder="Ex: 25000"></div>
+            <div class="form-group"><label>Nom du produit *</label><input type="text" id="prodName" required placeholder="Ex: Bazin Riche Getzner"></div>
+            <div class="form-group"><label>Prix (FCFA) *</label><input type="number" id="prodPrice" required placeholder="Ex: 25000"></div>
             <div class="form-group">
-                <label>Catégorie</label>
+                <label>Catégorie *</label>
                 <select id="prodCategory" required><option value="">Choisir une catégorie...</option></select>
             </div>
             <div class="form-group"><label>Stock initial</label><input type="number" id="prodStock" value="1" min="1"></div>
-            <div class="form-group"><label>Description</label><textarea id="prodDesc" rows="3" required placeholder="Détails du produit..."></textarea></div>
+            <div class="form-group"><label>Description *</label><textarea id="prodDesc" rows="3" required placeholder="Détails du produit..."></textarea></div>
+
+            <!-- Multi-photo upload -->
             <div class="form-group">
-                <label>Image du produit</label>
-                <input type="file" id="prodImage" accept="image/*" onchange="previewImage(event)">
-                <div id="imagePreview" style="margin-top:1rem;display:none;"><img src="" alt="Preview" style="max-width:100%;height:200px;object-fit:cover;border-radius:var(--radius-sm);"></div>
+                <label>📸 Photos du produit <span id="photo-limit-label" style="color:#1565C0;font-weight:normal;font-size:0.85rem;">(max 50 photos)</span></label>
+                <div class="photo-upload-zone" onclick="document.getElementById('prodImages').click()">
+                    <input type="file" id="prodImages" accept="image/*" multiple onchange="handleMultipleImages(event)">
+                    <div style="font-size:2rem;">📷</div>
+                    <div style="font-weight:600;margin:0.5rem 0;">Cliquez pour ajouter des photos</div>
+                    <div style="font-size:0.85rem;color:var(--text-gray);">Sélectionnez plusieurs photos à la fois</div>
+                </div>
+                <div id="photoGrid" class="photo-grid"></div>
+                <div id="photoCounter" class="photo-counter"></div>
             </div>
+
             <div class="form-group" style="margin-top:1rem;border-top:1px solid var(--border-color);padding-top:1rem;">
-                <label style="font-weight:600;margin-bottom:0.5rem;display:block;">Méthodes de livraison</label>
+                <label style="font-weight:600;margin-bottom:0.5rem;display:block;">🚚 Méthodes de livraison</label>
                 <div style="display:grid;gap:0.5rem;">
                     <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;"><input type="checkbox" id="delivHand" style="width:auto;"> Remise en main propre (Gratuit)</label>
                     <div style="display:flex;align-items:center;gap:1rem;"><label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;flex:1;"><input type="checkbox" id="delivMoto" style="width:auto;"> Moto-taxi</label><input type="number" id="delivMotoPrice" placeholder="Frais (ex: 1500)" style="width:150px;padding:0.25rem 0.5rem;"></div>
@@ -364,8 +374,9 @@
 const API_BASE_URL = 'https://web-production-8f94.up.railway.app';
 let currentUser = null;
 let token = null;
-let base64Image = null;
+let base64Images = []; // tableau de toutes les images
 let allCommandes = [];
+let isPremium = false;
 
 document.addEventListener('DOMContentLoaded', () => {
     token = localStorage.getItem('token');
@@ -402,29 +413,62 @@ function openModal(isEdit = false) {
         document.getElementById('modalTitle').textContent = 'Ajouter un Nouveau Produit';
         document.getElementById('prodId').value = '';
         document.getElementById('productForm').reset();
-        document.getElementById('imagePreview').style.display = 'none';
-        base64Image = null;
-        document.getElementById('prodImage').required = true;
+        base64Images = [];
+        renderPhotoGrid();
+        document.getElementById('prodImages').required = true;
     }
+    // Mettre à jour la limite selon le statut premium
+    const maxPhotos = isPremium ? '∞' : '50';
+    document.getElementById('photo-limit-label').textContent = isPremium ? '(illimité - Premium ⭐)' : '(max 50 photos)';
 }
 function closeModal() { document.getElementById('productModal').style.display = 'none'; }
 function openProfileModal() { document.getElementById('profileModal').style.display = 'flex'; }
 function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
 
-function previewImage(event) {
-    const file = event.target.files[0];
-    if (file) {
+// ==================== MULTI-PHOTO ====================
+function handleMultipleImages(event) {
+    const files = Array.from(event.target.files);
+    const maxPhotos = isPremium ? Infinity : 50;
+    
+    files.forEach(file => {
+        if (base64Images.length >= maxPhotos) {
+            alert(`Limite atteinte ! ${isPremium ? 'Illimité Premium' : 'Maximum 50 photos en Basic'}`);
+            return;
+        }
         const reader = new FileReader();
         reader.onload = e => {
-            base64Image = e.target.result;
-            const preview = document.getElementById('imagePreview');
-            preview.style.display = 'block';
-            preview.querySelector('img').src = base64Image;
+            base64Images.push(e.target.result);
+            renderPhotoGrid();
         };
         reader.readAsDataURL(file);
-    }
+    });
+    // Reset input pour permettre re-sélection
+    event.target.value = '';
 }
 
+function renderPhotoGrid() {
+    const grid = document.getElementById('photoGrid');
+    const counter = document.getElementById('photoCounter');
+    const maxPhotos = isPremium ? '∞' : 50;
+    
+    grid.innerHTML = base64Images.map((img, i) => `
+        <div class="photo-item">
+            <img src="${img}" alt="Photo ${i+1}">
+            <button type="button" class="remove-photo" onclick="removePhoto(${i})">×</button>
+        </div>
+    `).join('');
+    
+    counter.innerHTML = base64Images.length > 0 
+        ? `<span style="color:#1565C0;font-weight:600;">${base64Images.length} photo(s)</span> / ${maxPhotos} ${isPremium ? '⭐' : ''}` 
+        : '';
+}
+
+function removePhoto(index) {
+    base64Images.splice(index, 1);
+    renderPhotoGrid();
+}
+
+// ==================== CATEGORIES ====================
 async function loadDashboardCategories() {
     try {
         const response = await fetch(`${API_BASE_URL}/api/categories`);
@@ -440,6 +484,7 @@ async function loadDashboardCategories() {
     } catch (e) { console.error(e); }
 }
 
+// ==================== PROFIL ====================
 async function loadVendorProfile() {
     document.getElementById('profile-full-name').textContent = currentUser.prenom + ' ' + currentUser.nom;
     try {
@@ -448,6 +493,7 @@ async function loadVendorProfile() {
         });
         if (response.ok) {
             const myShop = await response.json();
+            isPremium = myShop.est_premium || false;
             document.getElementById('profile-shop-name').textContent = myShop.nom_boutique || 'Ma Boutique';
             document.getElementById('profile-desc').textContent = myShop.description_boutique || 'Pas de description';
             document.getElementById('profile-phone').textContent = myShop.whatsapp || currentUser.telephone;
@@ -505,6 +551,7 @@ async function handleProfileSubmit(event) {
     finally { btn.disabled = false; btn.textContent = 'Enregistrer les modifications'; }
 }
 
+// ==================== PRODUITS ====================
 async function loadProducts() {
     try {
         const response = await fetch(`${API_BASE_URL}/api/produits?limit=100`);
@@ -525,7 +572,10 @@ function renderTable(tableId, products) {
         const tr = document.createElement('tr');
         const isAllTable = tableId.includes('all');
         tr.innerHTML = `
-            <td><img src="${imageUrl}" class="prod-img" onerror="this.src='https://placehold.co/150x150?text=Error'"></td>
+            <td style="position:relative;">
+                <img src="${imageUrl}" class="prod-img" onerror="this.src='https://placehold.co/150x150?text=Error'">
+                ${validImages.length > 1 ? `<span style="position:absolute;top:8px;left:8px;background:#1565C0;color:white;font-size:0.65rem;padding:1px 5px;border-radius:10px;">+${validImages.length}</span>` : ''}
+            </td>
             <td><strong>${p.nom}</strong></td>
             <td class="text-success"><strong>${p.prix.toLocaleString()} FCFA</strong></td>
             <td><span class="badge badge-warning">${p.categorie}</span></td>
@@ -541,8 +591,16 @@ function renderTable(tableId, products) {
 
 async function handleProductSubmit(event) {
     event.preventDefault();
+    
+    if (base64Images.length === 0) {
+        alert('Veuillez ajouter au moins une photo du produit.');
+        return;
+    }
+
     const btn = document.getElementById('submitProdBtn');
-    btn.disabled = true; btn.textContent = 'Enregistrement...';
+    btn.disabled = true;
+    btn.textContent = `Envoi de ${base64Images.length} photo(s)...`;
+
     const prodId = document.getElementById('prodId').value;
     const isEdit = !!prodId;
     const methodes_livraison = [];
@@ -550,6 +608,7 @@ async function handleProductSubmit(event) {
     if (document.getElementById('delivMoto').checked) methodes_livraison.push({nom:'Moto-taxi',prix:parseInt(document.getElementById('delivMotoPrice').value)||0});
     if (document.getElementById('delivTaxi').checked) methodes_livraison.push({nom:'Taxi',prix:parseInt(document.getElementById('delivTaxiPrice').value)||0});
     if (document.getElementById('delivRelais').checked) methodes_livraison.push({nom:'Point Relais',prix:parseInt(document.getElementById('delivRelaisPrice').value)||0});
+
     const payload = {
         nom: document.getElementById('prodName').value,
         description: document.getElementById('prodDesc').value,
@@ -557,9 +616,10 @@ async function handleProductSubmit(event) {
         categorie: document.getElementById('prodCategory').value,
         stock: parseInt(document.getElementById('prodStock').value),
         est_premium: document.getElementById('prodPremium').checked,
-        methodes_livraison
+        methodes_livraison,
+        images: base64Images
     };
-    if (base64Image) payload.images = [base64Image];
+
     try {
         const url = isEdit ? `${API_BASE_URL}/api/produits/${prodId}` : `${API_BASE_URL}/api/produits`;
         const response = await fetch(url, {
@@ -567,8 +627,15 @@ async function handleProductSubmit(event) {
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify(payload)
         });
-        if (response.ok) { alert(isEdit ? 'Produit modifié !' : 'Produit publié !'); closeModal(); loadProducts(); }
-        else { const err = await response.json(); alert('Erreur: ' + (err.detail || 'Impossible')); }
+        if (response.ok) {
+            alert(isEdit ? 'Produit modifié !' : `Produit publié avec ${base64Images.length} photo(s) !`);
+            closeModal();
+            base64Images = [];
+            loadProducts();
+        } else {
+            const err = await response.json();
+            alert('Erreur: ' + (err.detail || 'Impossible'));
+        }
     } catch (e) { alert('Erreur de connexion'); }
     finally { btn.disabled = false; btn.textContent = 'Publier le Produit'; }
 }
@@ -592,12 +659,10 @@ function editProduct(product) {
             if (m.nom === 'Point Relais') { document.getElementById('delivRelais').checked = true; document.getElementById('delivRelaisPrice').value = m.prix; }
         });
     }
-    document.getElementById('prodImage').required = false;
-    base64Image = null;
-    const validImages = (product.images || []).filter(img => img && img.trim());
-    const preview = document.getElementById('imagePreview');
-    if (validImages.length > 0) { preview.style.display = 'block'; preview.querySelector('img').src = validImages[0]; }
-    else { preview.style.display = 'none'; }
+    // Charger les images existantes
+    base64Images = (product.images || []).filter(img => img && img.trim());
+    renderPhotoGrid();
+    document.getElementById('prodImages').required = false;
     openModal(true);
 }
 
@@ -614,14 +679,10 @@ async function deleteProduct(id, nom) {
 }
 
 // ==================== COMMANDES ====================
-
 const STATUT_LABELS = {
-    'nouvelle': '📦 Nouvelle',
-    'confirmee': '✅ Confirmée',
-    'en_preparation': '🔧 En préparation',
-    'expedie': '🚚 Expédiée',
-    'livre': '🎉 Livrée',
-    'annulee': '❌ Annulée'
+    'nouvelle': '📦 Nouvelle', 'confirmee': '✅ Confirmée',
+    'en_preparation': '🔧 En préparation', 'expedie': '🚚 Expédiée',
+    'livre': '🎉 Livrée', 'annulee': '❌ Annulée'
 };
 
 async function loadCommandes() {
@@ -634,17 +695,12 @@ async function loadCommandes() {
         if (!response.ok) throw new Error('Erreur API');
         const data = await response.json();
         allCommandes = data.commandes || [];
-
-        // Mettre à jour stats
         document.getElementById('stat-total-commandes').textContent = allCommandes.length;
         const nouvelles = allCommandes.filter(c => c.statut === 'nouvelle').length;
         document.getElementById('stat-nouvelles-commandes').textContent = nouvelles;
-
-        // Badge sidebar
         const badge = document.getElementById('badge-commandes');
         if (nouvelles > 0) { badge.textContent = nouvelles; badge.style.display = 'flex'; }
         else { badge.style.display = 'none'; }
-
         renderCommandes(allCommandes);
     } catch (e) {
         container.innerHTML = '<div class="content-card" style="text-align:center;padding:2rem;"><p>❌ Erreur de chargement</p></div>';
@@ -653,8 +709,7 @@ async function loadCommandes() {
 
 function filterCommandes() {
     const filtre = document.getElementById('filtreStatut').value;
-    const filtered = filtre ? allCommandes.filter(c => c.statut === filtre) : allCommandes;
-    renderCommandes(filtered);
+    renderCommandes(filtre ? allCommandes.filter(c => c.statut === filtre) : allCommandes);
 }
 
 function renderCommandes(commandes) {
@@ -666,14 +721,9 @@ function renderCommandes(commandes) {
     let html = '<div class="content-card"><div class="table-responsive"><table><thead><tr><th>Référence</th><th>Client</th><th>Produit</th><th>Montant</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead><tbody>';
     commandes.forEach(c => {
         const date = new Date(c.date_commande).toLocaleDateString('fr-FR');
-        const statutClass = `cmd-${c.statut}`;
-        html += `
-        <tr>
+        html += `<tr>
             <td><strong style="font-family:monospace;font-size:0.85rem;">${c.reference}</strong></td>
-            <td>
-                <div style="font-weight:600;">${c.client_nom}</div>
-                <div style="font-size:0.8rem;color:var(--text-gray);">📱 ${c.client_telephone}</div>
-            </td>
+            <td><div style="font-weight:600;">${c.client_nom}</div><div style="font-size:0.8rem;color:var(--text-gray);">📱 ${c.client_telephone}</div></td>
             <td>${c.produit_nom}</td>
             <td style="font-weight:700;color:#1565C0;">${c.montant_total.toLocaleString()} FCFA</td>
             <td style="font-size:0.85rem;">${date}</td>
@@ -687,9 +737,7 @@ function renderCommandes(commandes) {
                     <option value="annulee" ${c.statut==='annulee'?'selected':''}>❌ Annulée</option>
                 </select>
             </td>
-            <td>
-                <button onclick="voirDetailCommande('${c.id}')" style="padding:4px 10px;background:#E3F2FD;color:#1565C0;border:none;border-radius:4px;cursor:pointer;font-size:0.8rem;">👁️ Détail</button>
-            </td>
+            <td><button onclick="voirDetailCommande('${c.id}')" style="padding:4px 10px;background:#E3F2FD;color:#1565C0;border:none;border-radius:4px;cursor:pointer;font-size:0.8rem;">👁️ Détail</button></td>
         </tr>`;
     });
     html += '</tbody></table></div></div>';
@@ -704,19 +752,14 @@ async function updateCommandeStatut(commandeId, statut) {
             body: JSON.stringify({ statut })
         });
         if (response.ok) {
-            // Mettre à jour localement
             const cmd = allCommandes.find(c => c.id === commandeId);
             if (cmd) cmd.statut = statut;
-            // Recalculer stats
             const nouvelles = allCommandes.filter(c => c.statut === 'nouvelle').length;
             document.getElementById('stat-nouvelles-commandes').textContent = nouvelles;
             const badge = document.getElementById('badge-commandes');
             if (nouvelles > 0) { badge.textContent = nouvelles; badge.style.display = 'flex'; }
             else { badge.style.display = 'none'; }
-        } else {
-            alert('Erreur lors de la mise à jour');
-            loadCommandes();
-        }
+        } else { alert('Erreur mise à jour'); loadCommandes(); }
     } catch (e) { console.error(e); }
 }
 
@@ -724,27 +767,17 @@ function voirDetailCommande(commandeId) {
     const cmd = allCommandes.find(c => c.id === commandeId);
     if (!cmd) return;
     const historique = (cmd.historique || []).map(h =>
-        `<div style="display:flex;gap:0.5rem;align-items:center;padding:0.4rem 0;border-bottom:1px solid #f0f0f0;">
+        `<div style="display:flex;gap:0.5rem;padding:0.4rem 0;border-bottom:1px solid #f0f0f0;">
             <span>${h.label || h.statut}</span>
             <span style="margin-left:auto;font-size:0.8rem;color:var(--text-gray);">${new Date(h.date).toLocaleString('fr-FR')}</span>
         </div>`
     ).join('');
-
     document.getElementById('commandeDetailContent').innerHTML = `
         <div style="display:grid;gap:1rem;">
             <div style="background:#f8f9fa;padding:1rem;border-radius:8px;">
-                <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
-                    <span style="font-weight:600;">Référence</span>
-                    <span style="font-family:monospace;color:#1565C0;font-weight:700;">${cmd.reference}</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
-                    <span style="font-weight:600;">Produit</span>
-                    <span>${cmd.produit_nom}</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
-                    <span style="font-weight:600;">Montant</span>
-                    <span style="font-weight:700;color:#1565C0;">${cmd.montant_total.toLocaleString()} FCFA</span>
-                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;"><span style="font-weight:600;">Référence</span><span style="font-family:monospace;color:#1565C0;font-weight:700;">${cmd.reference}</span></div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;"><span style="font-weight:600;">Produit</span><span>${cmd.produit_nom}</span></div>
+                <div style="display:flex;justify-content:space-between;"><span style="font-weight:600;">Montant</span><span style="font-weight:700;color:#1565C0;">${cmd.montant_total.toLocaleString()} FCFA</span></div>
             </div>
             <div style="background:#f8f9fa;padding:1rem;border-radius:8px;">
                 <h4 style="margin-bottom:0.5rem;">👤 Client</h4>
@@ -754,11 +787,10 @@ function voirDetailCommande(commandeId) {
                 ${cmd.message ? `<div><strong>Message :</strong> ${cmd.message}</div>` : ''}
             </div>
             ${historique ? `<div><h4 style="margin-bottom:0.5rem;">📋 Historique</h4>${historique}</div>` : ''}
-            <a href="https://wa.me/223${cmd.client_telephone}?text=Bonjour%20${cmd.client_nom},%20votre%20commande%20${cmd.reference}%20est%20en%20cours%20de%20traitement%20sur%20APHRIKE%20JULA." target="_blank" style="display:block;text-align:center;background:#25D366;color:white;padding:12px;border-radius:100px;text-decoration:none;font-weight:600;">
+            <a href="https://wa.me/223${cmd.client_telephone}?text=Bonjour%20${cmd.client_nom},%20votre%20commande%20${cmd.reference}%20est%20en%20cours%20de%20traitement." target="_blank" style="display:block;text-align:center;background:#25D366;color:white;padding:12px;border-radius:100px;text-decoration:none;font-weight:600;">
                 📱 Contacter le client sur WhatsApp
             </a>
-        </div>
-    `;
+        </div>`;
     document.getElementById('commandeDetailModal').style.display = 'flex';
 }
 
@@ -788,8 +820,7 @@ async function loadDeliveries() {
                         <option value="envoi_colis" ${v.statut_livraison==='envoi_colis'?'selected':''}>🚚 Envoi colis</option>
                         <option value="livre" ${v.statut_livraison==='livre'?'selected':''}>✅ Livré</option>
                     </select>
-                </td>
-            `;
+                </td>`;
             tbody.appendChild(tr);
         });
     } catch (e) { console.error(e); }
@@ -797,12 +828,11 @@ async function loadDeliveries() {
 
 async function updateDeliveryStatus(venteId, statut) {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/ventes/${venteId}/livraison`, {
+        await fetch(`${API_BASE_URL}/api/ventes/${venteId}/livraison`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ statut })
         });
-        if (!response.ok) alert('Erreur lors de la mise à jour');
     } catch (e) { console.error(e); }
 }
 </script>
