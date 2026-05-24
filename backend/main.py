@@ -1644,7 +1644,7 @@ async def suivi_commandes_client(telephone: str):
 
 
 @app.get("/api/vendeurs/mes-commandes")
-async def commandes_vendeur(vendeur=Depends(get_current_vendeur)):
+async def commandes_vendeur(vendeur=Depends(get_current_user)):
     """
     Vendeur voit TOUTES ses commandes avec statuts.
     Auth vendeur requise.
