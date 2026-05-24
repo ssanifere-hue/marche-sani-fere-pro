@@ -1644,7 +1644,7 @@ async def suivi_commandes_client(telephone: str):
 
 
 @app.get("/api/vendeurs/mes-commandes")
-async def commandes_vendeur(vendeur=Depends(get_current_user)):
+async def commandes_vendeur(current_user=Depends(get_current_user)):     vendeur = await db.vendeurs.find_one({"user_id": str(current_user["_id"])})     if not vendeur:         raise HTTPException(status_code=404, detail="Profil vendeur non trouvé")     vendeur_id = str(vendeur["_id"])
     """
     Vendeur voit TOUTES ses commandes avec statuts.
     Auth vendeur requise.
