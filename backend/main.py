@@ -1477,6 +1477,333 @@ async def supprimer_categorie(cat_id: str, current_user = Depends(get_current_us
     return {"message": "Catégorie supprimée"}
 
 
-if __name__ == "__main__":
+
+    # ==================== COMMANDES (NOUVEAU SYSTEME) ====================
+# Coller ce bloc dans main.py juste avant : if __name__ == "__main__":
+
+class CommandeCreate(BaseModel):
+    produit_id: str
+    vendeur_id: str
+    nom: str
+    prenom: str
+    telephone: str  # WhatsApp du client
+    adresse_livraison: Optional[str] = None
+    quantite: int = 1
+    methode_livraison: Optional[str] = None
+    frais_livraison: Optional[int] = 0
+    message: Optional[str] = None
+
+class CommandeStatutUpdate(BaseModel):
+    statut: str  # voir STATUTS_COMMANDE ci-dessous
+
+STATUTS_COMMANDE = [
+    "nouvelle",          # 0 - commande reçue
+    "confirmee",         # 1 - vendeur confirme
+    "en_preparation",    # 2 - vendeur prépare le colis
+    "expedie",           # 3 - colis envoyé/en route
+    "livre",             # 4 - livré au client
+    "annulee"            # X - annulée
+]
+
+LABELS_STATUT = {
+    "nouvelle":        "📦 Commande reçue",
+    "confirmee":       "✅ Confirmée par le vendeur",
+    "en_preparation":  "🔧 En préparation",
+    "expedie":         "🚚 Expédiée / En route",
+    "livre":           "🎉 Livrée",
+    "annulee":         "❌ Annulée"
+}
+
+@app.post("/api/commandes")
+async def creer_commande(commande: CommandeCreate):
+    """
+    Client passe une commande — pas d'auth requise.
+    Le vendeur reçoit une notification WhatsApp automatique.
+    """
+    # Vérifier le produit
+    produit = await db.produits.find_one({"_id": ObjectId(commande.produit_id)})
+    if not produit:
+        raise HTTPException(status_code=404, detail="Produit non trouvé")
+
+    # Vérifier le vendeur
+    vendeur = await db.vendeurs.find_one({"_id": ObjectId(commande.vendeur_id)})
+    if not vendeur:
+        raise HTTPException(status_code=404, detail="Vendeur non trouvé")
+
+    montant_total = produit["prix"] * commande.quantite + (commande.frais_livraison or 0)
+
+    # Générer référence unique
+    reference = f"CMD-{secrets.token_hex(4).upper()}"
+
+    commande_data = {
+        "reference": reference,
+        "produit_id": commande.produit_id,
+        "produit_nom": produit["nom"],
+        "produit_prix": produit["prix"],
+        "vendeur_id": commande.vendeur_id,
+        "vendeur_nom_boutique": vendeur["nom_boutique"],
+        "client_nom": commande.nom,
+        "client_prenom": commande.prenom,
+        "client_telephone": commande.telephone,
+        "adresse_livraison": commande.adresse_livraison or "",
+        "quantite": commande.quantite,
+        "methode_livraison": commande.methode_livraison or "",
+        "frais_livraison": commande.frais_livraison or 0,
+        "montant_total": montant_total,
+        "message": commande.message or "",
+        "statut": "nouvelle",
+        "historique_statuts": [
+            {
+                "statut": "nouvelle",
+                "label": LABELS_STATUT["nouvelle"],
+                "date": datetime.utcnow()
+            }
+        ],
+        "date_commande": datetime.utcnow()
+    }
+
+    result = await db.commandes.insert_one(commande_data)
+    commande_id = str(result.inserted_id)
+
+    # Construire le lien WhatsApp pour le vendeur
+    vendeur_whatsapp = vendeur.get("whatsapp", vendeur.get("telephone", ""))
+    if vendeur_whatsapp:
+        # Nettoyer le numéro (supprimer espaces, ajouter indicatif Mali si absent)
+        num = vendeur_whatsapp.replace(" ", "").replace("-", "")
+        if not num.startswith("+"):
+            num = "+223" + num
+        
+        msg = (
+            f"🛒 NOUVELLE COMMANDE - {reference}\n\n"
+            f"Client : {commande.nom} {commande.prenom}\n"
+            f"📱 WhatsApp : {commande.telephone}\n"
+            f"📍 Adresse : {commande.adresse_livraison or 'Non précisée'}\n\n"
+            f"Produit : {produit['nom']}\n"
+            f"Qté : {commande.quantite}\n"
+            f"Prix unitaire : {produit['prix']:,} FCFA\n"
+            f"Livraison : {commande.frais_livraison or 0:,} FCFA\n"
+            f"💰 TOTAL : {montant_total:,} FCFA\n\n"
+            f"Message client : {commande.message or 'Aucun'}\n\n"
+            f"Réf: {reference} | APHRIKE JULA"
+        )
+        
+        import urllib.parse
+        whatsapp_url = f"https://wa.me/{num.replace('+','')}?text={urllib.parse.quote(msg)}"
+    else:
+        whatsapp_url = None
+
+    return {
+        "message": "Commande passée avec succès",
+        "commande_id": commande_id,
+        "reference": reference,
+        "montant_total": montant_total,
+        "statut": "nouvelle",
+        "whatsapp_vendeur_url": whatsapp_url  # Frontend ouvre ce lien
+    }
+
+
+@app.get("/api/commandes/suivi/{telephone}")
+async def suivi_commandes_client(telephone: str):
+    """
+    Client suit TOUTES ses commandes avec son numéro WhatsApp.
+    Pas d'auth requise.
+    """
+    commandes = await db.commandes.find(
+        {"client_telephone": telephone}
+    ).sort("date_commande", -1).to_list(50)
+
+    if not commandes:
+        return {
+            "telephone": telephone,
+            "total": 0,
+            "commandes": [],
+            "message": "Aucune commande trouvée pour ce numéro"
+        }
+
+    result = []
+    for c in commandes:
+        result.append({
+            "id": str(c["_id"]),
+            "reference": c["reference"],
+            "produit_nom": c["produit_nom"],
+            "produit_prix": c["produit_prix"],
+            "vendeur_nom": c["vendeur_nom_boutique"],
+            "quantite": c["quantite"],
+            "montant_total": c["montant_total"],
+            "statut": c["statut"],
+            "statut_label": LABELS_STATUT.get(c["statut"], c["statut"]),
+            "historique": c.get("historique_statuts", []),
+            "date_commande": c["date_commande"]
+        })
+
+    return {
+        "telephone": telephone,
+        "total": len(result),
+        "commandes": result
+    }
+
+
+@app.get("/api/vendeurs/mes-commandes")
+async def commandes_vendeur(vendeur=Depends(get_current_vendeur)):
+    """
+    Vendeur voit TOUTES ses commandes avec statuts.
+    Auth vendeur requise.
+    """
+    commandes = await db.commandes.find(
+        {"vendeur_id": str(vendeur["_id"])}
+    ).sort("date_commande", -1).to_list(200)
+
+    result = []
+    for c in commandes:
+        result.append({
+            "id": str(c["_id"]),
+            "reference": c["reference"],
+            "produit_nom": c["produit_nom"],
+            "client_nom": f"{c['client_nom']} {c['client_prenom']}",
+            "client_telephone": c["client_telephone"],
+            "adresse_livraison": c.get("adresse_livraison", ""),
+            "quantite": c["quantite"],
+            "montant_total": c["montant_total"],
+            "statut": c["statut"],
+            "statut_label": LABELS_STATUT.get(c["statut"], c["statut"]),
+            "historique": c.get("historique_statuts", []),
+            "message": c.get("message", ""),
+            "date_commande": c["date_commande"]
+        })
+
+    return {
+        "total": len(result),
+        "commandes": result
+    }
+
+
+@app.put("/api/commandes/{commande_id}/statut")
+async def mettre_a_jour_statut(
+    commande_id: str,
+    payload: CommandeStatutUpdate,
+    vendeur=Depends(get_current_vendeur)
+):
+    """
+    Vendeur met à jour le statut d'une commande.
+    Le client peut suivre en temps réel via /api/commandes/suivi/{telephone}
+    """
+    if payload.statut not in STATUTS_COMMANDE:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Statut invalide. Valides: {STATUTS_COMMANDE}"
+        )
+
+    commande = await db.commandes.find_one({"_id": ObjectId(commande_id)})
+    if not commande:
+        raise HTTPException(status_code=404, detail="Commande non trouvée")
+
+    if commande["vendeur_id"] != str(vendeur["_id"]):
+        raise HTTPException(status_code=403, detail="Cette commande ne vous appartient pas")
+
+    historique_entry = {
+        "statut": payload.statut,
+        "label": LABELS_STATUT.get(payload.statut, payload.statut),
+        "date": datetime.utcnow()
+    }
+
+    await db.commandes.update_one(
+        {"_id": ObjectId(commande_id)},
+        {
+            "$set": {"statut": payload.statut},
+            "$push": {"historique_statuts": historique_entry}
+        }
+    )
+
+    return {
+        "message": "Statut mis à jour",
+        "commande_id": commande_id,
+        "nouveau_statut": payload.statut,
+        "label": LABELS_STATUT.get(payload.statut)
+    }
+
+
+@app.get("/api/admin/commandes")
+async def admin_toutes_commandes(
+    statut: Optional[str] = None,
+    vendeur_id: Optional[str] = None
+):
+    """
+    ADMIN — Voir TOUTES les commandes de la plateforme.
+    Filtrable par statut et par vendeur.
+    """
+    query = {}
+    if statut:
+        query["statut"] = statut
+    if vendeur_id:
+        query["vendeur_id"] = vendeur_id
+
+    commandes = await db.commandes.find(query).sort("date_commande", -1).to_list(500)
+
+    result = []
+    for c in commandes:
+        result.append({
+            "id": str(c["_id"]),
+            "reference": c["reference"],
+            "vendeur_nom": c["vendeur_nom_boutique"],
+            "vendeur_id": c["vendeur_id"],
+            "produit_nom": c["produit_nom"],
+            "client_nom": f"{c['client_nom']} {c['client_prenom']}",
+            "client_telephone": c["client_telephone"],
+            "montant_total": c["montant_total"],
+            "statut": c["statut"],
+            "statut_label": LABELS_STATUT.get(c["statut"], c["statut"]),
+            "date_commande": c["date_commande"]
+        })
+
+    # Statistiques rapides
+    total_montant = sum(c["montant_total"] for c in commandes)
+
+    return {
+        "total": len(result),
+        "montant_total_plateforme": total_montant,
+        "commandes": result
+    }
+
+
+@app.get("/api/admin/vendeurs-activite")
+async def admin_activite_vendeurs():
+    """
+    ADMIN — Vue d'ensemble de tous les vendeurs + leur activité.
+    """
+    vendeurs = await db.vendeurs.find().sort("date_creation", -1).to_list(500)
+
+    result = []
+    for v in vendeurs:
+        vid = str(v["_id"])
+        nb_produits = await db.produits.count_documents({"vendeur_id": vid})
+        nb_commandes = await db.commandes.count_documents({"vendeur_id": vid})
+        commandes_nouvelles = await db.commandes.count_documents(
+            {"vendeur_id": vid, "statut": "nouvelle"}
+        )
+        ca_agg = await db.commandes.aggregate([
+            {"$match": {"vendeur_id": vid, "statut": {"$ne": "annulee"}}},
+            {"$group": {"_id": None, "total": {"$sum": "$montant_total"}}}
+        ]).to_list(1)
+        ca = ca_agg[0]["total"] if ca_agg else 0
+
+        result.append({
+            "id": vid,
+            "nom_boutique": v["nom_boutique"],
+            "telephone": v.get("telephone", ""),
+            "est_premium": v.get("est_premium", False),
+            "actif": v.get("actif", False),
+            "nb_produits": nb_produits,
+            "nb_commandes": nb_commandes,
+            "commandes_nouvelles": commandes_nouvelles,
+            "chiffre_affaires": ca,
+            "date_creation": v["date_creation"]
+        })
+
+    return {
+        "total_vendeurs": len(result),
+        "vendeurs": result
+    }
+    if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
