@@ -628,7 +628,7 @@ async function loadCommandes() {
     const container = document.getElementById('commandes-container');
     container.innerHTML = '<div class="content-card" style="text-align:center;padding:2rem;"><p>Chargement...</p></div>';
     try {
-        const response = await fetch(`${API_BASE_URL}/api/vendeurs/mes-commandes`, {
+        const response = await fetch(`${API_BASE_URL}/api/admin/commandes`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!response.ok) throw new Error('Erreur API');
