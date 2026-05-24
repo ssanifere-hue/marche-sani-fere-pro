@@ -415,7 +415,7 @@ function openModal(isEdit = false) {
         document.getElementById('productForm').reset();
         base64Images = [];
         renderPhotoGrid();
-        document.getElementById('prodImages').required = true;
+        document.getElementById('prodImages').required = false;
     }
     // Mettre à jour la limite selon le statut premium
     const maxPhotos = isPremium ? '∞' : '50';
