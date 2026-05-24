@@ -12,13 +12,11 @@
             gap: var(--spacing-xl);
             margin-bottom: var(--spacing-xl);
         }
-        
         .product-gallery {
             position: sticky;
             top: calc(80px + var(--spacing-md));
             height: fit-content;
         }
-        
         .main-image {
             width: 100%;
             aspect-ratio: 1;
@@ -27,13 +25,11 @@
             box-shadow: var(--shadow-lg);
             margin-bottom: var(--spacing-md);
         }
-        
         .thumbnail-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
             gap: 0.5rem;
         }
-        
         .thumbnail {
             width: 80px;
             height: 80px;
@@ -43,40 +39,33 @@
             border: 3px solid transparent;
             transition: var(--transition-fast);
         }
-
-        
         .thumbnail:hover,
         .thumbnail.active {
             border-color: var(--primary-green);
         }
-        
         .product-details {
             background: white;
             padding: var(--spacing-lg);
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow-sm);
         }
-        
         .product-title-large {
             font-size: 2rem;
             font-weight: 700;
             margin-bottom: var(--spacing-sm);
         }
-        
         .product-price-large {
             font-size: 2.5rem;
             font-weight: 700;
             color: var(--primary-green);
             margin-bottom: var(--spacing-md);
         }
-        
         .buy-section {
             background: linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 100%);
             padding: var(--spacing-md);
             border-radius: var(--radius-md);
             margin-bottom: var(--spacing-md);
         }
-        
         .buy-btn {
             width: 100%;
             background: var(--primary-orange);
@@ -91,13 +80,11 @@
             box-shadow: var(--shadow-md);
             margin-top: var(--spacing-sm);
         }
-        
         .buy-btn:hover {
             background: var(--primary-red);
             transform: translateY(-2px);
             box-shadow: var(--shadow-lg);
         }
-        
         .vendor-card-inline {
             display: flex;
             align-items: center;
@@ -111,58 +98,37 @@
             color: var(--text-dark);
             transition: var(--transition-fast);
         }
-        
         .vendor-card-inline:hover {
             box-shadow: var(--shadow-lg);
             transform: translateY(-2px);
         }
-        
-        @media (max-width: 768px) {
-            .product-page {
-                grid-template-columns: 1fr;
-                gap: var(--spacing-md);
-            }
-            
-            .product-gallery {
-                position: static;
-            }
-
-            .product-title-large {
-                font-size: 1.4rem;
-            }
-
-            .product-price-large {
-                font-size: 1.75rem;
-            }
-
-            .product-details {
-                padding: var(--spacing-md);
-            }
-
-            .buy-btn {
-                font-size: 1.05rem;
-                padding: 1rem;
-            }
-
-            .vendor-card-inline {
-                gap: var(--spacing-sm);
-                padding: var(--spacing-sm);
-            }
-
-            .thumbnail {
-                width: 60px;
-                height: 60px;
-            }
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            box-sizing: border-box;
+            font-size: 0.95rem;
         }
-
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+        @media (max-width: 768px) {
+            .product-page { grid-template-columns: 1fr; gap: var(--spacing-md); }
+            .product-gallery { position: static; }
+            .product-title-large { font-size: 1.4rem; }
+            .product-price-large { font-size: 1.75rem; }
+            .product-details { padding: var(--spacing-md); }
+            .buy-btn { font-size: 1.05rem; padding: 1rem; }
+            .vendor-card-inline { gap: var(--spacing-sm); padding: var(--spacing-sm); }
+            .thumbnail { width: 60px; height: 60px; }
+        }
         @media (max-width: 480px) {
-            .product-title-large {
-                font-size: 1.2rem;
-            }
-
-            .product-price-large {
-                font-size: 1.5rem;
-            }
+            .product-title-large { font-size: 1.2rem; }
+            .product-price-large { font-size: 1.5rem; }
         }
     </style>
 </head>
@@ -178,18 +144,16 @@
             </div>
             <span style="font-size:17px;font-weight:600;color:#fff;letter-spacing:-0.01em;white-space:nowrap;">APHRIKE JULA</span>
         </a>
-
         <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border-radius:100px;padding:7px 16px;flex:1;max-width:420px;margin:0 auto;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input type="text" id="searchInput" placeholder="Chercher..." style="background:transparent;border:none;outline:none;font-size:14px;color:#fff;width:100%;">
         </div>
-
         <div id="navActions" style="display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;">
             <a href="#" onclick="toggleCartDrawer(); return false;" style="position:relative;color:#fff;font-size:1.3rem;text-decoration:none;padding:4px 8px;" title="Panier">
                 🛒<span id="cartBadge" style="position:absolute;top:-4px;right:-4px;background:#FFD700;color:#1565C0;font-size:0.65rem;font-weight:700;width:18px;height:18px;border-radius:50%;display:none;align-items:center;justify-content:center;">0</span>
             </a>
-            <a href="vendre.html" style="padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;border:none;cursor:pointer;background:#FFD700;color:#1565C0;text-decoration:none;transition:background 0.2s;">Vendre</a>
-            <a href="connexion.html" style="padding:7px 16px;border-radius:100px;font-size:14px;font-weight:500;cursor:pointer;background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.5);text-decoration:none;transition:background 0.2s;">Connexion</a>
+            <a href="vendre.html" style="padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;border:none;cursor:pointer;background:#FFD700;color:#1565C0;text-decoration:none;">Vendre</a>
+            <a href="connexion.html" style="padding:7px 16px;border-radius:100px;font-size:14px;font-weight:500;cursor:pointer;background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.5);text-decoration:none;">Connexion</a>
         </div>
     </nav>
 
@@ -214,22 +178,17 @@
         let productId = null;
         let productData = null;
         let currentImageIndex = 0;
+        let currentDeliveryPrice = 0;
+        let selectedDeliveryMethod = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             updateNavbar();
-            
             const params = new URLSearchParams(window.location.search);
             productId = params.get('id');
-            
-            if (!productId) {
-                window.location.href = 'index.html';
-                return;
-            }
-            
+            if (!productId) { window.location.href = 'index.html'; return; }
             loadProduct();
         });
 
-        // Session navbar (même logique que app.js)
         function updateNavbar() {
             const token = localStorage.getItem('token');
             const userStr = localStorage.getItem('user');
@@ -239,9 +198,7 @@
                     const user = JSON.parse(userStr);
                     const firstName = user.prenom || user.nom || 'Compte';
                     navActions.innerHTML = `
-                        ${user.role === 'vendeur'
-                            ? '<a href="/dashboard" class="nav-btn primary">Dashboard</a><a href="vendre.html" class="nav-btn primary" style="margin-left:8px;">Vendre</a>'
-                            : ''}
+                        ${user.role === 'vendeur' ? '<a href="/dashboard" class="nav-btn primary">Dashboard</a><a href="vendre.html" class="nav-btn primary" style="margin-left:8px;">Vendre</a>' : ''}
                         <div style="display:flex;align-items:center;gap:1rem;">
                             <span style="font-weight:600;color:var(--text-dark);">👤 ${firstName}</span>
                             <a href="#" class="nav-btn" onclick="handleLogout(event)">Déconnexion</a>
@@ -250,6 +207,7 @@
                 } catch(e) {}
             }
         }
+
         function handleLogout(e) {
             if(e) e.preventDefault();
             localStorage.removeItem('token');
@@ -260,107 +218,109 @@
         async function loadProduct() {
             try {
                 const response = await fetch(`${API_BASE_URL}/api/produits/${productId}`);
-                
                 if (!response.ok) throw new Error('Produit non trouvé');
-                
                 const data = await response.json();
-                
-                // L'API renvoie les champs directement (pas dans data.produit)
                 if (!data.id && !data.nom) throw new Error('Produit non trouvé');
-                
                 productData = data;
                 displayProduct(productData);
-                
             } catch (error) {
-                console.error('Erreur:', error);
                 document.getElementById('productPage').innerHTML = `
-                    <div style="grid-column: 1/-1; text-align:center; padding:3rem;">
+                    <div style="grid-column:1/-1;text-align:center;padding:3rem;">
                         <h3>❌ Produit non trouvé</h3>
                         <a href="index.html" class="nav-btn primary">Retour à l'accueil</a>
-                    </div>
-                `;
+                    </div>`;
             }
         }
 
         function displayProduct(product) {
-            // Compatibilité: backend renvoie 'nom', frontend utilisait 'titre'
             const productName = product.nom || product.titre || 'Produit';
             const vendorName = (product.vendeur && product.vendeur.nom_boutique) || product.vendeur_nom || 'Vendeur';
             const vendorId = (product.vendeur && product.vendeur.id) || product.vendeur_id || '';
-            
-            const images = product.images && product.images.length > 0 
-                ? product.images 
+            const images = product.images && product.images.length > 0
+                ? product.images
                 : ['https://via.placeholder.com/600x600/E9ECEF/6C757D?text=Produit'];
-            
-            const thumbnails = images.map((img, i) => 
+            const thumbnails = images.map((img, i) =>
                 `<img src="${img}" class="thumbnail ${i === 0 ? 'active' : ''}" onclick="changeImage(${i})" onerror="this.src='https://via.placeholder.com/80x80/E9ECEF/6C757D?text=IMG'">`
             ).join('');
-            
             const isPremium = product.est_premium || product.vendeur_premium || false;
-            
+
             const html = `
                 <div class="product-gallery">
                     <img src="${images[0]}" id="mainImage" class="main-image" alt="${productName}" onerror="this.src='https://via.placeholder.com/600x600/E9ECEF/6C757D?text=Image'">
                     ${images.length > 1 ? `<div class="thumbnail-grid">${thumbnails}</div>` : ''}
                 </div>
 
-                
                 <div class="product-details">
                     <h1 class="product-title-large">${productName}</h1>
                     <div class="product-price-large">${formatPrice(product.prix)} FCFA</div>
-                    
-                    <div class="delivery-options-section" style="margin-bottom: 1.5rem;">
-                        <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem;">🚚 Options de livraison</h3>
-                        <div id="deliveryOptionsContainer" style="display: grid; gap: 0.5rem;">
-                            <!-- Dynamically populated -->
-                        </div>
+
+                    <div class="delivery-options-section" style="margin-bottom:1.5rem;">
+                        <h3 style="margin-bottom:0.5rem;font-size:1.1rem;">🚚 Options de livraison</h3>
+                        <div id="deliveryOptionsContainer" style="display:grid;gap:0.5rem;"></div>
                     </div>
 
-                    <div class="buy-section" style="background: var(--bg-light); padding: 1.5rem; border-radius: var(--radius-md);">
-                        <div style="margin-bottom: 1rem;">
-                            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Votre numéro de téléphone (pour suivi)</label>
-                            <input type="tel" id="buyerPhone" placeholder="Ex: 70000000" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm);" required>
+                    <div class="buy-section" style="background:var(--bg-light);padding:1.5rem;border-radius:var(--radius-md);">
+                        
+                        <!-- Formulaire commande -->
+                        <div style="display:grid;gap:0.75rem;margin-bottom:1rem;">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+                                <div>
+                                    <label class="form-label">Nom *</label>
+                                    <input type="text" id="buyerNom" placeholder="Ex: Konaté" class="form-input">
+                                </div>
+                                <div>
+                                    <label class="form-label">Prénom</label>
+                                    <input type="text" id="buyerPrenom" placeholder="Ex: Bah" class="form-input">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label">WhatsApp * (pour suivi)</label>
+                                <input type="tel" id="buyerPhone" placeholder="Ex: 70000000" class="form-input">
+                            </div>
+                            <div>
+                                <label class="form-label">Adresse de livraison</label>
+                                <input type="text" id="buyerAdresse" placeholder="Ex: Hamdallaye ACI 2000, Bamako" class="form-input">
+                            </div>
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.2rem; margin-bottom: 1rem;">
+
+                        <div style="display:flex;justify-content:space-between;font-weight:700;font-size:1.2rem;margin-bottom:1rem;">
                             <span>Total à payer:</span>
                             <span id="displayTotalPrice">${formatPrice(product.prix)} FCFA</span>
                         </div>
-                        <p style="margin-bottom: 0.5rem; font-weight: 600;">💳 Paiement sécurisé Orange Money</p>
-                        <div style="display: grid; gap: 0.5rem;">
+                        <p style="margin-bottom:0.5rem;font-weight:600;">💳 Paiement sécurisé Orange Money</p>
+                        <div style="display:grid;gap:0.5rem;">
                             <button class="buy-btn" onclick="acheterProduit()" id="buyBtn">
                                 🛒 Acheter Maintenant
                             </button>
-                            <button class="buy-btn" onclick="ajouterAuPanierProduit()" id="cartBtn" style="background: #1565C0; color: white;">
+                            <button class="buy-btn" onclick="ajouterAuPanierProduit()" id="cartBtn" style="background:#1565C0;color:white;">
                                 🛍️ Ajouter au Panier
                             </button>
                         </div>
-                        <p style="text-align:center;margin-top:0.75rem;font-size:0.85rem;"><a href="suivi.html" style="color:#1565C0;font-weight:600;">📦 Suivre une commande existante</a></p>
-                    </div>
-                    
-                    <a href="vendeur.html?id=${vendorId}" class="vendor-card-inline">
-                        <div class="vendor-avatar" style="width: 60px; height: 60px; font-size: 1.5rem;">
-                            ${vendorName.charAt(0).toUpperCase()}
-                        </div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 700; margin-bottom: 0.25rem;">
-                                ${vendorName} ${isPremium ? '<span style="color: var(--premium-gold);">✓</span>' : ''}
-                            </div>
-                            <div style="font-size: 0.9rem; color: var(--text-gray);">
-                                Voir la boutique →
-                            </div>
-                        </div>
-                    </a>
-                    
-                    <div style="margin-bottom: var(--spacing-md);">
-                        <h3 style="margin-bottom: 0.5rem;">📝 Description</h3>
-                        <p style="color: var(--text-gray); line-height: 1.8;">
-                            ${product.description || 'Pas de description disponible.'}
+                        <p style="text-align:center;margin-top:0.75rem;font-size:0.85rem;">
+                            <a href="suivi.html" style="color:#1565C0;font-weight:600;">📦 Suivre une commande existante</a>
                         </p>
                     </div>
-                    
+
+                    <a href="vendeur.html?id=${vendorId}" class="vendor-card-inline">
+                        <div class="vendor-avatar" style="width:60px;height:60px;font-size:1.5rem;">
+                            ${vendorName.charAt(0).toUpperCase()}
+                        </div>
+                        <div style="flex:1;">
+                            <div style="font-weight:700;margin-bottom:0.25rem;">
+                                ${vendorName} ${isPremium ? '<span style="color:var(--premium-gold);">✓</span>' : ''}
+                            </div>
+                            <div style="font-size:0.9rem;color:var(--text-gray);">Voir la boutique →</div>
+                        </div>
+                    </a>
+
+                    <div style="margin-bottom:var(--spacing-md);">
+                        <h3 style="margin-bottom:0.5rem;">📝 Description</h3>
+                        <p style="color:var(--text-gray);line-height:1.8;">${product.description || 'Pas de description disponible.'}</p>
+                    </div>
+
                     <div>
-                        <h3 style="margin-bottom: 0.5rem;">ℹ️ Informations</h3>
-                        <div style="display: grid; gap: 0.5rem;">
+                        <h3 style="margin-bottom:0.5rem;">ℹ️ Informations</h3>
+                        <div style="display:grid;gap:0.5rem;">
                             <div><strong>Catégorie:</strong> ${product.categorie || 'Non classé'}</div>
                             <div><strong>État:</strong> ${product.etat || 'Neuf'}</div>
                             <div><strong>Localisation:</strong> ${product.localisation || 'Mali'}</div>
@@ -369,7 +329,7 @@
                     </div>
                 </div>
             `;
-            
+
             document.getElementById('productPage').innerHTML = html;
             document.title = `${productName} - APHRIKE JULA`;
 
@@ -380,27 +340,22 @@
                 product.methodes_livraison.forEach((method, index) => {
                     const priceLabel = method.prix > 0 ? `+ ${formatPrice(method.prix)} FCFA` : 'Gratuit';
                     const isChecked = index === 0 ? 'checked' : '';
-                    if (index === 0) updateTotalPrice(method.prix); // Set default selected price
-                    
+                    if (index === 0) updateTotalPrice(method.prix);
                     optionsHtml += `
-                        <label style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); cursor: pointer; background: white;">
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <label style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;border:1px solid var(--border-color);border-radius:var(--radius-sm);cursor:pointer;background:white;">
+                            <div style="display:flex;align-items:center;gap:0.5rem;">
                                 <input type="radio" name="deliveryMethod" value='${JSON.stringify(method)}' onchange="handleDeliveryChange(this)" ${isChecked}>
                                 <span>${method.nom}</span>
                             </div>
-                            <span style="font-weight: 600; color: var(--primary-color);">${priceLabel}</span>
-                        </label>
-                    `;
+                            <span style="font-weight:600;color:var(--primary-color);">${priceLabel}</span>
+                        </label>`;
                 });
                 deliveryContainer.innerHTML = optionsHtml;
             } else {
-                deliveryContainer.innerHTML = '<p style="color: var(--text-gray);">Contacter le vendeur pour la livraison.</p>';
+                deliveryContainer.innerHTML = '<p style="color:var(--text-gray);">Contacter le vendeur pour la livraison.</p>';
                 updateTotalPrice(0);
             }
         }
-
-        let currentDeliveryPrice = 0;
-        let selectedDeliveryMethod = null;
 
         function handleDeliveryChange(radio) {
             const method = JSON.parse(radio.value);
@@ -419,53 +374,62 @@
             currentImageIndex = index;
             const images = productData.images || [];
             document.getElementById('mainImage').src = images[index];
-            
             document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
                 thumb.classList.toggle('active', i === index);
             });
         }
 
         async function acheterProduit() {
-            const phone = document.getElementById('buyerPhone').value;
-            if (!phone || phone.length < 8) {
-                alert("Veuillez entrer un numéro de téléphone valide.");
-                return;
-            }
+            const nom = document.getElementById('buyerNom').value.trim();
+            const prenom = document.getElementById('buyerPrenom').value.trim();
+            const phone = document.getElementById('buyerPhone').value.trim();
+            const adresse = document.getElementById('buyerAdresse').value.trim();
+
+            if (!nom) { alert("Veuillez entrer votre nom."); return; }
+            if (!phone || phone.length < 8) { alert("Veuillez entrer un numéro WhatsApp valide."); return; }
 
             const btn = document.getElementById('buyBtn');
             btn.disabled = true;
             btn.textContent = 'Traitement...';
 
-            // Retrieve default selected if not clicked
             if (!selectedDeliveryMethod && productData.methodes_livraison && productData.methodes_livraison.length > 0) {
                 selectedDeliveryMethod = productData.methodes_livraison[0];
             }
 
+            const vendeurId = (productData.vendeur && productData.vendeur.id) || productData.vendeur_id || '';
+
             const payload = {
                 produit_id: productId,
-                acheteur_telephone: phone,
-                montant: productData.prix,
+                vendeur_id: vendeurId,
+                nom: nom,
+                prenom: prenom,
+                telephone: phone,
+                adresse_livraison: adresse,
+                quantite: 1,
                 methode_livraison: selectedDeliveryMethod ? selectedDeliveryMethod.nom : null,
                 frais_livraison: selectedDeliveryMethod ? selectedDeliveryMethod.prix : 0
             };
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/ventes/enregistrer`, {
+                const response = await fetch(`${API_BASE_URL}/api/commandes`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                
+
                 if (response.ok) {
                     const data = await response.json();
-                    const totalPayable = productData.prix + payload.frais_livraison;
-                    
-                    // Show OM Modal
-                    document.getElementById('omRef').textContent = 'REF-' + data.vente_id.substring(data.vente_id.length - 6).toUpperCase();
-                    document.getElementById('omAmount').textContent = formatPrice(totalPayable) + ' FCFA';
+                    // Ouvrir WhatsApp vers le vendeur automatiquement
+                    if (data.whatsapp_vendeur_url) {
+                        window.open(data.whatsapp_vendeur_url, '_blank');
+                    }
+                    // Afficher modal confirmation
+                    document.getElementById('omRef').textContent = data.reference;
+                    document.getElementById('omAmount').textContent = formatPrice(data.montant_total) + ' FCFA';
                     document.getElementById('omModal').style.display = 'flex';
                 } else {
-                    alert("Erreur lors de la création de la commande.");
+                    const err = await response.json();
+                    alert("Erreur: " + (err.detail || "Impossible de passer la commande."));
                 }
             } catch (e) {
                 console.error(e);
@@ -489,7 +453,6 @@
             return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
         }
 
-        // Add-to-cart wrapper for product page
         function ajouterAuPanierProduit() {
             if (!productData) return;
             let delivNom = null, delivPrix = 0;
@@ -502,36 +465,40 @@
         }
     </script>
     <script src="cart.js"></script>
-    <!-- Modal Orange Money -->
-    <div id="omModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:2000; justify-content:center; align-items:center;">
-        <div style="background:white; padding:2rem; border-radius:12px; max-width:400px; width:90%; position:relative;">
-            <button onclick="closeOmModal()" style="position:absolute; top:10px; right:15px; background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
-            <div style="text-align:center; margin-bottom:1.5rem;">
-                <h2 style="color:#FF6600; margin-bottom:0.5rem;">Paiement Orange Money</h2>
-                <p style="color:var(--text-gray); font-size:0.9rem;">Suivez les instructions pour finaliser votre commande</p>
+
+    <!-- Modal confirmation commande -->
+    <div id="omModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:2000;justify-content:center;align-items:center;">
+        <div style="background:white;padding:2rem;border-radius:12px;max-width:400px;width:90%;position:relative;">
+            <button onclick="closeOmModal()" style="position:absolute;top:10px;right:15px;background:none;border:none;font-size:1.5rem;cursor:pointer;">&times;</button>
+            <div style="text-align:center;margin-bottom:1.5rem;">
+                <div style="font-size:3rem;">🎉</div>
+                <h2 style="color:#1565C0;margin-bottom:0.5rem;">Commande envoyée !</h2>
+                <p style="color:var(--text-gray);font-size:0.9rem;">Le vendeur a reçu votre commande sur WhatsApp</p>
             </div>
-            
-            <div style="background:#f8f9fa; padding:1rem; border-radius:8px; margin-bottom:1.5rem; text-align:center;">
-                <p style="margin-bottom:0.5rem; font-weight:600;">Montant exact à payer :</p>
-                <div id="omAmount" style="font-size:1.5rem; font-weight:700; color:#1565C0; margin-bottom:1rem;"></div>
-                
-                <p style="margin-bottom:0.5rem; font-weight:600;">Référence de commande :</p>
-                <div id="omRef" style="font-size:1.2rem; font-family:monospace; background:#e3f2fd; padding:0.5rem; border-radius:4px; display:inline-block; font-weight:700; color:#1565C0;"></div>
+
+            <div style="background:#f8f9fa;padding:1rem;border-radius:8px;margin-bottom:1.5rem;text-align:center;">
+                <p style="margin-bottom:0.5rem;font-weight:600;">Référence de commande :</p>
+                <div id="omRef" style="font-size:1.2rem;font-family:monospace;background:#e3f2fd;padding:0.5rem;border-radius:4px;display:inline-block;font-weight:700;color:#1565C0;"></div>
+                <p style="margin-top:0.75rem;margin-bottom:0.25rem;font-weight:600;">Montant total :</p>
+                <div id="omAmount" style="font-size:1.5rem;font-weight:700;color:#1565C0;"></div>
             </div>
-            
-            <div style="margin-bottom:1.5rem;">
-                <p style="margin-bottom:0.5rem;"><strong>1.</strong> Effectuez le transfert Orange Money au numéro suivant :</p>
-                <div style="font-size:1.2rem; font-weight:700; text-align:center; padding:0.5rem; border:2px dashed #FF6600; border-radius:8px; margin-bottom:1rem;">+223 70 70 05 20</div>
-                <p style="margin-bottom:0.5rem;"><strong>2.</strong> Prenez une capture d'écran du SMS de confirmation.</p>
-                <p><strong>3.</strong> Envoyez la capture d'écran sur WhatsApp avec votre référence de commande.</p>
+
+            <div style="margin-bottom:1.5rem;font-size:0.9rem;color:var(--text-gray);">
+                <p style="margin-bottom:0.5rem;">📱 <strong>Gardez votre référence</strong> pour suivre votre commande</p>
+                <p style="margin-bottom:0.5rem;">✅ <strong>Le vendeur vous contactera</strong> sur WhatsApp pour confirmer</p>
+                <p>💰 <strong>Paiement</strong> à la livraison ou via Orange Money</p>
             </div>
-            
-            <a href="https://wa.me/22370700520?text=Bonjour,%20j'ai%20effectué%20le%20paiement%20pour%20ma%20commande." target="_blank" style="display:block; text-align:center; background:#25D366; color:white; padding:12px; border-radius:100px; text-decoration:none; font-weight:600; font-size:1.1rem;">
-                📱 Envoyer la preuve sur WhatsApp
-            </a>
+
+            <div style="display:grid;gap:0.5rem;">
+                <a href="suivi.html" style="display:block;text-align:center;background:#1565C0;color:white;padding:12px;border-radius:100px;text-decoration:none;font-weight:600;">
+                    📦 Suivre ma commande
+                </a>
+                <button onclick="closeOmModal()" style="background:#f8f9fa;border:1px solid var(--border-color);padding:10px;border-radius:100px;cursor:pointer;font-weight:600;">
+                    Continuer mes achats
+                </button>
+            </div>
         </div>
     </div>
-
 
 </body>
 </html>
