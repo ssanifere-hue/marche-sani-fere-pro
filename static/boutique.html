@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boutique - APHRIKE JULA</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="aj-navbar" style="display:flex;align-items:center;gap:12px;padding:0 24px;height:56px;background:#1565C0;position:sticky;top:0;z-index:1000;">
+        <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+            <span style="font-size:17px;font-weight:600;color:#fff;">⭐ APHRIKE JULA</span>
+        </a>
+        <div style="margin-left:auto;display:flex;gap:10px;">
+            <a href="index.html" style="color:#fff;text-decoration:none;padding:8px 16px;border:1.5px solid rgba(255,255,255,0.5);border-radius:100px;">← Retour</a>
+        </div>
+    </nav>
+
+    <div class="container" style="margin-top:2rem;">
+        <div id="boutiqueHeader" style="background:#1565C0;color:white;padding:2rem;border-radius:12px;text-align:center;margin-bottom:2rem;">
+            <div style="font-size:4rem;margin-bottom:1rem;" id="vendeurAvatar">?</div>
+            <h1 id="vendeurNom">Chargement...</h1>
+            <p id="vendeurInfo" style="opacity:0.85;"></p>
+        </div>
+        <h2 style="margin-bottom:1rem;">Produits de la boutique</h2>
+        <div id="produitsGrid" class="products-grid">
+            <div class="loading"><div class="spinner"></div></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://web-production-8f94.up.railway.app';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const vendeurId = params.get('id');
+            if (!vendeurId) { window.location.href = 'index.html'; return; }
+            loadBoutique(vendeurId);
+        });
+
+        async function loadBoutique(vendeurId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/vendeurs/${vendeurId}`);
+                const vendeur = await response.json();
+                document.getElementById('vendeurAvatar').textContent = (vendeur.nom_boutique || vendeur.nom || 'B').charAt(0).toUpperCase();
+                document.getElementById('vendeurNom').textContent = vendeur.nom_boutique || vendeur.nom || 'Boutique';
+                document.getElementById('vendeurInfo').textContent = vendeur.description || '';
+                document.title = (vendeur.nom_boutique || 'Boutique') + ' - APHRIKE JULA';
+            } catch(e) {
+                document.getElementById('vendeurNom').textContent = 'Boutique';
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/vendeurs/${vendeurId}/produits`);
+                const produits = await response.json();
+                const grid = document.getElementById('produitsGrid');
+                if (!produits || produits.length === 0) {
+                    grid.innerHTML = '<p style="text-align:center;padding:3rem;">Aucun produit dans cette boutique.</p>';
+                    return;
+                }
+                grid.innerHTML = produits.map(p => `
+                    <a href="produit.html?id=${p.id}" class="product-card">
+                        <img src="${(p.images && p.images[0]) || 'https://via.placeholder.com/300x300/E9ECEF/6C757D?text=Produit'}" 
+                             class="product-image" alt="${p.nom || p.titre}"
+                             onerror="this.src='https://via.placeholder.com/300x300/E9ECEF/6C757D?text=Image'">
+                        <div class="product-info">
+                            <div class="product-title">${p.nom || p.titre}</div>
+                            <div class="product-price">${new Intl.NumberFormat('fr-FR').format(p.prix)} FCFA</div>
+                        </div>
+                    </a>
+                `).join('');
+            } catch(e) {
+                document.getElementById('produitsGrid').innerHTML = '<p style="text-align:center;padding:3rem;">Erreur de chargement des produits.</p>';
+            }
+        }
+    </script>
+</body>
+</html>
