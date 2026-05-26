@@ -52,7 +52,7 @@
 
             try {
                 const response = await fetch(`${API_BASE_URL}/api/vendeurs/${vendeurId}/produits`);
-                const produits = await response.json();
+                const result = await response.json(); const produits = result.produits || result;
                 const grid = document.getElementById('produitsGrid');
                 if (!produits || produits.length === 0) {
                     grid.innerHTML = '<p style="text-align:center;padding:3rem;">Aucun produit dans cette boutique.</p>';
