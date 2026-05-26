@@ -3,160 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boutique Vendeur - APHRIKE JULA</title>
+    <title>Devenir Vendeur - APHRIKE JULA</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        .vendor-profile {
+        .seller-hero {
             background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-teal) 100%);
             color: white;
-            padding: var(--spacing-xl) 0;
-            margin-bottom: var(--spacing-xl);
+            padding: 4rem 0;
+            text-align: center;
         }
-        
-        .vendor-profile-content {
+        .seller-hero h1 { font-size: 2.5rem; margin-bottom: var(--spacing-md); }
+        .seller-hero p { font-size: 1.25rem; opacity: 0.95; max-width: 600px; margin: 0 auto; }
+        .benefits-section { padding: var(--spacing-xl) 0; }
+        .benefits-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-xl); }
+        .benefit-card { background: white; padding: var(--spacing-lg); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); text-align: center; transition: var(--transition-normal); }
+        .benefit-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+        .benefit-icon { font-size: 3rem; margin-bottom: var(--spacing-md); }
+        .benefit-title { font-size: 1.25rem; font-weight: 700; margin-bottom: var(--spacing-sm); color: var(--text-dark); }
+        .benefit-desc { color: var(--text-gray); line-height: 1.6; }
+        .pricing-section { background: var(--bg-light); padding: var(--spacing-xl) 0; }
+        .pricing-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-lg); max-width: 900px; margin: 0 auto; }
+        .pricing-card { background: white; padding: var(--spacing-xl); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); position: relative; }
+        .pricing-card.premium { border: 3px solid var(--premium-gold); }
+        .pricing-badge { position: absolute; top: -15px; right: 20px; background: var(--premium-gradient); color: white; padding: 0.5rem 1rem; border-radius: var(--radius-full); font-weight: 700; box-shadow: var(--shadow-md); }
+        .pricing-title { font-size: 1.5rem; font-weight: 700; margin-bottom: var(--spacing-sm); color: var(--text-dark); }
+        .pricing-price { font-size: 2.5rem; font-weight: 700; color: var(--primary-green); margin-bottom: var(--spacing-md); }
+        .pricing-price span { font-size: 1rem; color: var(--text-gray); }
+        .pricing-features { list-style: none; margin-bottom: var(--spacing-lg); }
+        .pricing-features li { padding: 0.75rem 0; border-bottom: 1px solid var(--border-gray); display: flex; align-items: center; gap: 0.5rem; }
+        .pricing-features li:last-child { border-bottom: none; }
+        .steps-section { padding: var(--spacing-xl) 0; }
+        .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-lg); }
+        .step-card { text-align: center; }
+        .step-number { width: 60px; height: 60px; background: var(--primary-green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; margin: 0 auto var(--spacing-md); }
+        .step-title { font-weight: 700; margin-bottom: 0.5rem; color: var(--text-dark); }
+        .step-desc { color: var(--text-gray); }
+
+        /* Code validation styles */
+        .code-box {
             display: flex;
-            gap: var(--spacing-lg);
-            align-items: center;
-            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+            margin: 1.5rem 0;
         }
-        
-        .vendor-avatar-large {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            background: white;
+        .code-digit {
+            width: 52px;
+            height: 64px;
+            border: 3px solid #1565C0;
+            border-radius: 10px;
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            color: #1565C0;
+            background: #E3F2FD;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 4rem;
-            font-weight: 700;
-            color: var(--primary-green);
-            box-shadow: var(--shadow-lg);
-            border: 5px solid white;
         }
-        
-        .vendor-info {
-            flex: 1;
-            min-width: 300px;
-        }
-        
-        .vendor-name-large {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .vendor-bio {
-            font-size: 1.1rem;
-            margin-bottom: var(--spacing-md);
-            opacity: 0.95;
-        }
-        
-        .vendor-stats-large {
-            display: flex;
-            gap: var(--spacing-lg);
-            flex-wrap: wrap;
-        }
-        
-        .stat-large {
-            background: rgba(255,255,255,0.2);
-            padding: var(--spacing-sm) var(--spacing-md);
-            border-radius: var(--radius-md);
-            backdrop-filter: blur(10px);
-        }
-        
-        .stat-large-value {
-            font-size: 2rem;
-            font-weight: 700;
-            display: block;
-        }
-        
-        .stat-large-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-        
-        .contact-vendor {
-            background: var(--primary-orange);
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: var(--radius-full);
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: var(--transition-fast);
-            box-shadow: var(--shadow-md);
-            margin-top: var(--spacing-md);
-        }
-        
-        .contact-vendor:hover {
-            background: var(--primary-red);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: var(--spacing-md);
-            border-bottom: 2px solid var(--border-gray);
-        }
-        
-        .tab {
-            background: none;
-            border: none;
-            padding: 1rem 1.5rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-gray);
-            cursor: pointer;
-            transition: var(--transition-fast);
-            border-bottom: 3px solid transparent;
-            margin-bottom: -2px;
-        }
-        
-        .tab.active {
-            color: var(--primary-green);
-            border-bottom-color: var(--primary-green);
-        }
-        
-        .tab-content {
+        .validation-section {
             display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        
-        .tab-content.active {
-            display: block;
+        .validation-section.active { display: block; }
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: #25D366;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 100px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(37,211,102,0.3);
+            transition: transform 0.2s;
         }
+        .whatsapp-btn:hover { transform: translateY(-2px); }
+        .code-input-row {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+        .code-input-digit {
+            width: 48px;
+            height: 56px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .code-input-digit:focus { border-color: #1565C0; }
+        .timer-text { color: #E65100; font-weight: 600; font-size: 0.9rem; }
 
         @media (max-width: 768px) {
-            .vendor-profile { padding: var(--spacing-lg) 0; }
-            .vendor-profile-content { flex-direction: column; text-align: center; }
-            .vendor-avatar-large { width: 100px; height: 100px; font-size: 2.5rem; margin: 0 auto; }
-            .vendor-info { min-width: auto; width: 100%; }
-            .vendor-name-large { font-size: 1.5rem; justify-content: center; }
-            .vendor-bio { font-size: 0.95rem; }
-            .vendor-stats-large { justify-content: center; gap: var(--spacing-sm); }
-            .stat-large { padding: 0.6rem 0.8rem; }
-            .stat-large-value { font-size: 1.4rem; }
-            .stat-large-label { font-size: 0.8rem; }
-            .contact-vendor { width: 100%; }
-            .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
-            .tab { flex-shrink: 0; padding: 0.75rem 1rem; font-size: 0.95rem; }
-        }
-
-        @media (max-width: 480px) {
-            .vendor-avatar-large { width: 80px; height: 80px; font-size: 2rem; }
-            .vendor-name-large { font-size: 1.25rem; }
-            .stat-large-value { font-size: 1.2rem; }
+            .seller-hero { padding: 2rem 0; }
+            .seller-hero h1 { font-size: 1.5rem; }
+            .benefits-grid { grid-template-columns: 1fr; }
+            .pricing-cards { grid-template-columns: 1fr; }
+            .steps-grid { grid-template-columns: 1fr 1fr; }
+            .code-digit { width: 40px; height: 52px; font-size: 1.5rem; }
+            .code-input-digit { width: 40px; height: 48px; font-size: 1.25rem; }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation APHRIKE JULA -->
     <nav class="aj-navbar" style="display:flex;align-items:center;gap:12px;padding:0 24px;height:56px;background:#1565C0;position:sticky;top:0;z-index:1000;box-shadow:0 2px 8px rgba(21,101,192,0.3);">
         <a href="index.html" class="aj-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;">
             <div class="aj-logo">
@@ -168,88 +128,274 @@
             </div>
             <span style="font-size:17px;font-weight:600;color:#fff;letter-spacing:-0.01em;white-space:nowrap;">APHRIKE JULA</span>
         </a>
-
-        <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border-radius:100px;padding:7px 16px;flex:1;max-width:420px;margin:0 auto;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="searchInput" placeholder="Chercher un produit..." autocomplete="off" style="background:transparent;border:none;outline:none;font-size:14px;color:#fff;width:100%;">
-        </div>
-
-        <div id="navActions" style="display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;">
-            <a href="vendre.html" style="padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;border:none;cursor:pointer;background:#FFD700;color:#1565C0;text-decoration:none;transition:background 0.2s;">Vendre</a>
-            <a href="connexion.html" style="padding:7px 16px;border-radius:100px;font-size:14px;font-weight:500;cursor:pointer;background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.5);text-decoration:none;transition:background 0.2s;">Connexion</a>
+        <div style="display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;">
+            <a href="#inscription-vendeur" style="padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;border:none;cursor:pointer;background:#FFD700;color:#1565C0;text-decoration:none;">Devenir Vendeur</a>
+            <a href="index.html" style="padding:7px 16px;border-radius:100px;font-size:14px;font-weight:500;cursor:pointer;background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.5);text-decoration:none;">← Retour</a>
         </div>
     </nav>
 
-    <!-- Profil Vendeur -->
-    <section class="vendor-profile">
+    <!-- Hero -->
+    <section class="seller-hero">
         <div class="container">
-            <div class="vendor-profile-content" id="vendorProfile">
-                <div class="loading">
-                    <div class="spinner"></div>
+            <h1>🏪 Vendez vos Produits au Mali</h1>
+            <p>Rejoignez la marketplace de confiance et développez votre business en toute sécurité avec Orange Money</p>
+        </div>
+    </section>
+
+    <!-- Avantages -->
+    <section class="benefits-section">
+        <div class="container">
+            <h2 class="section-title" style="text-align:center;">Pourquoi vendre sur APHRIKE JULA ?</h2>
+            <div class="benefits-grid">
+                <div class="benefit-card"><div class="benefit-icon">💰</div><div class="benefit-title">Commissions Réduites</div><div class="benefit-desc">Gardez plus d'argent sur chaque vente avec nos frais compétitifs</div></div>
+                <div class="benefit-card"><div class="benefit-icon">🔒</div><div class="benefit-title">Paiements Sécurisés</div><div class="benefit-desc">Orange Money intégré pour des transactions rapides et sûres</div></div>
+                <div class="benefit-card"><div class="benefit-icon">📱</div><div class="benefit-title">Dashboard Complet</div><div class="benefit-desc">Gérez vos produits, ventes et revenus en un seul endroit</div></div>
+                <div class="benefit-card"><div class="benefit-icon">⭐</div><div class="benefit-title">Badge Vérifié</div><div class="benefit-desc">Gagnez la confiance des acheteurs avec notre certification</div></div>
+                <div class="benefit-card"><div class="benefit-icon">📊</div><div class="benefit-title">Statistiques Avancées</div><div class="benefit-desc">Suivez vos performances et optimisez vos ventes</div></div>
+                <div class="benefit-card"><div class="benefit-icon">🤝</div><div class="benefit-title">Support Prioritaire</div><div class="benefit-desc">Notre équipe vous accompagne 7j/7 pour réussir</div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tarifs -->
+    <section class="pricing-section">
+        <div class="container">
+            <h2 class="section-title" style="text-align:center;">Choisissez Votre Formule</h2>
+            <div class="pricing-cards">
+                <div class="pricing-card">
+                    <div class="pricing-title">Basic</div>
+                    <div class="pricing-price">5 000 FCFA<span>/mois</span></div>
+                    <ul class="pricing-features">
+                        <li>✅ Accès au catalogue</li>
+                        <li>✅ Dashboard vendeur</li>
+                        <li>✅ Jusqu'à 50 produits</li>
+                        <li>✅ 50 photos par produit</li>
+                        <li>✅ Paiements Orange Money</li>
+                        <li>✅ Statistiques de base</li>
+                        <li>✅ 1 000 FCFA bonus inscription</li>
+                    </ul>
+                    <a href="#inscription-vendeur" class="nav-btn primary" style="width:100%;text-align:center;display:block;">Commencer</a>
+                </div>
+                <div class="pricing-card premium">
+                    <div class="pricing-badge">⭐ RECOMMANDÉ</div>
+                    <div class="pricing-title">Premium</div>
+                    <div class="pricing-price">10 000 FCFA<span>/mois</span></div>
+                    <ul class="pricing-features">
+                        <li>✅ <strong>Tout Basic +</strong></li>
+                        <li>⭐ <strong>Badge "Vérifié"</strong></li>
+                        <li>⭐ <strong>Photos illimitées</strong></li>
+                        <li>⭐ <strong>Produits illimités</strong></li>
+                        <li>⭐ <strong>Top du catalogue</strong></li>
+                        <li>⭐ <strong>Commission réduite</strong></li>
+                        <li>⭐ <strong>Support prioritaire 24/7</strong></li>
+                        <li>✅ 1 000 FCFA bonus inscription</li>
+                    </ul>
+                    <a href="#inscription-vendeur" class="nav-btn primary" style="width:100%;text-align:center;display:block;background:var(--primary-orange);">Devenir Premium</a>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Contenu Principal -->
-    <div class="container">
-        <!-- Tabs -->
-        <div class="tabs">
-            <button class="tab active" onclick="switchTab('produits')">
-                🛍️ Produits (<span id="productsCount">0</span>)
-            </button>
-            <button class="tab" onclick="switchTab('avis')">
-                ⭐ Avis (<span id="reviewsCount">0</span>)
-            </button>
-            <button class="tab" onclick="switchTab('apropos')">
-                ℹ️ À Propos
-            </button>
-        </div>
-        
-        <!-- Tab: Produits -->
-        <div id="produitsTab" class="tab-content active">
-            <div class="filters-bar">
-                <button class="filter-btn active" onclick="filterVendorProducts('tous')">Tous</button>
-                <button class="filter-btn" onclick="filterVendorProducts('recent')">Récents</button>
-                <button class="filter-btn" onclick="filterVendorProducts('popular')">Populaires</button>
-                <button class="filter-btn" onclick="filterVendorProducts('price-asc')">Prix ↑</button>
-                <button class="filter-btn" onclick="filterVendorProducts('price-desc')">Prix ↓</button>
-            </div>
-            
-            <div class="products-grid" id="vendorProductsGrid">
-                <div class="loading">
-                    <div class="spinner"></div>
-                </div>
-            </div>
-            
-            <div class="load-more">
-                <button class="load-more-btn" id="loadMoreVendorBtn" onclick="loadMoreVendorProducts()">
-                    Voir Plus de Produits
-                </button>
+    <!-- Comment ça marche -->
+    <section class="steps-section">
+        <div class="container">
+            <h2 class="section-title" style="text-align:center;">Comment ça marche ?</h2>
+            <div class="steps-grid">
+                <div class="step-card"><div class="step-number">1</div><div class="step-title">Inscrivez-vous</div><div class="step-desc">Créez votre compte vendeur en 2 minutes</div></div>
+                <div class="step-card"><div class="step-number">2</div><div class="step-title">Validez par WhatsApp</div><div class="step-desc">Confirmez votre identité avec un code de sécurité</div></div>
+                <div class="step-card"><div class="step-number">3</div><div class="step-title">Ajoutez vos produits</div><div class="step-desc">Photos, descriptions, prix - c'est simple !</div></div>
+                <div class="step-card"><div class="step-number">4</div><div class="step-title">Recevez l'argent</div><div class="step-desc">Paiement direct sur Orange Money</div></div>
             </div>
         </div>
-        
-        <!-- Tab: Avis -->
-        <div id="avisTab" class="tab-content">
-            <div id="reviewsContainer">
-                <div class="loading">
-                    <div class="spinner"></div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Tab: À Propos -->
-        <div id="aproposTab" class="tab-content">
-            <div style="background: white; padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);">
-                <h3 style="margin-bottom: 1rem;">📍 Informations</h3>
-                <div id="vendorAbout">
-                    <div class="loading">
-                        <div class="spinner"></div>
+    </section>
+
+    <!-- Inscription -->
+    <section id="inscription-vendeur" style="padding:var(--spacing-xl) 0;background:#f8f9fa;">
+        <div class="container" style="max-width:800px;margin:0 auto;">
+
+            <!-- Formulaire inscription -->
+            <div id="formSection" style="background:white;padding:2rem;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.05);">
+                <h2 style="text-align:center;margin-bottom:2rem;color:#1565C0;">Rejoignez APHRIKE JULA en tant que Vendeur</h2>
+
+                <div id="vendorErrorMessage" style="display:none;color:white;background:#dc3545;padding:10px;border-radius:5px;margin-bottom:15px;"></div>
+                <div id="vendorSuccessMessage" style="display:none;color:white;background:#28a745;padding:10px;border-radius:5px;margin-bottom:15px;"></div>
+
+                <form id="vendorRegisterForm" onsubmit="handleVendorRegister(event)">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                        <div><label>Nom *</label><input type="text" id="vNom" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;box-sizing:border-box;"></div>
+                        <div><label>Prénom *</label><input type="text" id="vPrenom" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;box-sizing:border-box;"></div>
                     </div>
+                    <div style="margin-bottom:1rem;">
+                        <label>Nom de la Boutique *</label>
+                        <input type="text" id="vBoutique" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;box-sizing:border-box;">
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                        <div><label>Téléphone WhatsApp (8 chiffres) *</label><input type="tel" id="vTelephone" pattern="[0-9]{8}" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;box-sizing:border-box;"></div>
+                        <div><label>Mot de passe *</label><input type="password" id="vPassword" required minlength="6" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;box-sizing:border-box;"></div>
+                    </div>
+                    <button type="submit" id="vendorRegisterBtn" style="width:100%;padding:14px;background:#FFD700;color:#1565C0;font-weight:bold;font-size:1.05rem;border:none;border-radius:8px;cursor:pointer;">
+                        🔐 Créer mon Compte Vendeur
+                    </button>
+                    <p style="text-align:center;margin-top:1rem;font-size:0.9rem;">
+                        <span style="color:#666;">🔒 Votre compte sera validé par code WhatsApp</span>
+                    </p>
+                    <p style="text-align:center;margin-top:0.5rem;">Déjà vendeur ? <a href="connexion.html">Connectez-vous ici</a></p>
+                </form>
+            </div>
+
+            <!-- Section validation code -->
+            <div id="validationSection" class="validation-section" style="margin-top:1rem;">
+                <div style="font-size:3rem;margin-bottom:1rem;">🔐</div>
+                <h2 style="color:#1565C0;margin-bottom:0.5rem;">Validez votre compte</h2>
+                <p style="color:#666;margin-bottom:1.5rem;">Votre compte a été créé ! Envoyez ce code sur WhatsApp pour l'activer.</p>
+
+                <!-- Affichage du code généré -->
+                <div style="background:#E3F2FD;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;">
+                    <p style="font-weight:600;color:#1565C0;margin-bottom:0.75rem;">Votre code de validation :</p>
+                    <div class="code-box" id="codeDisplay"></div>
+                    <p style="font-size:0.85rem;color:#666;margin-top:0.75rem;">Valable 30 minutes · <span id="timerDisplay" class="timer-text"></span></p>
+                </div>
+
+                <!-- Étapes -->
+                <div style="background:#f8f9fa;border-radius:10px;padding:1.25rem;margin-bottom:1.5rem;text-align:left;">
+                    <p style="font-weight:700;margin-bottom:0.75rem;">📋 Comment valider ?</p>
+                    <p style="margin-bottom:0.5rem;">1️⃣ Cliquez sur le bouton WhatsApp ci-dessous</p>
+                    <p style="margin-bottom:0.5rem;">2️⃣ Le message avec votre code sera pré-rempli</p>
+                    <p style="margin-bottom:0.5rem;">3️⃣ Envoyez-le à notre équipe APHRIKE JULA</p>
+                    <p>4️⃣ Votre compte sera activé dans les plus brefs délais</p>
+                </div>
+
+                <!-- Bouton WhatsApp -->
+                <a id="whatsappValidationBtn" href="#" target="_blank" class="whatsapp-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    Envoyer le code sur WhatsApp
+                </a>
+
+                <p style="color:#666;font-size:0.85rem;margin-top:1rem;">
+                    Vous n'avez pas reçu de confirmation ? 
+                    <a href="mailto:support@aphrikejula.com" style="color:#1565C0;">support@aphrikejula.com</a>
+                </p>
+
+                <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid #eee;">
+                    <p style="font-weight:600;margin-bottom:0.5rem;">Déjà validé par notre équipe ?</p>
+                    <a href="connexion.html" style="display:inline-block;padding:10px 24px;background:#1565C0;color:white;border-radius:8px;text-decoration:none;font-weight:600;">Se connecter →</a>
                 </div>
             </div>
+
         </div>
-    </div>
+    </section>
+
+    <script>
+        const API_BASE_URL = 'https://web-production-8f94.up.railway.app';
+        const APHRIKE_WHATSAPP = '22370700520';
+        let validationCode = '';
+        let timerInterval = null;
+
+        function generateCode() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        function displayCode(code) {
+            const container = document.getElementById('codeDisplay');
+            container.innerHTML = code.split('').map(digit =>
+                `<div class="code-digit">${digit}</div>`
+            ).join('');
+        }
+
+        function startTimer(minutes) {
+            let seconds = minutes * 60;
+            const display = document.getElementById('timerDisplay');
+            timerInterval = setInterval(() => {
+                const m = Math.floor(seconds / 60);
+                const s = seconds % 60;
+                display.textContent = `⏱️ Expire dans ${m}:${s.toString().padStart(2,'0')}`;
+                if (seconds <= 0) {
+                    clearInterval(timerInterval);
+                    display.textContent = '❌ Code expiré - Veuillez vous réinscrire';
+                }
+                seconds--;
+            }, 1000);
+        }
+
+        function setWhatsAppLink(nom, prenom, telephone, code) {
+            const message = encodeURIComponent(
+                `🔐 VALIDATION COMPTE VENDEUR - APHRIKE JULA\n\n` +
+                `Nom : ${nom} ${prenom}\n` +
+                `Téléphone : ${telephone}\n` +
+                `Code de validation : ${code}\n\n` +
+                `Merci de valider mon compte vendeur.`
+            );
+            document.getElementById('whatsappValidationBtn').href = `https://wa.me/${APHRIKE_WHATSAPP}?text=${message}`;
+        }
+
+        async function handleVendorRegister(event) {
+            event.preventDefault();
+            const btn = document.getElementById('vendorRegisterBtn');
+            const errDiv = document.getElementById('vendorErrorMessage');
+            const succDiv = document.getElementById('vendorSuccessMessage');
+
+            errDiv.style.display = 'none';
+            succDiv.style.display = 'none';
+            btn.disabled = true;
+            btn.textContent = 'Inscription en cours...';
+
+            const nom = document.getElementById('vNom').value;
+            const prenom = document.getElementById('vPrenom').value;
+            const telephone = document.getElementById('vTelephone').value;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nom: nom,
+                        prenom: prenom,
+                        telephone: telephone,
+                        mot_de_passe: document.getElementById('vPassword').value,
+                        nom_boutique: document.getElementById('vBoutique').value,
+                        role: 'vendeur'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Sauvegarder le token (compte en attente)
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+
+                    // Générer le code de validation
+                    validationCode = generateCode();
+
+                    // Afficher la section validation
+                    document.getElementById('formSection').style.display = 'none';
+                    document.getElementById('validationSection').classList.add('active');
+
+                    // Afficher le code
+                    displayCode(validationCode);
+
+                    // Démarrer le timer 30 min
+                    startTimer(30);
+
+                    // Préparer le lien WhatsApp
+                    setWhatsAppLink(nom, prenom, telephone, validationCode);
+
+                    // Scroll vers la validation
+                    document.getElementById('validationSection').scrollIntoView({behavior: 'smooth'});
+
+                } else {
+                    errDiv.textContent = data.detail || "Erreur d'inscription";
+                    errDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errDiv.textContent = "Erreur de connexion au serveur.";
+                errDiv.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔐 Créer mon Compte Vendeur';
+            }
+        }
+    </script>
 
     <!-- Footer -->
     <footer class="footer">
@@ -259,30 +405,24 @@
                     <h3>⭐ APHRIKE JULA</h3>
                     <p>La marketplace de confiance du Mali. Achetez et vendez en toute sécurité avec Orange Money.</p>
                 </div>
-                
                 <div class="footer-section">
                     <h3>Liens Rapides</h3>
                     <a href="index.html">Accueil</a>
                     <a href="catalogue.html">Catalogue</a>
                     <a href="vendre.html">Devenir Vendeur</a>
-                    <a href="https://wa.me/22370700520" target="_blank">Aide</a>
+                    <a href="connexion.html">Connexion</a>
                 </div>
-                
                 <div class="footer-section">
                     <h3>Contact</h3>
                     <p>📍 Bamako, Mali</p>
-                    <p>📧 aphrikejula@gmail.com</p>
-                    <p>📱 WhatsApp: +223 70 70 05 20</p>
+                    <p>📧 <a href="mailto:support@aphrikejula.com" style="color:inherit;">support@aphrikejula.com</a></p>
+                    <p>📱 WhatsApp: <a href="https://wa.me/22370700520" style="color:inherit;">+223 70 70 05 20</a></p>
                 </div>
             </div>
-            
             <div class="footer-bottom">
                 <p>&copy; 2026 APHRIKE JULA. Tous droits réservés. 🇲🇱</p>
             </div>
         </div>
     </footer>
-
-    <script src="app.js"></script>
-    <script src="vendeur.js"></script>
 </body>
 </html>
