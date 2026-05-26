@@ -211,7 +211,7 @@ async function loadVendorProducts(reset = false) {
         
         const grid = document.getElementById('vendorProductsGrid');
         
-        if (!data.produits || data.produits.length === 0) {
+        if (!data || data.length === 0) {
             if (reset || vendorProductsPage === 1) {
                 grid.innerHTML = `
                     <div style="grid-column: 1/-1; text-align:center; padding:3rem;">
@@ -227,7 +227,7 @@ async function loadVendorProducts(reset = false) {
         }
 
         
-        const productsHTML = data.produits.map(product => createVendorProductCard(product)).join('');
+        const productsHTML = data.map(product => createVendorProductCard(product)).join('');
         
         if (reset || vendorProductsPage === 1) {
             grid.innerHTML = productsHTML;
@@ -236,7 +236,7 @@ async function loadVendorProducts(reset = false) {
         }
 
         
-        hasMoreVendorProducts = data.produits.length === 24;
+        hasMoreVendorProducts = data.length === 24;
         vendorProductsPage++;
         
     } catch (error) {
