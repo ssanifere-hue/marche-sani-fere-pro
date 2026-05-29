@@ -66,17 +66,25 @@ if (vendeur.logo) { document.getElementById('vendeurLogo').src = vendeur.logo; d
                     grid.innerHTML = '<p style="text-align:center;padding:3rem;">Aucun produit dans cette boutique.</p>';
                     return;
                 }
-                grid.innerHTML = produits.map(p => `
+                grid.innerHTML = produits.map(p => {
+                    const nom = p.nom || p.titre || 'Produit';
+                    const imgs = (p.images || []).filter(i => i && i.trim());
+                    const img = imgs.length ? imgs[0] : 'https://via.placeholder.com/400x400/F4F6F9/B5C4DA?text=Produit';
+                    const prix = new Intl.NumberFormat('fr-FR').format(p.prix);
+                    const premium = p.est_premium ? '<div class="product-badge">\u2605 PREMIUM</div>' : '';
+                    return `
                     <a href="produit.html?id=${p.id}" class="product-card">
-                        <img src="${(p.images && p.images[0]) || 'https://via.placeholder.com/300x300/E9ECEF/6C757D?text=Produit'}" 
-                             class="product-image" alt="${p.nom || p.titre}"
-                             onerror="this.src='https://via.placeholder.com/300x300/E9ECEF/6C757D?text=Image'">
+                        ${premium}
+                        <span class="product-fav">\u2661</span>
+                        <img src="${img}" class="product-image" alt="${nom}"
+                             onerror="this.src='https://via.placeholder.com/400x400/F4F6F9/B5C4DA?text=Image'">
                         <div class="product-info">
-                            <div class="product-title">${p.nom || p.titre}</div>
-                            <div class="product-price">${new Intl.NumberFormat('fr-FR').format(p.prix)} FCFA</div>
+                            <div class="product-title">${nom}</div>
+                            <div><span class="product-price">${prix} <span class="devise">FCFA</span></span></div>
                         </div>
                     </a>
-                `).join('');
+                `;
+                }).join('');
             } catch(e) {
                 document.getElementById('produitsGrid').innerHTML = '<p style="text-align:center;padding:3rem;">Erreur de chargement des produits.</p>';
             }
