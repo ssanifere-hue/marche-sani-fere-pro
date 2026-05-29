@@ -24,6 +24,18 @@ ORANGE_MONEY_API_KEY = os.getenv("ORANGE_MONEY_API_KEY", "")
 
 app = FastAPI(title="Marche SANI-FÉRÉ PRO API")
 
+# === SOCLE MULTI-PAYS (config centrale) ===
+# Mali ACTIF. Les autres pays sont décrits mais éteints (actif=False)
+# jusqu'au jour de l'expansion : il suffira de passer "actif": True.
+PAYS = {
+    "ML": {"nom": "Mali",          "indicatif": "+223", "tel": 8,  "devise": "FCFA", "paiements": ["orange_money"],           "actif": True},
+    "BF": {"nom": "Burkina Faso",  "indicatif": "+226", "tel": 8,  "devise": "FCFA", "paiements": ["orange_money", "moov"],   "actif": False},
+    "NE": {"nom": "Niger",         "indicatif": "+227", "tel": 8,  "devise": "FCFA", "paiements": ["orange_money"],           "actif": False},
+    "SN": {"nom": "Sénégal",       "indicatif": "+221", "tel": 9,  "devise": "FCFA", "paiements": ["wave", "orange_money"],   "actif": False},
+    "CI": {"nom": "Côte d'Ivoire", "indicatif": "+225", "tel": 10, "devise": "FCFA", "paiements": ["wave", "orange_money"],   "actif": False},
+}
+PAYS_DEFAUT = "ML"
+
 # Cloudinary Configuration
 cloudinary.config(
     cloud_name=os.getenv("CLOUD_NAME"),
@@ -83,7 +95,8 @@ async def startup_event():
             "mot_de_passe": hash_password(demo_password),
             "role": "vendeur",
             "portefeuille": 5000,
-            "date_inscription": datetime.utcnow()
+            "date_inscription": datetime.utcnow(),
+            "pays": "ML"
         }
         result = await db.users.insert_one(user_data)
         user_id = str(result.inserted_id)
@@ -98,7 +111,8 @@ async def startup_event():
             "actif": True,
             "date_creation": datetime.utcnow(),
             "score": 5,
-            "avis": []
+            "avis": [],
+            "pays": "ML"
         }
         await db.vendeurs.insert_one(vendeur_data)
         print("Compte démo créé avec succès")
@@ -160,6 +174,7 @@ class UserCreate(BaseModel):
     role: str = "client"  # "client" ou "vendeur"
     nom_boutique: Optional[str] = None
     description_boutique: Optional[str] = None
+    pays: str = "ML"
 
 
 class UserLogin(BaseModel):
@@ -180,6 +195,7 @@ class ProduitCreate(BaseModel):
     stock: int = 1
     est_premium: bool = False
     methodes_livraison: Optional[List[MethodeLivraison]] = []
+    pays: str = "ML"
 
 class ProduitUpdate(BaseModel):
     nom: Optional[str] = None
@@ -203,6 +219,7 @@ class VendeurCreate(BaseModel):
     mot_de_passe: str
     nom_boutique: str
     description_boutique: Optional[str] = None
+    pays: str = "ML"
 
 class VendeurLogin(BaseModel):
     telephone: str
@@ -365,7 +382,8 @@ async def register(user: UserCreate):
         "mot_de_passe": hash_password(user.mot_de_passe),
         "role": user.role,
         "portefeuille": 1000,  # Bonus de bienvenue de 1000 FCFA
-        "date_inscription": datetime.utcnow()
+        "date_inscription": datetime.utcnow(),
+        "pays": user.pays
     }
     
     result = await db.users.insert_one(user_data)
@@ -382,7 +400,8 @@ async def register(user: UserCreate):
             "actif": False,  # Validation manuelle requise par l'admin
             "date_creation": datetime.utcnow(),
             "score": 0,
-            "avis": []
+            "avis": [],
+            "pays": user.pays
         }
         await db.vendeurs.insert_one(vendeur_data)
 
@@ -456,7 +475,8 @@ async def inscription_vendeur(vendeur: VendeurCreate):
         "parrains": [],  # Liste des vendeurs parrainés
         "commission_parrainage_gagnee": 0,
         "date_creation": datetime.utcnow(),
-        "derniere_connexion": datetime.utcnow()
+        "derniere_connexion": datetime.utcnow(),
+        "pays": vendeur.pays
     }
 
     
@@ -1146,7 +1166,8 @@ async def creer_produit(produit: ProduitCreate, current_user = Depends(get_curre
         "est_premium": produit.est_premium,
         "methodes_livraison": [m.dict() for m in (produit.methodes_livraison or [])],
         "vendeur_id": str(vendeur["_id"]),
-        "date_creation": datetime.utcnow()
+        "date_creation": datetime.utcnow(),
+        "pays": produit.pays
     }
     
     result = await db.produits.insert_one(produit_data)
@@ -1810,3 +1831,26 @@ if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
+
+# === Migration unique : tag des données existantes sans pays -> "ML" ===
+@app.post("/api/admin/migrer-pays")
+async def migrer_pays(current_user: dict = Depends(get_current_user)):
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Accès refusé. Réservé aux administrateurs.")
+    filtre = {"pays": {"$exists": False}}
+    r_users = await db.users.update_many(filtre, {"$set": {"pays": PAYS_DEFAUT}})
+    r_vend = await db.vendeurs.update_many(filtre, {"$set": {"pays": PAYS_DEFAUT}})
+    r_prod = await db.produits.update_many(filtre, {"$set": {"pays": PAYS_DEFAUT}})
+    return {
+        "message": "Migration pays terminée",
+        "users_taggés": r_users.modified_count,
+        "vendeurs_taggés": r_vend.modified_count,
+        "produits_taggés": r_prod.modified_count,
+    }
+
+
+# === Liste des pays actifs (utile pour le futur sélecteur, invisible tant qu'un seul pays) ===
+@app.get("/api/pays")
+async def liste_pays():
+    actifs = {code: info for code, info in PAYS.items() if info.get("actif")}
+    return {"pays": actifs, "defaut": PAYS_DEFAUT}
