@@ -171,28 +171,53 @@ async function loadProducts(reset = false) {
 
 function createProductCard(product) {
     const isPremium = product.est_premium || product.vendeur_premium || false;
-    const premiumBadge = isPremium ? '<div class="product-badge">✓ PREMIUM</div>' : '';
-    const verifiedIcon = isPremium ? '<span class="vendor-verified">✓</span>' : '';
-    
-    // Compatibilité: backend renvoie 'nom', frontend utilisait 'titre'
-    const productName = product.nom || product.titre || 'Produit';
-    
-    // Image par défaut si pas d'image (filtre les chaînes vides)
+    const nom = product.nom || product.titre || 'Produit';
+
     const validImages = (product.images || []).filter(img => img && img.trim());
-    const imageUrl = validImages.length > 0 
-        ? validImages[0] 
-        : `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(productName)}`;
-    
+    const imageUrl = validImages.length > 0
+        ? validImages[0]
+        : `https://via.placeholder.com/400x400/F4F6F9/B5C4DA?text=${encodeURIComponent(nom)}`;
+
+    const premiumBadge = isPremium ? '<div class="product-badge">\u2605 PREMIUM</div>' : '';
+    const verified = isPremium ? '<span class="vendor-verified">\u2714</span>' : '';
+
+    let starsHTML = '';
+    if (product.note) {
+        const n = Math.max(0, Math.min(5, Math.round(product.note)));
+        const pleines = '\u2605'.repeat(n);
+        const vides = '<span style="color:#D1D9E6;">' + '\u2605'.repeat(5 - n) + '</span>';
+        const nbAvis = product.nb_avis ? `<span class="reviews">(${product.nb_avis})</span>` : '';
+        starsHTML = `<div class="product-stars"><span class="stars">${pleines}${vides}</span>${nbAvis}</div>`;
+    }
+
+    let oldPriceHTML = '';
+    if (product.ancien_prix && product.ancien_prix > product.prix) {
+        oldPriceHTML = `<span class="product-oldprice">${formatPrice(product.ancien_prix)}</span>`;
+    }
+
+    let deliveryHTML = '';
+    const methodes = product.methodes_livraison || [];
+    if (methodes.length > 0) {
+        const gratuite = methodes.find(m => Number(m.prix) === 0);
+        if (gratuite) {
+            deliveryHTML = '<div class="product-delivery">Livraison GRATUITE</div>';
+        } else {
+            const min = Math.min(...methodes.map(m => Number(m.prix) || 0));
+            deliveryHTML = `<div class="product-delivery" style="color:#5A6172;">Livraison des ${formatPrice(min)} FCFA</div>`;
+        }
+    }
+
     return `
         <a href="produit.html?id=${product.id}" class="product-card">
             ${premiumBadge}
-            <img src="${imageUrl}" alt="${productName}" class="product-image" onerror="this.src='https://via.placeholder.com/300x300/E9ECEF/6C757D?text=Image'">
+            <span class="product-fav">\u2661</span>
+            <img src="${imageUrl}" alt="${nom}" class="product-image" onerror="this.src='https://via.placeholder.com/400x400/F4F6F9/B5C4DA?text=Image'">
             <div class="product-info">
-                <div class="product-title">${productName}</div>
-                <div class="product-price">${formatPrice(product.prix)} FCFA</div>
-                <div class="product-vendor">
-                    👤 ${product.vendeur_nom || 'Vendeur'} ${verifiedIcon}
-                </div>
+                <div class="product-title">${nom}</div>
+                ${starsHTML}
+                <div><span class="product-price">${formatPrice(product.prix)} <span class="devise">FCFA</span></span>${oldPriceHTML}</div>
+                ${deliveryHTML}
+                <div class="product-vendor">\ud83d\udc64 ${product.vendeur_nom || 'Vendeur'} ${verified}</div>
             </div>
         </a>
     `;
