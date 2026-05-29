@@ -1,434 +1,424 @@
-// Configuration
-var API_BASE_URL = 'https://web-production-8f94.up.railway.app';
-
-// État
-let vendorId = null;
-let vendorData = null;
-let vendorProductsPage = 1;
-let vendorProductsFilter = 'tous';
-let isLoadingVendorProducts = false;
-let hasMoreVendorProducts = true;
-
-// Initialisation
-document.addEventListener('DOMContentLoaded', () => {
-    const params = new URLSearchParams(window.location.search);
-    vendorId = params.get('id');
-    
-    if (!vendorId) {
-        window.location.href = 'index.html';
-        return;
-    }
-    
-    loadVendorProfile();
-    loadVendorProducts();
-    updateNavbar();
-});
-
-// Session navbar (même logique que app.js)
-function updateNavbar() {
-    const token = localStorage.getItem('token');
-    const userStr = localStorage.getItem('user');
-    const navActions = document.getElementById('navActions');
-    if (token && userStr && navActions) {
-        try {
-            const user = JSON.parse(userStr);
-            const firstName = user.prenom || user.nom || 'Compte';
-            navActions.innerHTML = `
-                ${user.role === 'vendeur'
-                    ? '<a href="/dashboard" style="padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;border:none;cursor:pointer;background:#FFD700;color:#1565C0;text-decoration:none;transition:background 0.2s;">Dashboard</a><a href="vendre.html" style="padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;border:none;cursor:pointer;background:#FFD700;color:#1565C0;text-decoration:none;transition:background 0.2s;margin-left:8px;">Vendre</a>'
-                    : ''}
-                <div style="display:flex;align-items:center;gap:1rem;">
-                    <span style="font-weight:600;color:var(--text-dark);">👤 ${firstName}</span>
-                    <a href="#" style="padding:7px 16px;border-radius:100px;font-size:14px;font-weight:500;cursor:pointer;background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.5);text-decoration:none;transition:background 0.2s;" onclick="handleLogout(event)">Déconnexion</a>
-                </div>
-            `;
-        } catch(e) {}
-    }
-}
-function handleLogout(e) {
-    if(e) e.preventDefault();
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.reload();
-}
-
-// Charger le profil vendeur
-async function loadVendorProfile() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/vendeurs/${vendorId}`);
-        const data = await response.json();
-        
-        // L'API renvoie les données directement (pas dans data.vendeur)
-        if (!data.id && !data.nom_boutique) {
-            throw new Error('Vendeur non trouvé');
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devenir Vendeur - APHRIKE JULA</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .seller-hero {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-teal) 100%);
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
         }
-        
-        vendorData = data;
-        displayVendorProfile(vendorData);
-        displayVendorAbout(vendorData);
+        .seller-hero h1 { font-size: 2.5rem; margin-bottom: var(--spacing-md); }
+        .seller-hero p { font-size: 1.25rem; opacity: 0.95; max-width: 600px; margin: 0 auto; }
+        .benefits-section { padding: var(--spacing-xl) 0; }
+        .benefits-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-xl); }
+        .benefit-card { background: white; padding: var(--spacing-lg); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); text-align: center; transition: var(--transition-normal); }
+        .benefit-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+        .benefit-icon { font-size: 3rem; margin-bottom: var(--spacing-md); }
+        .benefit-title { font-size: 1.25rem; font-weight: 700; margin-bottom: var(--spacing-sm); color: var(--text-dark); }
+        .benefit-desc { color: var(--text-gray); line-height: 1.6; }
+        .pricing-section { background: var(--bg-light); padding: var(--spacing-xl) 0; }
+        .pricing-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-lg); max-width: 900px; margin: 0 auto; }
+        .pricing-card { background: white; padding: var(--spacing-xl); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); position: relative; }
+        .pricing-card.premium { border: 3px solid var(--premium-gold); }
+        .pricing-badge { position: absolute; top: -15px; right: 20px; background: var(--premium-gradient); color: white; padding: 0.5rem 1rem; border-radius: var(--radius-full); font-weight: 700; box-shadow: var(--shadow-md); }
+        .pricing-title { font-size: 1.5rem; font-weight: 700; margin-bottom: var(--spacing-sm); color: var(--text-dark); }
+        .pricing-price { font-size: 2.5rem; font-weight: 700; color: var(--primary-green); margin-bottom: var(--spacing-md); }
+        .pricing-price span { font-size: 1rem; color: var(--text-gray); }
+        .pricing-features { list-style: none; margin-bottom: var(--spacing-lg); }
+        .pricing-features li { padding: 0.75rem 0; border-bottom: 1px solid var(--border-gray); display: flex; align-items: center; gap: 0.5rem; }
+        .pricing-features li:last-child { border-bottom: none; }
+        .steps-section { padding: var(--spacing-xl) 0; }
+        .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-lg); }
+        .step-card { text-align: center; }
+        .step-number { width: 60px; height: 60px; background: var(--primary-green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; margin: 0 auto var(--spacing-md); }
+        .step-title { font-weight: 700; margin-bottom: 0.5rem; color: var(--text-dark); }
+        .step-desc { color: var(--text-gray); }
 
-        
-    } catch (error) {
-        console.error('Erreur chargement profil vendeur:', error);
-        document.getElementById('vendorProfile').innerHTML = `
-            <div style="text-align:center; padding:2rem;">
-                <h3>❌ Vendeur non trouvé</h3>
-                <p>Ce vendeur n'existe pas ou a été supprimé.</p>
-                <a href="index.html" class="nav-btn primary" style="margin-top:1rem;">Retour à l'accueil</a>
-            </div>
-        `;
-    }
-}
-
-// Afficher le profil vendeur
-function displayVendorProfile(vendor) {
-    const isPremium = vendor.est_premium || false;
-    const premiumBadge = isPremium ? '<span style="background: var(--premium-gradient); padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: 0.9rem;">✓ PREMIUM</span>' : '';
-    
-    const vendorDisplayName = vendor.nom_boutique || vendor.nom || 'Vendeur';
-    const initial = vendorDisplayName.charAt(0).toUpperCase();
-    
-    const bannerHtml = vendor.banniere 
-        ? `<div style="height: 200px; width: 100%; background: url('${vendor.banniere}') center/cover; position: absolute; top: 0; left: 0; z-index: 0; border-radius: 12px 12px 0 0;"></div>` 
-        : '';
-        
-    const avatarHtml = vendor.logo
-        ? `<img src="${vendor.logo}" class="vendor-avatar-large" style="object-fit: cover; z-index: 1; border: 4px solid white; background: white;">`
-        : `<div class="vendor-avatar-large" style="z-index: 1; border: 4px solid white;">${initial}</div>`;
-
-    const contactActions = [];
-    if (vendor.whatsapp) {
-        contactActions.push(`<a href="https://wa.me/${vendor.whatsapp.replace(/\+/g, '')}" target="_blank" class="contact-vendor" style="background: #25D366; text-decoration: none;">📱 WhatsApp</a>`);
-    } else {
-        contactActions.push(`<button class="contact-vendor" onclick="contactVendor()">💬 Contacter le Vendeur</button>`);
-    }
-
-    const html = `
-        ${bannerHtml}
-        <div style="position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; width: 100%; ${vendor.banniere ? 'margin-top: 150px;' : ''}">
-            ${avatarHtml}
-            <div class="vendor-info" style="text-align: center;">
-                <div class="vendor-name-large">
-                    ${vendorDisplayName}
-                    ${premiumBadge}
-                </div>
-                <div class="vendor-bio" style="max-width: 600px; margin: 1rem auto;">
-                    ${vendor.description_boutique || vendor.bio || 'Vendeur sur APHRIKE JULA'}
-                </div>
-                ${vendor.adresse ? `<div style="color: var(--text-gray); margin-bottom: 1rem;">📍 ${vendor.adresse}</div>` : ''}
-                
-                <div class="vendor-stats-large" style="justify-content: center;">
-                    <div class="stat-large">
-                        <span class="stat-large-value">${vendor.total_ventes || 0}</span>
-                        <span class="stat-large-label">Ventes</span>
-                    </div>
-                    <div class="stat-large">
-                        <span class="stat-large-value">${vendor.note || '5.0'}</span>
-                        <span class="stat-large-label">⭐ Note</span>
-                    </div>
-                    <div class="stat-large">
-                        <span class="stat-large-value">${vendor.total_produits || 0}</span>
-                        <span class="stat-large-label">Produits</span>
-                    </div>
-                    <div class="stat-large">
-                        <span class="stat-large-value">${formatMemberDate(vendor.date_creation || vendor.date_inscription)}</span>
-                        <span class="stat-large-label">Membre depuis</span>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
-                    ${contactActions.join('')}
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // Assurez-vous que vendorProfile a position relative
-    const vendorProfileDiv = document.getElementById('vendorProfile');
-    vendorProfileDiv.style.position = 'relative';
-    vendorProfileDiv.style.padding = vendor.banniere ? '0 0 2rem 0' : '2rem';
-    vendorProfileDiv.innerHTML = html;
-    
-    document.getElementById('productsCount').textContent = vendor.total_produits || 0;
-    document.getElementById('reviewsCount').textContent = vendor.total_avis || 0;
-}
-
-// Afficher À Propos
-function displayVendorAbout(vendor) {
-    const isPremium = vendor.est_premium || false;
-    
-    const html = `
-        <div style="display: grid; gap: 1rem;">
-            <div>
-                <strong>📍 Localisation:</strong> ${vendor.localisation || 'Mali'}
-            </div>
-            <div>
-                <strong>📅 Membre depuis:</strong> ${formatFullDate(vendor.date_creation || vendor.date_inscription)}
-            </div>
-            <div>
-                <strong>✉️ Email:</strong> ${vendor.email || 'Non renseigné'}
-            </div>
-            <div>
-                <strong>📱 Téléphone:</strong> ${vendor.telephone || 'Non renseigné'}
-            </div>
-            <div>
-                <strong>🏆 Statut:</strong> ${isPremium ? 'Vendeur Premium ⭐' : 'Vendeur Basic'}
-            </div>
-            ${vendor.bio ? `
-            <div>
-                <strong>ℹ️ Bio:</strong><br>
-                ${vendor.bio}
-            </div>
-            ` : ''}
-        </div>
-    `;
-    
-    document.getElementById('vendorAbout').innerHTML = html;
-}
-
-// Charger les produits du vendeur
-async function loadVendorProducts(reset = false) {
-    if (isLoadingVendorProducts) return;
-    
-    if (reset || vendorProductsPage === 1) {
-        vendorProductsPage = 1;
-        hasMoreVendorProducts = true;
-        document.getElementById('vendorProductsGrid').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-    }
-
-    
-    isLoadingVendorProducts = true;
-    updateLoadMoreVendorButton(true);
-    
-    try {
-        let url = `${API_BASE_URL}/api/vendeurs/${vendorId}/produits?page=${vendorProductsPage}&limit=24`;
-        
-        if (vendorProductsFilter && vendorProductsFilter !== 'tous') {
-            url += `&sort=${vendorProductsFilter}`;
+        /* Code validation styles */
+        .code-box {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            margin: 1.5rem 0;
         }
-        
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        const grid = document.getElementById('vendorProductsGrid');
-        
-        if (!data || data.length === 0) {
-            if (reset || vendorProductsPage === 1) {
-                grid.innerHTML = `
-                    <div style="grid-column: 1/-1; text-align:center; padding:3rem;">
-                        <h3>📦 Aucun produit disponible</h3>
-                        <p>Ce vendeur n'a pas encore ajouté de produits</p>
-                    </div>
-                `;
-            }
-            hasMoreVendorProducts = false;
-            updateLoadMoreVendorButton(false);
-            isLoadingVendorProducts = false;
-            return;
+        .code-digit {
+            width: 52px;
+            height: 64px;
+            border: 3px solid #1565C0;
+            border-radius: 10px;
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            color: #1565C0;
+            background: #E3F2FD;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        
-        const productsHTML = data.map(product => createVendorProductCard(product)).join('');
-        
-        if (reset || vendorProductsPage === 1) {
-            grid.innerHTML = productsHTML;
-        } else {
-            grid.insertAdjacentHTML('beforeend', productsHTML);
+        .validation-section {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-
-        
-        hasMoreVendorProducts = data.length === 24;
-        vendorProductsPage++;
-        
-    } catch (error) {
-        console.error('Erreur chargement produits vendeur:', error);
-        const grid = document.getElementById('vendorProductsGrid');
-        if (reset || vendorProductsPage === 1) {
-            grid.innerHTML = `
-                <div style="grid-column: 1/-1; text-align:center; padding:3rem;">
-                    <h3>❌ Erreur de chargement</h3>
-                    <p>Impossible de charger les produits</p>
-                </div>
-            `;
+        .validation-section.active { display: block; }
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: #25D366;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 100px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none;
+            margin: 1rem 0;
+            box-shadow: 0 4px 12px rgba(37,211,102,0.3);
+            transition: transform 0.2s;
         }
+        .whatsapp-btn:hover { transform: translateY(-2px); }
+        .code-input-row {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+        .code-input-digit {
+            width: 48px;
+            height: 56px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .code-input-digit:focus { border-color: #1565C0; }
+        .timer-text { color: #E65100; font-weight: 600; font-size: 0.9rem; }
 
-    } finally {
-        isLoadingVendorProducts = false;
-        updateLoadMoreVendorButton(false);
-    }
-}
-
-// Créer carte produit
-function createVendorProductCard(product) {
-    const productName = product.nom || product.titre || 'Produit';
-    const validImages = (product.images || []).filter(img => img && img.trim());
-    const imageUrl = validImages.length > 0 
-        ? validImages[0] 
-        : `https://via.placeholder.com/300x300/E9ECEF/6C757D?text=${encodeURIComponent(productName)}`;
-    
-    return `
-        <a href="produit.html?id=${product.id}" class="product-card">
-            <img src="${imageUrl}" alt="${productName}" class="product-image" onerror="this.src='https://via.placeholder.com/300x300/E9ECEF/6C757D?text=Image'">
-            <div class="product-info">
-                <div class="product-title">${productName}</div>
-                <div class="product-price">${formatPrice(product.prix)} FCFA</div>
+        @media (max-width: 768px) {
+            .seller-hero { padding: 2rem 0; }
+            .seller-hero h1 { font-size: 1.5rem; }
+            .benefits-grid { grid-template-columns: 1fr; }
+            .pricing-cards { grid-template-columns: 1fr; }
+            .steps-grid { grid-template-columns: 1fr 1fr; }
+            .code-digit { width: 40px; height: 52px; font-size: 1.5rem; }
+            .code-input-digit { width: 40px; height: 48px; font-size: 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="aj-navbar" style="display:flex;align-items:center;gap:12px;padding:0 24px;height:56px;background:#1565C0;position:sticky;top:0;z-index:1000;box-shadow:0 2px 8px rgba(21,101,192,0.3);">
+        <a href="index.html" class="aj-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;">
+            <div class="aj-logo">
+                <svg viewBox="0 0 220 250" width="34" height="34" style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" aria-label="APHRIKE JULA"><path d="M 54,40 C 70,30 110,28 150,32 C 158,33 164,38 168,46 C 175,56 182,66 196,82 C 200,87 200,92 194,94 C 184,96 176,100 170,108 C 166,120 164,135 158,152 C 152,170 146,184 138,198 C 130,212 122,222 114,223 C 108,223 104,216 101,206 C 97,192 95,176 92,160 C 90,150 88,142 84,136 C 81,131 76,130 70,131 C 60,132 52,130 46,124 C 40,118 38,118 30,114 C 24,111 24,104 30,100 C 40,94 44,86 46,74 C 47,62 48,50 54,40 Z" fill="#EAF1FB" stroke="#0D3C82" stroke-width="2" stroke-linejoin="round"/><ellipse cx="160" cy="185" rx="7" ry="17" transform="rotate(-22 160 185)" fill="#EAF1FB" stroke="#0D3C82" stroke-width="1.6"/><g transform="translate(62,84)"><polygon points="0,-19 5.7,-6 19,-6 8,2.5 12.5,15.5 0,7.5 -12.5,15.5 -8,2.5 -19,-6 -5.7,-6" fill="#F2A100" stroke="#A86604" stroke-width="1.3" stroke-linejoin="round"/><polygon points="0,-11.4 3.42,-3.6 11.4,-3.6 4.8,1.5 7.5,9.3 0,4.5 -7.5,9.3 -4.8,1.5 -11.4,-3.6 -3.42,-3.6" fill="#FFD400"/><polygon points="0,-19 5.7,-6 0,-3 -5.7,-6" fill="#FFF6C8" opacity="0.9"/><polygon points="17,-20 18.2,-16.2 22,-15 18.2,-13.8 17,-10 15.8,-13.8 12,-15 15.8,-16.2" fill="#FFFFFF" opacity="0.95"/><polygon points="-14,8 -13,11 -10,12 -13,13 -14,16 -15,13 -18,12 -15,11" fill="#FFFFFF" opacity="0.9"/><polygon points="16,7 16.7,9 19,9.7 16.7,10.4 16,12.5 15.3,10.4 13,9.7 15.3,9" fill="#FFF1B0" opacity="0.9"/></g></svg>
             </div>
+            <span style="font-size:17px;font-weight:600;color:#fff;letter-spacing:-0.01em;white-space:nowrap;">APHRIKE JULA</span>
         </a>
-    `;
-}
+        <div style="display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;">
+            <a href="#inscription-vendeur" style="padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;border:none;cursor:pointer;background:#FFD700;color:#1565C0;text-decoration:none;">Devenir Vendeur</a>
+            <a href="index.html" style="padding:7px 16px;border-radius:100px;font-size:14px;font-weight:500;cursor:pointer;background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.5);text-decoration:none;">← Retour</a>
+        </div>
+    </nav>
 
+    <!-- Hero -->
+    <section class="seller-hero">
+        <div class="container">
+            <h1>🏪 Vendez vos Produits au Mali</h1>
+            <p>Rejoignez la marketplace de confiance et développez votre business en toute sécurité avec Orange Money</p>
+        </div>
+    </section>
 
-// Filtrer produits vendeur
-function filterVendorProducts(filter) {
-    vendorProductsFilter = filter;
-    
-    // Mettre à jour UI
-    document.querySelectorAll('.filters-bar .filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(`'${filter}'`)) {
-            btn.classList.add('active');
-        }
-    });
-    
-    loadVendorProducts(true);
-}
-
-
-// Charger plus de produits
-function loadMoreVendorProducts() {
-    if (!hasMoreVendorProducts || isLoadingVendorProducts) return;
-    loadVendorProducts(false);
-}
-
-function updateLoadMoreVendorButton(loading) {
-    const btn = document.getElementById('loadMoreVendorBtn');
-    if (!btn) return;
-    
-    if (loading) {
-        btn.disabled = true;
-        btn.textContent = 'Chargement...';
-    } else if (!hasMoreVendorProducts) {
-        btn.disabled = true;
-        btn.textContent = 'Tous les produits chargés';
-    } else {
-        btn.disabled = false;
-        btn.textContent = 'Voir Plus de Produits';
-    }
-}
-
-// Recherche dans vendeur
-function searchInVendor() {
-    const query = document.getElementById('searchInput').value.trim();
-    if (!query) return;
-    
-    window.location.href = `catalogue.html?search=${encodeURIComponent(query)}&vendeur=${vendorId}`;
-}
-
-// Contacter vendeur
-function contactVendor() {
-    if (!vendorData) return;
-    
-    const telephone = vendorData.telephone || '';
-    const nom = vendorData.nom || 'le vendeur';
-    
-    if (telephone) {
-        const message = encodeURIComponent(`Bonjour ${nom}, je vous contacte depuis APHRIKE JULA à propos de vos produits.`);
-        window.open(`https://wa.me/${telephone}?text=${message}`, '_blank');
-    } else {
-        alert('Ce vendeur n\'a pas renseigné de numéro de téléphone. Essayez de le contacter via le chatbot.');
-    }
-}
-
-// Gérer les tabs
-function switchTab(tabName) {
-    // Mettre à jour les boutons
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.classList.remove('active');
-        if (tab.getAttribute('onclick') && tab.getAttribute('onclick').includes(`'${tabName}'`)) {
-            tab.classList.add('active');
-        }
-    });
-    
-    // Mettre à jour le contenu
-    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-    document.getElementById(`${tabName}Tab`).classList.add('active');
-    
-    // Charger les données si nécessaire
-    if (tabName === 'avis') {
-        loadVendorReviews();
-    }
-}
-
-// Charger les avis
-async function loadVendorReviews() {
-    const container = document.getElementById('reviewsContainer');
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/vendeurs/${vendorId}/avis`);
-        const data = await response.json();
-        
-        if (!data.avis || data.avis.length === 0) {
-            container.innerHTML = `
-                <div style="text-align:center; padding:3rem;">
-                    <h3>💬 Aucun avis pour le moment</h3>
-                    <p>Soyez le premier à laisser un avis !</p>
-                </div>
-            `;
-            return;
-        }
-        
-        const html = data.avis.map(avis => `
-            <div style="background: white; padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1rem; box-shadow: var(--shadow-sm);">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <strong>${avis.auteur || 'Acheteur'}</strong>
-                    <span style="color: var(--primary-gold);">${'⭐'.repeat(avis.note || 5)}</span>
-                </div>
-                <p style="color: var(--text-gray); margin-bottom: 0.5rem;">${avis.commentaire || ''}</p>
-                <small style="color: var(--text-gray);">${formatDate(avis.date)}</small>
+    <!-- Avantages -->
+    <section class="benefits-section">
+        <div class="container">
+            <h2 class="section-title" style="text-align:center;">Pourquoi vendre sur APHRIKE JULA ?</h2>
+            <div class="benefits-grid">
+                <div class="benefit-card"><div class="benefit-icon">💰</div><div class="benefit-title">Commissions Réduites</div><div class="benefit-desc">Gardez plus d'argent sur chaque vente avec nos frais compétitifs</div></div>
+                <div class="benefit-card"><div class="benefit-icon">🔒</div><div class="benefit-title">Paiements Sécurisés</div><div class="benefit-desc">Orange Money intégré pour des transactions rapides et sûres</div></div>
+                <div class="benefit-card"><div class="benefit-icon">📱</div><div class="benefit-title">Dashboard Complet</div><div class="benefit-desc">Gérez vos produits, ventes et revenus en un seul endroit</div></div>
+                <div class="benefit-card"><div class="benefit-icon"><svg viewBox="0 0 220 250" style="height:1.15em;width:auto;vertical-align:-0.22em;margin-right:3px" xmlns="http://www.w3.org/2000/svg" aria-label="APHRIKE JULA"><path d="M 54,40 C 70,30 110,28 150,32 C 158,33 164,38 168,46 C 175,56 182,66 196,82 C 200,87 200,92 194,94 C 184,96 176,100 170,108 C 166,120 164,135 158,152 C 152,170 146,184 138,198 C 130,212 122,222 114,223 C 108,223 104,216 101,206 C 97,192 95,176 92,160 C 90,150 88,142 84,136 C 81,131 76,130 70,131 C 60,132 52,130 46,124 C 40,118 38,118 30,114 C 24,111 24,104 30,100 C 40,94 44,86 46,74 C 47,62 48,50 54,40 Z" fill="#EAF1FB" stroke="#0D3C82" stroke-width="2" stroke-linejoin="round"/><ellipse cx="160" cy="185" rx="7" ry="17" transform="rotate(-22 160 185)" fill="#EAF1FB" stroke="#0D3C82" stroke-width="1.6"/><g transform="translate(62,84)"><polygon points="0,-19 5.7,-6 19,-6 8,2.5 12.5,15.5 0,7.5 -12.5,15.5 -8,2.5 -19,-6 -5.7,-6" fill="#F2A100" stroke="#A86604" stroke-width="1.3" stroke-linejoin="round"/><polygon points="0,-11.4 3.42,-3.6 11.4,-3.6 4.8,1.5 7.5,9.3 0,4.5 -7.5,9.3 -4.8,1.5 -11.4,-3.6 -3.42,-3.6" fill="#FFD400"/><polygon points="0,-19 5.7,-6 0,-3 -5.7,-6" fill="#FFF6C8" opacity="0.9"/><polygon points="17,-20 18.2,-16.2 22,-15 18.2,-13.8 17,-10 15.8,-13.8 12,-15 15.8,-16.2" fill="#FFFFFF" opacity="0.95"/><polygon points="-14,8 -13,11 -10,12 -13,13 -14,16 -15,13 -18,12 -15,11" fill="#FFFFFF" opacity="0.9"/><polygon points="16,7 16.7,9 19,9.7 16.7,10.4 16,12.5 15.3,10.4 13,9.7 15.3,9" fill="#FFF1B0" opacity="0.9"/></g></svg></div><div class="benefit-title">Badge Vérifié</div><div class="benefit-desc">Gagnez la confiance des acheteurs avec notre certification</div></div>
+                <div class="benefit-card"><div class="benefit-icon">📊</div><div class="benefit-title">Statistiques Avancées</div><div class="benefit-desc">Suivez vos performances et optimisez vos ventes</div></div>
+                <div class="benefit-card"><div class="benefit-icon">🤝</div><div class="benefit-title">Support Prioritaire</div><div class="benefit-desc">Notre équipe vous accompagne 7j/7 pour réussir</div></div>
             </div>
-        `).join('');
-        
-        container.innerHTML = html;
-        
-    } catch (error) {
-        console.error('Erreur chargement avis:', error);
-        container.innerHTML = `
-            <div style="text-align:center; padding:2rem;">
-                <p>Impossible de charger les avis</p>
+        </div>
+    </section>
+
+    <!-- Tarifs -->
+    <section class="pricing-section">
+        <div class="container">
+            <h2 class="section-title" style="text-align:center;">Choisissez Votre Formule</h2>
+            <div class="pricing-cards">
+                <div class="pricing-card">
+                    <div class="pricing-title">Basic</div>
+                    <div class="pricing-price">5 000 FCFA<span>/mois</span></div>
+                    <ul class="pricing-features">
+                        <li>✅ Accès au catalogue</li>
+                        <li>✅ Dashboard vendeur</li>
+                        <li>✅ Jusqu'à 50 produits</li>
+                        <li>✅ 50 photos par produit</li>
+                        <li>✅ Paiements Orange Money</li>
+                        <li>✅ Statistiques de base</li>
+                        <li>✅ 1 000 FCFA bonus inscription</li>
+                    </ul>
+                    <a href="#inscription-vendeur" class="nav-btn primary" style="width:100%;text-align:center;display:block;">Commencer</a>
+                </div>
+                <div class="pricing-card premium">
+                    <div class="pricing-badge"><svg viewBox="0 0 220 250" style="height:1.15em;width:auto;vertical-align:-0.22em;margin-right:3px" xmlns="http://www.w3.org/2000/svg" aria-label="APHRIKE JULA"><path d="M 54,40 C 70,30 110,28 150,32 C 158,33 164,38 168,46 C 175,56 182,66 196,82 C 200,87 200,92 194,94 C 184,96 176,100 170,108 C 166,120 164,135 158,152 C 152,170 146,184 138,198 C 130,212 122,222 114,223 C 108,223 104,216 101,206 C 97,192 95,176 92,160 C 90,150 88,142 84,136 C 81,131 76,130 70,131 C 60,132 52,130 46,124 C 40,118 38,118 30,114 C 24,111 24,104 30,100 C 40,94 44,86 46,74 C 47,62 48,50 54,40 Z" fill="#EAF1FB" stroke="#0D3C82" stroke-width="2" stroke-linejoin="round"/><ellipse cx="160" cy="185" rx="7" ry="17" transform="rotate(-22 160 185)" fill="#EAF1FB" stroke="#0D3C82" stroke-width="1.6"/><g transform="translate(62,84)"><polygon points="0,-19 5.7,-6 19,-6 8,2.5 12.5,15.5 0,7.5 -12.5,15.5 -8,2.5 -19,-6 -5.7,-6" fill="#F2A100" stroke="#A86604" stroke-width="1.3" stroke-linejoin="round"/><polygon points="0,-11.4 3.42,-3.6 11.4,-3.6 4.8,1.5 7.5,9.3 0,4.5 -7.5,9.3 -4.8,1.5 -11.4,-3.6 -3.42,-3.6" fill="#FFD400"/><polygon points="0,-19 5.7,-6 0,-3 -5.7,-6" fill="#FFF6C8" opacity="0.9"/><polygon points="17,-20 18.2,-16.2 22,-15 18.2,-13.8 17,-10 15.8,-13.8 12,-15 15.8,-16.2" fill="#FFFFFF" opacity="0.95"/><polygon points="-14,8 -13,11 -10,12 -13,13 -14,16 -15,13 -18,12 -15,11" fill="#FFFFFF" opacity="0.9"/><polygon points="16,7 16.7,9 19,9.7 16.7,10.4 16,12.5 15.3,10.4 13,9.7 15.3,9" fill="#FFF1B0" opacity="0.9"/></g></svg> RECOMMANDÉ</div>
+                    <div class="pricing-title">Premium</div>
+                    <div class="pricing-price">10 000 FCFA<span>/mois</span></div>
+                    <ul class="pricing-features">
+                        <li>✅ <strong>Tout Basic +</strong></li>
+                        <li><svg viewBox="0 0 220 250" style="height:1.15em;width:auto;vertical-align:-0.22em;margin-right:3px" xmlns="http://www.w3.org/2000/svg" aria-label="APHRIKE JULA"><path d="M 54,40 C 70,30 110,28 150,32 C 158,33 164,38 168,46 C 175,56 182,66 196,82 C 200,87 200,92 194,94 C 184,96 176,100 170,108 C 166,120 164,135 158,152 C 152,170 146,184 138,198 C 130,212 122,222 114,223 C 108,223 104,216 101,206 C 97,192 95,176 92,160 C 90,150 88,142 84,136 C 81,131 76,130 70,131 C 60,132 52,130 46,124 C 40,118 38,118 30,114 C 24,111 24,104 30,100 C 40,94 44,86 46,74 C 47,62 48,50 54,40 Z" fill="#EAF1FB" stroke="#0D3C82" stroke-width="2" stroke-linejoin="round"/><ellipse cx="160" cy="185" rx="7" ry="17" transform="rotate(-22 160 185)" fill="#EAF1FB" stroke="#0D3C82" stroke-width="1.6"/><g transform="translate(62,84)"><polygon points="0,-19 5.7,-6 19,-6 8,2.5 12.5,15.5 0,7.5 -12.5,15.5 -8,2.5 -19,-6 -5.7,-6" fill="#F2A100" stroke="#A86604" stroke-width="1.3" stroke-linejoin="round"/><polygon points="0,-11.4 3.42,-3.6 11.4,-3.6 4.8,1.5 7.5,9.3 0,4.5 -7.5,9.3 -4.8,1.5 -11.4,-3.6 -3.42,-3.6" fill="#FFD400"/><polygon points="0,-19 5.7,-6 0,-3 -5.7,-6" fill="#FFF6C8" opacity="0.9"/><polygon points="17,-20 18.2,-16.2 22,-15 18.2,-13.8 17,-10 15.8,-13.8 12,-15 15.8,-16.2" fill="#FFFFFF" opacity="0.95"/><polygon points="-14,8 -13,11 -10,12 -13,13 -14,16 -15,13 -18,12 -15,11" fill="#FFFFFF" opacity="0.9"/><polygon points="16,7 16.7,9 19,9.7 16.7,10.4 16,12.5 15.3,10.4 13,9.7 15.3,9" fill="#FFF1B0" opacity="0.9"/></g></svg> <strong>Badge "Vérifié"</strong></li>
+                        <li><svg viewBox="0 0 220 250" style="height:1.15em;width:auto;vertical-align:-0.22em;margin-right:3px" xmlns="http://www.w3.org/2000/svg" aria-label="APHRIKE JULA"><path d="M 54,40 C 70,30 110,28 150,32 C 158,33 164,38 168,46 C 175,56 182,66 196,82 C 200,87 200,92 194,94 C 184,96 176,100 170,108 C 166,120 164,135 158,152 C 152,170 146,184 138,198 C 130,212 122,222 114,223 C 108,223 104,216 101,206 C 97,192 95,176 92,160 C 90,150 88,142 84,136 C 81,131 76,130 70,131 C 60,132 52,130 46,124 C 40,118 38,118 30,114 C 24,111 24,104 30,100 C 40,94 44,86 46,74 C 47,62 48,50 54,40 Z" fill="#EAF1FB" stroke="#0D3C82" stroke-width="2" stroke-linejoin="round"/><ellipse cx="160" cy="185" rx="7" ry="17" transform="rotate(-22 160 185)" fill="#EAF1FB" stroke="#0D3C82" stroke-width="1.6"/><g transform="translate(62,84)"><polygon points="0,-19 5.7,-6 19,-6 8,2.5 12.5,15.5 0,7.5 -12.5,15.5 -8,2.5 -19,-6 -5.7,-6" fill="#F2A100" stroke="#A86604" stroke-width="1.3" stroke-linejoin="round"/><polygon points="0,-11.4 3.42,-3.6 11.4,-3.6 4.8,1.5 7.5,9.3 0,4.5 -7.5,9.3 -4.8,1.5 -11.4,-3.6 -3.42,-3.6" fill="#FFD400"/><polygon points="0,-19 5.7,-6 0,-3 -5.7,-6" fill="#FFF6C8" opacity="0.9"/><polygon points="17,-20 18.2,-16.2 22,-15 18.2,-13.8 17,-10 15.8,-13.8 12,-15 15.8,-16.2" fill="#FFFFFF" opacity="0.95"/><polygon points="-14,8 -13,11 -10,12 -13,13 -14,16 -15,13 -18,12 -15,11" fill="#FFFFFF" opacity="0.9"/><polygon points="16,7 16.7,9 19,9.7 16.7,10.4 16,12.5 15.3,10.4 13,9.7 15.3,9" fill="#FFF1B0" opacity="0.9"/></g></svg> <strong>Photos illimitées</strong></li>
+                        <li><svg viewBox="0 0 220 250" style="height:1.15em;width:auto;vertical-align:-0.22em;margin-right:3px" xmlns="http://www.w3.org/2000/svg" aria-label="APHRIKE JULA"><path d="M 54,40 C 70,30 110,28 150,32 C 158,33 164,38 168,46 C 175,56 182,66 196,82 C 200,87 200,92 194,94 C 184,96 176,100 170,108 C 166,120 164,135 158,152 C 152,170 146,184 138,198 C 130,212 122,222 114,223 C 108,223 104,216 101,206 C 97,192 95,176 92,160 C 90,150 88,142 84,136 C 81,131 76,130 70,131 C 60,132 52,130 46,124 C 40,118 38,118 30,114 C 24,111 24,104 30,100 C 40,94 44,86 46,74 C 47,62 48,50 54,40 Z" fill="#EAF1FB" stroke="#0D3C82" stroke-width="2" stroke-linejoin="round"/><ellipse cx="160" cy="185" rx="7" ry="17" transform="rotate(-22 160 185)" fill="#EAF1FB" stroke="#0D3C82" stroke-width="1.6"/><g transform="translate(62,84)"><polygon points="0,-19 5.7,-6 19,-6 8,2.5 12.5,15.5 0,7.5 -12.5,15.5 -8,2.5 -19,-6 -5.7,-6" fill="#F2A100" stroke="#A86604" stroke-width="1.3" stroke-linejoin="round"/><polygon points="0,-11.4 3.42,-3.6 11.4,-3.6 4.8,1.5 7.5,9.3 0,4.5 -7.5,9.3 -4.8,1.5 -11.4,-3.6 -3.42,-3.6" fill="#FFD400"/><polygon points="0,-19 5.7,-6 0,-3 -5.7,-6" fill="#FFF6C8" opacity="0.9"/><polygon points="17,-20 18.2,-16.2 22,-15 18.2,-13.8 17,-10 15.8,-13.8 12,-15 15.8,-16.2" fill="#FFFFFF" opacity="0.95"/><polygon points="-14,8 -13,11 -10,12 -13,13 -14,16 -15,13 -18,12 -15,11" fill="#FFFFFF" opacity="0.9"/><polygon points="16,7 16.7,9 19,9.7 16.7,10.4 16,12.5 15.3,10.4 13,9.7 15.3,9" fill="#FFF1B0" opacity="0.9"/></g></svg> <strong>Produits illimités</strong></li>
+                        <li><svg viewBox="0 0 220 250" style="height:1.15em;width:auto;vertical-align:-0.22em;margin-right:3px" xmlns="http://www.w3.org/2000/svg" aria-label="APHRIKE JULA"><path d="M 54,40 C 70,30 110,28 150,32 C 158,33 164,38 168,46 C 175,56 182,66 196,82 C 200,87 200,92 194,94 C 184,96 176,100 170,108 C 166,120 164,135 158,152 C 152,170 146,184 138,198 C 130,212 122,222 114,223 C 108,223 104,216 101,206 C 97,192 95,176 92,160 C 90,150 88,142 84,136 C 81,131 76,130 70,131 C 60,132 52,130 46,124 C 40,118 38,118 30,114 C 24,111 24,104 30,100 C 40,94 44,86 46,74 C 47,62 48,50 54,40 Z" fill="#EAF1FB" stroke="#0D3C82" stroke-width="2" stroke-linejoin="round"/><ellipse cx="160" cy="185" rx="7" ry="17" transform="rotate(-22 160 185)" fill="#EAF1FB" stroke="#0D3C82" stroke-width="1.6"/><g transform="translate(62,84)"><polygon points="0,-19 5.7,-6 19,-6 8,2.5 12.5,15.5 0,7.5 -12.5,15.5 -8,2.5 -19,-6 -5.7,-6" fill="#F2A100" stroke="#A86604" stroke-width="1.3" stroke-linejoin="round"/><polygon points="0,-11.4 3.42,-3.6 11.4,-3.6 4.8,1.5 7.5,9.3 0,4.5 -7.5,9.3 -4.8,1.5 -11.4,-3.6 -3.42,-3.6" fill="#FFD400"/><polygon points="0,-19 5.7,-6 0,-3 -5.7,-6" fill="#FFF6C8" opacity="0.9"/><polygon points="17,-20 18.2,-16.2 22,-15 18.2,-13.8 17,-10 15.8,-13.8 12,-15 15.8,-16.2" fill="#FFFFFF" opacity="0.95"/><polygon points="-14,8 -13,11 -10,12 -13,13 -14,16 -15,13 -18,12 -15,11" fill="#FFFFFF" opacity="0.9"/><polygon points="16,7 16.7,9 19,9.7 16.7,10.4 16,12.5 15.3,10.4 13,9.7 15.3,9" fill="#FFF1B0" opacity="0.9"/></g></svg> <strong>Top du catalogue</strong></li>
+                        <li><svg viewBox="0 0 220 250" style="height:1.15em;width:auto;vertical-align:-0.22em;margin-right:3px" xmlns="http://www.w3.org/2000/svg" aria-label="APHRIKE JULA"><path d="M 54,40 C 70,30 110,28 150,32 C 158,33 164,38 168,46 C 175,56 182,66 196,82 C 200,87 200,92 194,94 C 184,96 176,100 170,108 C 166,120 164,135 158,152 C 152,170 146,184 138,198 C 130,212 122,222 114,223 C 108,223 104,216 101,206 C 97,192 95,176 92,160 C 90,150 88,142 84,136 C 81,131 76,130 70,131 C 60,132 52,130 46,124 C 40,118 38,118 30,114 C 24,111 24,104 30,100 C 40,94 44,86 46,74 C 47,62 48,50 54,40 Z" fill="#EAF1FB" stroke="#0D3C82" stroke-width="2" stroke-linejoin="round"/><ellipse cx="160" cy="185" rx="7" ry="17" transform="rotate(-22 160 185)" fill="#EAF1FB" stroke="#0D3C82" stroke-width="1.6"/><g transform="translate(62,84)"><polygon points="0,-19 5.7,-6 19,-6 8,2.5 12.5,15.5 0,7.5 -12.5,15.5 -8,2.5 -19,-6 -5.7,-6" fill="#F2A100" stroke="#A86604" stroke-width="1.3" stroke-linejoin="round"/><polygon points="0,-11.4 3.42,-3.6 11.4,-3.6 4.8,1.5 7.5,9.3 0,4.5 -7.5,9.3 -4.8,1.5 -11.4,-3.6 -3.42,-3.6" fill="#FFD400"/><polygon points="0,-19 5.7,-6 0,-3 -5.7,-6" fill="#FFF6C8" opacity="0.9"/><polygon points="17,-20 18.2,-16.2 22,-15 18.2,-13.8 17,-10 15.8,-13.8 12,-15 15.8,-16.2" fill="#FFFFFF" opacity="0.95"/><polygon points="-14,8 -13,11 -10,12 -13,13 -14,16 -15,13 -18,12 -15,11" fill="#FFFFFF" opacity="0.9"/><polygon points="16,7 16.7,9 19,9.7 16.7,10.4 16,12.5 15.3,10.4 13,9.7 15.3,9" fill="#FFF1B0" opacity="0.9"/></g></svg> <strong>Commission réduite</strong></li>
+                        <li><svg viewBox="0 0 220 250" style="height:1.15em;width:auto;vertical-align:-0.22em;margin-right:3px" xmlns="http://www.w3.org/2000/svg" aria-label="APHRIKE JULA"><path d="M 54,40 C 70,30 110,28 150,32 C 158,33 164,38 168,46 C 175,56 182,66 196,82 C 200,87 200,92 194,94 C 184,96 176,100 170,108 C 166,120 164,135 158,152 C 152,170 146,184 138,198 C 130,212 122,222 114,223 C 108,223 104,216 101,206 C 97,192 95,176 92,160 C 90,150 88,142 84,136 C 81,131 76,130 70,131 C 60,132 52,130 46,124 C 40,118 38,118 30,114 C 24,111 24,104 30,100 C 40,94 44,86 46,74 C 47,62 48,50 54,40 Z" fill="#EAF1FB" stroke="#0D3C82" stroke-width="2" stroke-linejoin="round"/><ellipse cx="160" cy="185" rx="7" ry="17" transform="rotate(-22 160 185)" fill="#EAF1FB" stroke="#0D3C82" stroke-width="1.6"/><g transform="translate(62,84)"><polygon points="0,-19 5.7,-6 19,-6 8,2.5 12.5,15.5 0,7.5 -12.5,15.5 -8,2.5 -19,-6 -5.7,-6" fill="#F2A100" stroke="#A86604" stroke-width="1.3" stroke-linejoin="round"/><polygon points="0,-11.4 3.42,-3.6 11.4,-3.6 4.8,1.5 7.5,9.3 0,4.5 -7.5,9.3 -4.8,1.5 -11.4,-3.6 -3.42,-3.6" fill="#FFD400"/><polygon points="0,-19 5.7,-6 0,-3 -5.7,-6" fill="#FFF6C8" opacity="0.9"/><polygon points="17,-20 18.2,-16.2 22,-15 18.2,-13.8 17,-10 15.8,-13.8 12,-15 15.8,-16.2" fill="#FFFFFF" opacity="0.95"/><polygon points="-14,8 -13,11 -10,12 -13,13 -14,16 -15,13 -18,12 -15,11" fill="#FFFFFF" opacity="0.9"/><polygon points="16,7 16.7,9 19,9.7 16.7,10.4 16,12.5 15.3,10.4 13,9.7 15.3,9" fill="#FFF1B0" opacity="0.9"/></g></svg> <strong>Support prioritaire 24/7</strong></li>
+                        <li>✅ 1 000 FCFA bonus inscription</li>
+                    </ul>
+                    <a href="#inscription-vendeur" class="nav-btn primary" style="width:100%;text-align:center;display:block;background:var(--primary-orange);">Devenir Premium</a>
+                </div>
             </div>
-        `;
-    }
-}
+        </div>
+    </section>
 
-// Utilitaires
-function formatPrice(price) {
-    return new Intl.NumberFormat('fr-FR').format(price);
-}
+    <!-- Comment ça marche -->
+    <section class="steps-section">
+        <div class="container">
+            <h2 class="section-title" style="text-align:center;">Comment ça marche ?</h2>
+            <div class="steps-grid">
+                <div class="step-card"><div class="step-number">1</div><div class="step-title">Inscrivez-vous</div><div class="step-desc">Créez votre compte vendeur en 2 minutes</div></div>
+                <div class="step-card"><div class="step-number">2</div><div class="step-title">Validez par WhatsApp</div><div class="step-desc">Confirmez votre identité avec un code de sécurité</div></div>
+                <div class="step-card"><div class="step-number">3</div><div class="step-title">Ajoutez vos produits</div><div class="step-desc">Photos, descriptions, prix - c'est simple !</div></div>
+                <div class="step-card"><div class="step-number">4</div><div class="step-title">Recevez l'argent</div><div class="step-desc">Paiement direct sur Orange Money</div></div>
+            </div>
+        </div>
+    </section>
 
-function formatDate(dateStr) {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-}
+    <!-- Inscription -->
+    <section id="inscription-vendeur" style="padding:var(--spacing-xl) 0;background:#f8f9fa;">
+        <div class="container" style="max-width:800px;margin:0 auto;">
 
-function formatFullDate(dateStr) {
-    if (!dateStr) return 'Non renseigné';
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return 'Non renseigné';
-    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-}
+            <!-- Formulaire inscription -->
+            <div id="formSection" style="background:white;padding:2rem;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.05);">
+                <h2 style="text-align:center;margin-bottom:2rem;color:#1565C0;">Rejoignez APHRIKE JULA en tant que Vendeur</h2>
 
-function formatMemberDate(dateStr) {
-    if (!dateStr) return 'N/A';
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return 'N/A';
-    const now = new Date();
-    const diffTime = Math.abs(now - date);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays < 30) {
-        return `${diffDays}j`;
-    } else if (diffDays < 365) {
-        return `${Math.floor(diffDays / 30)}m`;
-    } else {
-        return `${Math.floor(diffDays / 365)}a`;
-    }
-}
+                <div id="vendorErrorMessage" style="display:none;color:white;background:#dc3545;padding:10px;border-radius:5px;margin-bottom:15px;"></div>
+                <div id="vendorSuccessMessage" style="display:none;color:white;background:#28a745;padding:10px;border-radius:5px;margin-bottom:15px;"></div>
+
+                <form id="vendorRegisterForm" onsubmit="handleVendorRegister(event)">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                        <div><label>Nom *</label><input type="text" id="vNom" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;box-sizing:border-box;"></div>
+                        <div><label>Prénom *</label><input type="text" id="vPrenom" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;box-sizing:border-box;"></div>
+                    </div>
+                    <div style="margin-bottom:1rem;">
+                        <label>Nom de la Boutique *</label>
+                        <input type="text" id="vBoutique" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;box-sizing:border-box;">
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                        <div><label>Téléphone WhatsApp (8 chiffres) *</label><input type="tel" id="vTelephone" pattern="[0-9]{8}" required style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;box-sizing:border-box;"></div>
+                        <div><label>Mot de passe *</label><input type="password" id="vPassword" required minlength="6" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:5px;box-sizing:border-box;"></div>
+                    </div>
+                    <button type="submit" id="vendorRegisterBtn" style="width:100%;padding:14px;background:#FFD700;color:#1565C0;font-weight:bold;font-size:1.05rem;border:none;border-radius:8px;cursor:pointer;">
+                        🔐 Créer mon Compte Vendeur
+                    </button>
+                    <p style="text-align:center;margin-top:1rem;font-size:0.9rem;">
+                        <span style="color:#666;">🔒 Votre compte sera validé par code WhatsApp</span>
+                    </p>
+                    <p style="text-align:center;margin-top:0.5rem;">Déjà vendeur ? <a href="connexion.html">Connectez-vous ici</a></p>
+                </form>
+            </div>
+
+            <!-- Section validation code -->
+            <div id="validationSection" class="validation-section" style="margin-top:1rem;">
+                <div style="font-size:3rem;margin-bottom:1rem;">🔐</div>
+                <h2 style="color:#1565C0;margin-bottom:0.5rem;">Validez votre compte</h2>
+                <p style="color:#666;margin-bottom:1.5rem;">Votre compte a été créé ! Envoyez ce code sur WhatsApp pour l'activer.</p>
+
+                <!-- Affichage du code généré -->
+                <div style="background:#E3F2FD;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;">
+                    <p style="font-weight:600;color:#1565C0;margin-bottom:0.75rem;">Votre code de validation :</p>
+                    <div class="code-box" id="codeDisplay"></div>
+                    <p style="font-size:0.85rem;color:#666;margin-top:0.75rem;">Valable 30 minutes · <span id="timerDisplay" class="timer-text"></span></p>
+                </div>
+
+                <!-- Étapes -->
+                <div style="background:#f8f9fa;border-radius:10px;padding:1.25rem;margin-bottom:1.5rem;text-align:left;">
+                    <p style="font-weight:700;margin-bottom:0.75rem;">📋 Comment valider ?</p>
+                    <p style="margin-bottom:0.5rem;">1️⃣ Cliquez sur le bouton WhatsApp ci-dessous</p>
+                    <p style="margin-bottom:0.5rem;">2️⃣ Le message avec votre code sera pré-rempli</p>
+                    <p style="margin-bottom:0.5rem;">3️⃣ Envoyez-le à notre équipe APHRIKE JULA</p>
+                    <p>4️⃣ Votre compte sera activé dans les plus brefs délais</p>
+                </div>
+
+                <!-- Bouton WhatsApp -->
+                <a id="whatsappValidationBtn" href="#" target="_blank" class="whatsapp-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    Envoyer le code sur WhatsApp
+                </a>
+
+                <p style="color:#666;font-size:0.85rem;margin-top:1rem;">
+                    Vous n'avez pas reçu de confirmation ? 
+                    <a href="mailto:support@aphrikejula.com" style="color:#1565C0;">support@aphrikejula.com</a>
+                </p>
+
+                <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid #eee;">
+                    <p style="font-weight:600;margin-bottom:0.5rem;">Déjà validé par notre équipe ?</p>
+                    <a href="connexion.html" style="display:inline-block;padding:10px 24px;background:#1565C0;color:white;border-radius:8px;text-decoration:none;font-weight:600;">Se connecter →</a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <script>
+        const API_BASE_URL = 'https://web-production-8f94.up.railway.app';
+        const APHRIKE_WHATSAPP = '22370700520';
+        let validationCode = '';
+        let timerInterval = null;
+
+        function generateCode() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        function displayCode(code) {
+            const container = document.getElementById('codeDisplay');
+            container.innerHTML = code.split('').map(digit =>
+                `<div class="code-digit">${digit}</div>`
+            ).join('');
+        }
+
+        function startTimer(minutes) {
+            let seconds = minutes * 60;
+            const display = document.getElementById('timerDisplay');
+            timerInterval = setInterval(() => {
+                const m = Math.floor(seconds / 60);
+                const s = seconds % 60;
+                display.textContent = `⏱️ Expire dans ${m}:${s.toString().padStart(2,'0')}`;
+                if (seconds <= 0) {
+                    clearInterval(timerInterval);
+                    display.textContent = '❌ Code expiré - Veuillez vous réinscrire';
+                }
+                seconds--;
+            }, 1000);
+        }
+
+        function setWhatsAppLink(nom, prenom, telephone, code) {
+            const message = encodeURIComponent(
+                `🔐 VALIDATION COMPTE VENDEUR - APHRIKE JULA\n\n` +
+                `Nom : ${nom} ${prenom}\n` +
+                `Téléphone : ${telephone}\n` +
+                `Code de validation : ${code}\n\n` +
+                `Merci de valider mon compte vendeur.`
+            );
+            document.getElementById('whatsappValidationBtn').href = `https://wa.me/${APHRIKE_WHATSAPP}?text=${message}`;
+        }
+
+        async function handleVendorRegister(event) {
+            event.preventDefault();
+            const btn = document.getElementById('vendorRegisterBtn');
+            const errDiv = document.getElementById('vendorErrorMessage');
+            const succDiv = document.getElementById('vendorSuccessMessage');
+
+            errDiv.style.display = 'none';
+            succDiv.style.display = 'none';
+            btn.disabled = true;
+            btn.textContent = 'Inscription en cours...';
+
+            const nom = document.getElementById('vNom').value;
+            const prenom = document.getElementById('vPrenom').value;
+            const telephone = document.getElementById('vTelephone').value;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nom: nom,
+                        prenom: prenom,
+                        telephone: telephone,
+                        mot_de_passe: document.getElementById('vPassword').value,
+                        nom_boutique: document.getElementById('vBoutique').value,
+                        role: 'vendeur'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Sauvegarder le token (compte en attente)
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+
+                    // Générer le code de validation
+                    validationCode = generateCode();
+
+                    // Afficher la section validation
+                    document.getElementById('formSection').style.display = 'none';
+                    document.getElementById('validationSection').classList.add('active');
+
+                    // Afficher le code
+                    displayCode(validationCode);
+
+                    // Démarrer le timer 30 min
+                    startTimer(30);
+
+                    // Préparer le lien WhatsApp
+                    setWhatsAppLink(nom, prenom, telephone, validationCode);
+
+                    // Scroll vers la validation
+                    document.getElementById('validationSection').scrollIntoView({behavior: 'smooth'});
+
+                } else {
+                    errDiv.textContent = data.detail || "Erreur d'inscription";
+                    errDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errDiv.textContent = "Erreur de connexion au serveur.";
+                errDiv.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔐 Créer mon Compte Vendeur';
+            }
+        }
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3><svg viewBox="0 0 220 250" style="height:1.15em;width:auto;vertical-align:-0.22em;margin-right:3px" xmlns="http://www.w3.org/2000/svg" aria-label="APHRIKE JULA"><path d="M 54,40 C 70,30 110,28 150,32 C 158,33 164,38 168,46 C 175,56 182,66 196,82 C 200,87 200,92 194,94 C 184,96 176,100 170,108 C 166,120 164,135 158,152 C 152,170 146,184 138,198 C 130,212 122,222 114,223 C 108,223 104,216 101,206 C 97,192 95,176 92,160 C 90,150 88,142 84,136 C 81,131 76,130 70,131 C 60,132 52,130 46,124 C 40,118 38,118 30,114 C 24,111 24,104 30,100 C 40,94 44,86 46,74 C 47,62 48,50 54,40 Z" fill="#EAF1FB" stroke="#0D3C82" stroke-width="2" stroke-linejoin="round"/><ellipse cx="160" cy="185" rx="7" ry="17" transform="rotate(-22 160 185)" fill="#EAF1FB" stroke="#0D3C82" stroke-width="1.6"/><g transform="translate(62,84)"><polygon points="0,-19 5.7,-6 19,-6 8,2.5 12.5,15.5 0,7.5 -12.5,15.5 -8,2.5 -19,-6 -5.7,-6" fill="#F2A100" stroke="#A86604" stroke-width="1.3" stroke-linejoin="round"/><polygon points="0,-11.4 3.42,-3.6 11.4,-3.6 4.8,1.5 7.5,9.3 0,4.5 -7.5,9.3 -4.8,1.5 -11.4,-3.6 -3.42,-3.6" fill="#FFD400"/><polygon points="0,-19 5.7,-6 0,-3 -5.7,-6" fill="#FFF6C8" opacity="0.9"/><polygon points="17,-20 18.2,-16.2 22,-15 18.2,-13.8 17,-10 15.8,-13.8 12,-15 15.8,-16.2" fill="#FFFFFF" opacity="0.95"/><polygon points="-14,8 -13,11 -10,12 -13,13 -14,16 -15,13 -18,12 -15,11" fill="#FFFFFF" opacity="0.9"/><polygon points="16,7 16.7,9 19,9.7 16.7,10.4 16,12.5 15.3,10.4 13,9.7 15.3,9" fill="#FFF1B0" opacity="0.9"/></g></svg> APHRIKE JULA</h3>
+                    <p>La marketplace de confiance du Mali. Achetez et vendez en toute sécurité avec Orange Money.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Liens Rapides</h3>
+                    <a href="index.html">Accueil</a>
+                    <a href="catalogue.html">Catalogue</a>
+                    <a href="vendre.html">Devenir Vendeur</a>
+                    <a href="connexion.html">Connexion</a>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p>📍 Bamako, Mali</p>
+                    <p>📧 <a href="mailto:support@aphrikejula.com" style="color:inherit;">support@aphrikejula.com</a></p>
+                    <p>📱 WhatsApp: <a href="https://wa.me/22370700520" style="color:inherit;">+223 70 70 05 20</a></p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 APHRIKE JULA. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
