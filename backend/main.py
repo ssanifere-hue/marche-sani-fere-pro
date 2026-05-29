@@ -847,9 +847,15 @@ async def enregistrer_vente(vente: VenteCreate):
         
     vendeur_id = str(produit["vendeur_id"])
     
+    # Taux de commission selon le plan du vendeur (calcule cote serveur, non manipulable)
+    # Premium = 2%  |  Basic = 5%
+    vendeur_doc = await db.vendeurs.find_one({"_id": ObjectId(vendeur_id)})
+    est_premium = bool(vendeur_doc.get("est_premium")) if vendeur_doc else False
+    taux_commission = 0.02 if est_premium else 0.05  # Premium 2% / Basic 5%
+    
     # Calculer la commission (uniquement sur le montant du produit, pas la livraison)
     montant_produit = vente.montant
-    commission = montant_produit * vente.commission_taux
+    commission = montant_produit * taux_commission
     montant_net = montant_produit - commission
     
     vente_data = {
@@ -857,7 +863,7 @@ async def enregistrer_vente(vente: VenteCreate):
         "produit_id": vente.produit_id,
         "acheteur_telephone": vente.acheteur_telephone,
         "montant": montant_produit,
-        "commission_taux": vente.commission_taux,
+        "commission_taux": taux_commission,
         "commission_montant": commission,
         "montant_net": montant_net,
         "methode_livraison": vente.methode_livraison,
@@ -1077,10 +1083,13 @@ async def lister_produits(
     if premium is not None:
         query["est_premium"] = premium
 
-    # Tri
-    sort_query = [("date_creation", -1)]
-    if sort == "prix_asc": sort_query = [("prix", 1)]
-    elif sort == "prix_desc": sort_query = [("prix", -1)]
+    # Tri — TOP CATALOGUE : les produits Premium remontent toujours en premier
+    if sort == "prix_asc":
+        sort_query = [("est_premium", -1), ("prix", 1)]
+    elif sort == "prix_desc":
+        sort_query = [("est_premium", -1), ("prix", -1)]
+    else:
+        sort_query = [("est_premium", -1), ("date_creation", -1)]
     
     # Exécution
     skip = (page - 1) * limit
