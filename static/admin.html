@@ -278,6 +278,45 @@
             </table>
         </div>
 
+       <!-- Vérifications Vendeurs -->
+        <div id="verifications-section" class="section">
+            <h2 style="margin-bottom: 1.5rem; color: #2d3748;">Vérification des vendeurs</h2>
+
+            <!-- Connexion admin -->
+            <div id="admin-login-box" style="background:#f7fafc;padding:1.5rem;border-radius:12px;margin-bottom:1.5rem;">
+                <p style="margin-bottom:1rem;color:#2d3748;font-weight:600;">🔒 Connexion administrateur requise</p>
+                <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;">
+                    <input id="admin-tel" type="text" placeholder="Téléphone admin" style="padding:0.8rem;border:1px solid #cbd5e0;border-radius:8px;flex:1;min-width:150px;">
+                    <input id="admin-pass" type="password" placeholder="Mot de passe" style="padding:0.8rem;border:1px solid #cbd5e0;border-radius:8px;flex:1;min-width:150px;">
+                    <button class="btn" onclick="adminLogin()">Se connecter</button>
+                </div>
+            </div>
+
+            <div id="verifications-alert" style="display:none;"></div>
+
+            <div id="verifications-content" style="display:none;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                    <p style="color:#22543d;font-weight:600;">✅ Connecté en admin</p>
+                    <button class="btn" onclick="loadVerifications()">🔄 Actualiser</button>
+                </div>
+
+                <table class="table" id="verifications-table">
+                    <thead>
+                        <tr>
+                            <th>Boutique</th>
+                            <th>Téléphone</th>
+                            <th>Type doc</th>
+                            <th>Documents</th>
+                            <th>Adresse</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="6" style="text-align:center;padding:2rem;color:#718096;">Connectez-vous pour voir les demandes</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
         <!-- Catégories -->
         <div id="categories-section" class="section">
             <h2 style="margin-bottom: 1.5rem; color: #2d3748;">Catégories APHRIKE JULA</h2>
