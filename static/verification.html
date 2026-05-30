@@ -220,7 +220,11 @@
                     formBox.style.display = 'block';
                 }
             } catch (e) {
-                showAlert('error', e.message);
+               localStorage.removeItem('token');
+                TOKEN = null;
+                document.getElementById('main-box').style.display = 'none';
+                document.getElementById('login-box').style.display = 'block';
+                showAlert('error', 'Veuillez vous connecter avec votre compte vendeur.');
             }
         }
 
