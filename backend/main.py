@@ -1106,6 +1106,19 @@ async def lister_produits(
     skip = (page - 1) * limit
     produits = await db.produits.find(query).sort(sort_query).skip(skip).limit(limit).to_list(limit)
     total = await db.produits.count_documents(query)
+    # Statut "Vérifié" des vendeurs de cette page (1 requête groupée)
+    vendeur_ids = list({p.get("vendeur_id") for p in produits if p.get("vendeur_id")})
+    obj_ids = []
+    for vid in vendeur_ids:
+        try:
+            obj_ids.append(ObjectId(vid))
+        except Exception:
+            pass
+    verifies = {}
+    if obj_ids:
+        async for vd in db.vendeurs.find({"_id": {"$in": obj_ids}}, {"vendeur_verifie": 1}):
+            verifies[str(vd["_id"])] = bool(vd.get("vendeur_verifie", False))
+    
     
     return {
         "total": total,
@@ -1121,6 +1134,7 @@ async def lister_produits(
                 "images": filter_images(p.get("images", [])),
                 "est_premium": p.get("est_premium", False),
                 "vendeur_id": p["vendeur_id"],
+                "vendeur_verifie": verifies.get(str(p.get("vendeur_id")), False),
                 "date_creation": p["date_creation"]
             }
             for p in produits
@@ -1315,6 +1329,7 @@ async def detail_vendeur(vendeur_id: str):
         "est_premium": vendeur["est_premium"],
         "score": vendeur.get("score", 0),
         "total_produits": total_produits,
+        "vendeur_verifie": bool(vendeur.get("vendeur_verifie", False)),
         "date_creation": vendeur["date_creation"]
     }
 
@@ -1874,3 +1889,114 @@ async def migrer_pays(current_user: dict = Depends(get_current_user)):
 async def liste_pays():
     actifs = {code: info for code, info in PAYS.items() if info.get("actif")}
     return {"pays": actifs, "defaut": PAYS_DEFAUT}
+
+# ==================== VÉRIFICATION VENDEUR ====================
+# Couche de confiance : le vendeur soumet ses justificatifs, l'admin valide à la main.
+# Aucun argent ne transite (contrainte BCEAO) — on certifie l'identité, pas le paiement.
+
+TYPES_DOCUMENT_VALIDES = ["cni", "nina", "passeport", "registre_commerce"]
+
+@app.post("/api/vendeur/demande-verification")
+async def demander_verification(demande: DemandeVerification, vendeur = Depends(get_current_vendeur)):
+    """Le vendeur soumet ses justificatifs pour obtenir le badge Vérifié."""
+    if demande.type_document not in TYPES_DOCUMENT_VALIDES:
+        raise HTTPException(status_code=400, detail=f"Type de document invalide. Valides: {TYPES_DOCUMENT_VALIDES}")
+
+    statut_actuel = vendeur.get("verification_statut", "non_demande")
+    if statut_actuel == "verifie":
+        raise HTTPException(status_code=400, detail="Votre boutique est déjà vérifiée")
+    if statut_actuel == "en_attente":
+        raise HTTPException(status_code=400, detail="Une demande de vérification est déjà en cours")
+
+    recto_url = demande.document_recto
+    if recto_url.startswith("data:image/"):
+        recto_url = await upload_image_to_cloudinary(recto_url)
+    verso_url = demande.document_verso
+    if verso_url and verso_url.startswith("data:image/"):
+        verso_url = await upload_image_to_cloudinary(verso_url)
+
+    await db.vendeurs.update_one(
+        {"_id": vendeur["_id"]},
+        {"$set": {
+            "verification_statut": "en_attente",
+            "verification_documents": {
+                "type_document": demande.type_document,
+                "document_recto": recto_url,
+                "document_verso": verso_url,
+                "adresse": demande.adresse,
+                "telephone_confirme": demande.telephone_confirme
+            },
+            "verification_date_demande": datetime.utcnow(),
+            "verification_motif_rejet": None
+        }}
+    )
+    return {"message": "Demande de vérification envoyée. Elle sera examinée sous peu.", "statut": "en_attente"}
+
+
+@app.get("/api/vendeur/ma-verification")
+async def ma_verification(vendeur = Depends(get_current_vendeur)):
+    """Le vendeur consulte l'état de sa vérification."""
+    return {
+        "statut": vendeur.get("verification_statut", "non_demande"),
+        "vendeur_verifie": bool(vendeur.get("vendeur_verifie", False)),
+        "motif_rejet": vendeur.get("verification_motif_rejet"),
+        "date_demande": vendeur.get("verification_date_demande")
+    }
+
+
+@app.get("/api/admin/verifications")
+async def admin_verifications_en_attente(current_user = Depends(get_current_user)):
+    """ADMIN — Demandes de vérification en attente (avec documents)."""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Accès refusé. Réservé aux administrateurs.")
+    vendeurs = await db.vendeurs.find({"verification_statut": "en_attente"}).sort("verification_date_demande", 1).to_list(200)
+    return {
+        "total": len(vendeurs),
+        "demandes": [
+            {
+                "vendeur_id": str(v["_id"]),
+                "nom_boutique": v.get("nom_boutique", ""),
+                "telephone": v.get("telephone", ""),
+                "documents": v.get("verification_documents", {}),
+                "date_demande": v.get("verification_date_demande")
+            }
+            for v in vendeurs
+        ]
+    }
+
+
+@app.post("/api/admin/valider-verification/{vendeur_id}")
+async def admin_valider_verification(vendeur_id: str, current_user = Depends(get_current_user)):
+    """ADMIN — Valide une demande : le vendeur obtient le badge Vérifié."""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Accès refusé. Réservé aux administrateurs.")
+    result = await db.vendeurs.update_one(
+        {"_id": ObjectId(vendeur_id)},
+        {"$set": {
+            "vendeur_verifie": True,
+            "verification_statut": "verifie",
+            "verification_date_validation": datetime.utcnow(),
+            "verification_motif_rejet": None
+        }}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Vendeur non trouvé")
+    return {"message": "Vendeur vérifié avec succès", "vendeur_id": vendeur_id, "vendeur_verifie": True}
+
+
+@app.post("/api/admin/rejeter-verification/{vendeur_id}")
+async def admin_rejeter_verification(vendeur_id: str, payload: RejetVerification, current_user = Depends(get_current_user)):
+    """ADMIN — Rejette une demande avec un motif (le vendeur pourra resoumettre)."""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Accès refusé. Réservé aux administrateurs.")
+    result = await db.vendeurs.update_one(
+        {"_id": ObjectId(vendeur_id)},
+        {"$set": {
+            "vendeur_verifie": False,
+            "verification_statut": "rejete",
+            "verification_motif_rejet": payload.motif
+        }}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Vendeur non trouvé")
+    return {"message": "Demande rejetée", "vendeur_id": vendeur_id, "motif": payload.motif}
