@@ -1354,6 +1354,8 @@ async def get_my_vendor_profile(current_user = Depends(get_current_user)):
         "email_contact": vendeur.get("email_contact"),
         "adresse": vendeur.get("adresse"),
         "est_premium": vendeur.get("est_premium", False),
+        "vendeur_verifie": bool(vendeur.get("vendeur_verifie", False)),
+        "verification_statut": vendeur.get("verification_statut", "non_demande"),
         "score": vendeur.get("score", 0),
         "date_creation": vendeur["date_creation"]
     }
