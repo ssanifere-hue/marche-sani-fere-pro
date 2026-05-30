@@ -430,7 +430,113 @@
                 showAlert('produits', 'error', `❌ Erreur: ${error.message}`);
             }
         }
+// ==================== VÉRIFICATIONS VENDEURS ====================
+        let ADMIN_TOKEN = null;
 
+        async function adminLogin() {
+            const tel = document.getElementById('admin-tel').value.trim();
+            const pass = document.getElementById('admin-pass').value;
+            if (!tel || !pass) {
+                showAlert('verifications', 'error', '❌ Téléphone et mot de passe requis');
+                return;
+            }
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telephone: tel, mot_de_passe: pass })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Connexion échouée');
+                if (data.user && data.user.role !== 'admin') throw new Error('Ce compte n\'est pas administrateur');
+
+                ADMIN_TOKEN = data.token || data.access_token;
+                document.getElementById('admin-login-box').style.display = 'none';
+                document.getElementById('verifications-content').style.display = 'block';
+                showAlert('verifications', 'success', '✅ Connecté en tant qu\'admin');
+                loadVerifications();
+            } catch (e) {
+                showAlert('verifications', 'error', '❌ ' + e.message);
+            }
+        }
+
+        async function loadVerifications() {
+            if (!ADMIN_TOKEN) return;
+            try {
+                const res = await fetch('/api/admin/verifications', {
+                    headers: { 'Authorization': 'Bearer ' + ADMIN_TOKEN }
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Erreur');
+
+                const tbody = document.querySelector('#verifications-table tbody');
+                tbody.innerHTML = '';
+                const demandes = data.demandes || [];
+
+                if (demandes.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:#718096;">Aucune demande en attente 🎉</td></tr>';
+                    return;
+                }
+
+                demandes.forEach(function(d) {
+                    const doc = d.documents || {};
+                    let docsHtml = '';
+                    if (doc.document_recto) docsHtml += '<a href="' + doc.document_recto + '" target="_blank" style="color:#667eea;font-weight:600;">📄 Recto</a> ';
+                    if (doc.document_verso) docsHtml += '<a href="' + doc.document_verso + '" target="_blank" style="color:#667eea;font-weight:600;">📄 Verso</a>';
+                    if (!docsHtml) docsHtml = '<span style="color:#a0aec0;">Aucun</span>';
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML =
+                        '<td><strong>' + (d.nom_boutique || '-') + '</strong></td>' +
+                        '<td>' + (doc.telephone_confirme || d.telephone || '-') + '</td>' +
+                        '<td>' + (doc.type_document || '-') + '</td>' +
+                        '<td>' + docsHtml + '</td>' +
+                        '<td>' + (doc.adresse || '-') + '</td>' +
+                        '<td>' +
+                            '<button class="btn" style="padding:0.5rem 1rem;background:#38a169;margin-bottom:0.3rem;" onclick="validerVerif(\'' + d.vendeur_id + '\')">✅ Valider</button> ' +
+                            '<button class="btn" style="padding:0.5rem 1rem;background:#e53e3e;" onclick="rejeterVerif(\'' + d.vendeur_id + '\')">❌ Rejeter</button>' +
+                        '</td>';
+                    tbody.appendChild(tr);
+                });
+                showAlert('verifications', 'success', '✅ ' + demandes.length + ' demande(s) en attente');
+            } catch (e) {
+                showAlert('verifications', 'error', '❌ ' + e.message);
+            }
+        }
+
+        async function validerVerif(vendeurId) {
+            if (!confirm('Valider la vérification de cette boutique ?')) return;
+            try {
+                const res = await fetch('/api/admin/valider-verification/' + vendeurId, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + ADMIN_TOKEN }
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Erreur');
+                showAlert('verifications', 'success', '✅ Boutique vérifiée !');
+                loadVerifications();
+            } catch (e) {
+                showAlert('verifications', 'error', '❌ ' + e.message);
+            }
+        }
+
+        async function rejeterVerif(vendeurId) {
+            const motif = prompt('Motif du rejet (visible par le vendeur) :');
+            if (motif === null) return;
+            try {
+                const res = await fetch('/api/admin/rejeter-verification/' + vendeurId, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + ADMIN_TOKEN, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ motif: motif || 'Documents non conformes' })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Erreur');
+                showAlert('verifications', 'success', '❌ Demande rejetée');
+                loadVerifications();
+            } catch (e) {
+                showAlert('verifications', 'error', '❌ ' + e.message);
+            }
+        }
         function showAlert(section, type, message) {
             const alertDiv = document.getElementById(section + '-alert');
             if (!alertDiv) return;
