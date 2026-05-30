@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faire vérifier ma boutique - APHRIKE JULA</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+        .navbar {
+            display: flex; align-items: center; gap: 12px;
+            padding: 0 24px; height: 56px; background: #1565C0;
+            position: sticky; top: 0; z-index: 1000;
+            box-shadow: 0 2px 8px rgba(21,101,192,0.3);
+        }
+        .navbar a { color: #fff; text-decoration: none; font-weight: 600; }
+        .navbar .brand { font-size: 17px; }
+        .navbar .back {
+            margin-left: auto; padding: 7px 16px; border-radius: 100px;
+            font-size: 14px; border: 1.5px solid rgba(255,255,255,0.5);
+        }
+        .wrap { max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+        .card {
+            background: #fff; border-radius: 14px; padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06); margin-bottom: 1.5rem;
+        }
+        h1 { color: #0D3C82; font-size: 1.6rem; margin-bottom: 0.5rem; }
+        .subtitle { color: #666; margin-bottom: 1.5rem; line-height: 1.5; }
+        label { display: block; font-weight: 600; color: #2d3748; margin-bottom: 0.4rem; margin-top: 1rem; }
+        input, select {
+            width: 100%; padding: 0.8rem; border: 1.5px solid #d0d7de;
+            border-radius: 8px; font-size: 1rem; box-sizing: border-box;
+        }
+        input:focus, select:focus { outline: none; border-color: #1565C0; }
+        .file-zone {
+            border: 2px dashed #1565C0; border-radius: 10px; padding: 1.5rem;
+            text-align: center; cursor: pointer; background: #E3F2FD;
+            margin-top: 0.4rem; transition: background 0.2s;
+        }
+        .file-zone:hover { background: #d0e8fb; }
+        .file-zone img { max-width: 100%; max-height: 200px; border-radius: 8px; margin-top: 0.5rem; }
+        .btn {
+            width: 100%; padding: 0.9rem; background: #1565C0; color: #fff;
+            border: none; border-radius: 8px; font-size: 1.05rem; font-weight: 700;
+            cursor: pointer; margin-top: 1.5rem; transition: background 0.2s;
+        }
+        .btn:hover { background: #0d4a9e; }
+        .btn:disabled { background: #9db8d8; cursor: not-allowed; }
+        .alert { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-weight: 500; display: none; }
+        .alert-success { background: #d4edda; color: #155724; }
+        .alert-error { background: #f8d7da; color: #721c24; }
+        .alert-info { background: #cce5ff; color: #004085; }
+        .status-badge {
+            display: inline-block; padding: 0.5rem 1.1rem; border-radius: 100px;
+            font-weight: 700; font-size: 0.95rem;
+        }
+        .st-verifie { background: #d4edda; color: #155724; }
+        .st-attente { background: #fff3cd; color: #856404; }
+        .st-rejete { background: #f8d7da; color: #721c24; }
+        .st-non { background: #e2e3e5; color: #383d41; }
+        .info-box {
+            background: #f8f9fa; border-left: 4px solid #1565C0;
+            padding: 1rem; border-radius: 8px; margin: 1rem 0; font-size: 0.92rem; color: #444; line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="brand">🛡️ APHRIKE JULA</a>
+        <a href="index.html" class="back">← Retour</a>
+    </nav>
+
+    <div class="wrap">
+        <div class="card">
+            <h1>✅ Faire vérifier ma boutique</h1>
+            <p class="subtitle">Un badge « Vérifié » rassure les acheteurs et augmente vos ventes. Envoyez vos justificatifs, notre équipe les valide à la main.</p>
+
+            <div id="alert" class="alert"></div>
+
+            <div id="login-box" style="display:none;">
+                <div class="info-box">🔒 Connectez-vous avec votre compte vendeur pour demander la vérification.</div>
+                <label>Téléphone</label>
+                <input id="login-tel" type="text" placeholder="Votre numéro (8 chiffres)">
+                <label>Mot de passe</label>
+                <input id="login-pass" type="password" placeholder="Votre mot de passe">
+                <button class="btn" onclick="doLogin()">Se connecter</button>
+            </div>
+
+            <div id="main-box" style="display:none;">
+                <div style="margin-bottom:1.2rem;">
+                    Statut actuel : <span id="statut-badge" class="status-badge st-non">Chargement...</span>
+                </div>
+                <div id="motif-rejet" class="alert alert-error" style="display:none;"></div>
+
+                <div id="form-box">
+                    <div class="info-box">
+                        📄 Documents acceptés : Carte d'identité (CNI), carte NINA, passeport ou registre de commerce. Vos documents sont confidentiels et ne servent qu'à la vérification.
+                    </div>
+
+                    <label>Type de document</label>
+                    <select id="type-doc">
+                        <option value="cni">Carte d'identité (CNI)</option>
+                        <option value="nina">Carte NINA</option>
+                        <option value="passeport">Passeport</option>
+                        <option value="registre_commerce">Registre de commerce</option>
+                    </select>
+
+                    <label>Photo du document (recto)</label>
+                    <div class="file-zone" onclick="document.getElementById('file-recto').click()">
+                        <span id="recto-label">📷 Cliquez pour ajouter une photo</span>
+                        <input type="file" id="file-recto" accept="image/*" style="display:none" onchange="previewImage(this,'recto')">
+                        <div id="recto-preview"></div>
+                    </div>
+
+                    <label>Photo du document (verso) — optionnel</label>
+                    <div class="file-zone" onclick="document.getElementById('file-verso').click()">
+                        <span id="verso-label">📷 Cliquez pour ajouter une photo</span>
+                        <input type="file" id="file-verso" accept="image/*" style="display:none" onchange="previewImage(this,'verso')">
+                        <div id="verso-preview"></div>
+                    </div>
+
+                    <label>Adresse physique de la boutique</label>
+                    <input id="adresse" type="text" placeholder="Ex : Marché de Médine, Bamako">
+
+                    <label>Numéro de téléphone confirmé</label>
+                    <input id="tel-confirme" type="text" placeholder="Votre numéro WhatsApp">
+
+                    <button class="btn" id="submit-btn" onclick="soumettre()">Envoyer ma demande</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'https://web-production-8f94.up.railway.app';
+        let TOKEN = localStorage.getItem('token');
+        let rectoData = null, versoData = null;
+
+        function showAlert(type, msg) {
+            const a = document.getElementById('alert');
+            a.className = 'alert alert-' + type;
+            a.textContent = msg;
+            a.style.display = 'block';
+            if (type === 'success') setTimeout(function() { a.style.display = 'none'; }, 6000);
+        }
+
+        function previewImage(input, which) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const dataUrl = e.target.result;
+                if (which === 'recto') { rectoData = dataUrl; }
+                else { versoData = dataUrl; }
+                document.getElementById(which + '-preview').innerHTML = '<img src="' + dataUrl + '">';
+                document.getElementById(which + '-label').textContent = '✅ Photo ajoutée (cliquez pour changer)';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function doLogin() {
+            const tel = document.getElementById('login-tel').value.trim();
+            const pass = document.getElementById('login-pass').value;
+            if (!tel || !pass) { showAlert('error', 'Téléphone et mot de passe requis'); return; }
+            try {
+                const res = await fetch(API + '/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ telephone: tel, mot_de_passe: pass })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Connexion échouée');
+                TOKEN = data.token || data.access_token;
+                localStorage.setItem('token', TOKEN);
+                document.getElementById('login-box').style.display = 'none';
+                document.getElementById('main-box').style.display = 'block';
+                chargerStatut();
+            } catch (e) { showAlert('error', e.message); }
+        }
+
+        async function chargerStatut() {
+            try {
+                const res = await fetch(API + '/api/vendeur/ma-verification', {
+                    headers: { 'Authorization': 'Bearer ' + TOKEN }
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Erreur');
+
+                const badge = document.getElementById('statut-badge');
+                const formBox = document.getElementById('form-box');
+                const motifBox = document.getElementById('motif-rejet');
+                motifBox.style.display = 'none';
+
+                const statut = data.statut || 'non_demande';
+                if (statut === 'verifie') {
+                    badge.className = 'status-badge st-verifie';
+                    badge.textContent = '✅ Boutique vérifiée';
+                    formBox.style.display = 'none';
+                    showAlert('success', '🎉 Votre boutique est vérifiée ! Le badge apparaît sur vos produits.');
+                } else if (statut === 'en_attente') {
+                    badge.className = 'status-badge st-attente';
+                    badge.textContent = '⏳ En attente de validation';
+                    formBox.style.display = 'none';
+                    showAlert('info', 'Votre demande a été reçue. Notre équipe l\'examine, vous serez notifié.');
+                } else if (statut === 'rejete') {
+                    badge.className = 'status-badge st-rejete';
+                    badge.textContent = '❌ Demande rejetée';
+                    formBox.style.display = 'block';
+                    if (data.motif_rejet) {
+                        motifBox.textContent = '❌ Motif du rejet : ' + data.motif_rejet + ' — Vous pouvez resoumettre.';
+                        motifBox.style.display = 'block';
+                    }
+                } else {
+                    badge.className = 'status-badge st-non';
+                    badge.textContent = 'Non vérifiée';
+                    formBox.style.display = 'block';
+                }
+            } catch (e) {
+                showAlert('error', e.message);
+            }
+        }
+
+        async function soumettre() {
+            const typeDoc = document.getElementById('type-doc').value;
+            const adresse = document.getElementById('adresse').value.trim();
+            const telConfirme = document.getElementById('tel-confirme').value.trim();
+            const btn = document.getElementById('submit-btn');
+
+            if (!rectoData) { showAlert('error', 'Ajoutez au moins la photo recto du document'); return; }
+            if (!adresse) { showAlert('error', 'Indiquez l\'adresse de votre boutique'); return; }
+            if (!telConfirme) { showAlert('error', 'Indiquez votre numéro de téléphone'); return; }
+
+            btn.disabled = true;
+            btn.textContent = 'Envoi en cours...';
+            try {
+                const res = await fetch(API + '/api/vendeur/demande-verification', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type_document: typeDoc,
+                        document_recto: rectoData,
+                        document_verso: versoData,
+                        adresse: adresse,
+                        telephone_confirme: telConfirme
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Erreur lors de l\'envoi');
+                showAlert('success', '✅ Demande envoyée ! Notre équipe va l\'examiner.');
+                chargerStatut();
+            } catch (e) {
+                showAlert('error', e.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Envoyer ma demande';
+            }
+        }
+
+        if (TOKEN) {
+            document.getElementById('main-box').style.display = 'block';
+            chargerStatut();
+        } else {
+            document.getElementById('login-box').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
