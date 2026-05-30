@@ -255,6 +255,17 @@ class VenteCreate(BaseModel):
 
 class CodeParrainage(BaseModel):
     code: str
+    
+class DemandeVerification(BaseModel):
+    type_document: str            # "cni", "nina", "passeport", "registre_commerce"
+    document_recto: str           # base64 (data:image/...) ou URL
+    document_verso: Optional[str] = None
+    adresse: str
+    telephone_confirme: str
+
+class RejetVerification(BaseModel):
+    motif: str
+
 
 # ==================== HELPER FUNCTIONS ====================
 
