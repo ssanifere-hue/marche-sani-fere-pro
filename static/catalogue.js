@@ -183,8 +183,7 @@ function createProductCard(product) {
         : `https://via.placeholder.com/400x400/F4F6F9/B5C4DA?text=${encodeURIComponent(nom)}`;
 
     const premiumBadge = isPremium ? '<div class="product-badge">\u2605 PREMIUM</div>' : '';
-    const verified = isPremium ? '<span class="vendor-verified">\u2714</span>' : '';
-
+    const verified = product.vendeur_verifie ? '<span class="vendor-verified" title="Vendeur vérifié" style="color:#1565C0;font-weight:bold;">\u2714 Vérifié</span>' : '';
     let starsHTML = '';
     if (product.note) {
         const n = Math.max(0, Math.min(5, Math.round(product.note)));
