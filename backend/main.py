@@ -1416,9 +1416,14 @@ async def avis_vendeur(vendeur_id: str):
 
 # ==================== ADMIN DASHBOARD ====================
 
-@app.get("/api/admin/statistiques")
-async def statistiques_admin():
-    """Statistiques globales (À SÉCURISER avec authentification admin)"""
+1419  @app.get("/api/admin/statistiques")
+1420  async def statistiques_admin(current_user = Depends(get_current_user)):
+1421      """Statistiques globales (ADMIN ONLY)"""
+1422      if current_user.get("role") != "admin":
+1423          raise HTTPException(status_code=403, detail="Accès refusé. Réservé aux administrateurs.")
+1424      
+1426   
+   
     
     # Total vendeurs
     total_vendeurs = await db.vendeurs.count_documents({})
@@ -1453,8 +1458,10 @@ async def statistiques_admin():
     }
 
 @app.get("/api/admin/abonnements-en-attente")
-async def abonnements_en_attente():
+async def abonnements_en_attente(current_user = Depends(get_current_user)):
     """Liste des abonnements en attente de validation (ADMIN ONLY)"""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Accès refusé. Réservé aux administrateurs.")
     
     abonnements = await db.abonnements.find({"statut": "en_attente"}).to_list(100)
     
@@ -1786,12 +1793,17 @@ async def mettre_a_jour_statut(
 @app.get("/api/admin/commandes")
 async def admin_toutes_commandes(
     statut: Optional[str] = None,
-    vendeur_id: Optional[str] = None
+    vendeur_id: Optional[str] = None,
+    current_user = Depends(get_current_user)
 ):
     """
+   
+    
     ADMIN — Voir TOUTES les commandes de la plateforme.
     Filtrable par statut et par vendeur.
     """
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Accès refusé. Réservé aux administrateurs.")
     query = {}
     if statut:
         query["statut"] = statut
