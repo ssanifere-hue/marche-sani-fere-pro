@@ -1839,10 +1839,12 @@ async def admin_toutes_commandes(
 
 
 @app.get("/api/admin/vendeurs-activite")
-async def admin_activite_vendeurs():
+async def admin_activite_vendeurs(current_user = Depends(get_current_user)):
     """
     ADMIN — Vue d'ensemble de tous les vendeurs + leur activité.
     """
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Accès refusé. Réservé aux administrateurs.")
     vendeurs = await db.vendeurs.find().sort("date_creation", -1).to_list(500)
 
     result = []
