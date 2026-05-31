@@ -1416,15 +1416,11 @@ async def avis_vendeur(vendeur_id: str):
 
 # ==================== ADMIN DASHBOARD ====================
 
-1419  @app.get("/api/admin/statistiques")
-1420  async def statistiques_admin(current_user = Depends(get_current_user)):
-1421      """Statistiques globales (ADMIN ONLY)"""
-1422      if current_user.get("role") != "admin":
-1423          raise HTTPException(status_code=403, detail="Accès refusé. Réservé aux administrateurs.")
-1424      
-1426   
-   
-    
+@app.get("/api/admin/statistiques")
+async def statistiques_admin(current_user = Depends(get_current_user)):
+    """Statistiques globales (ADMIN ONLY)"""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Accès refusé. Réservé aux administrateurs.")
     # Total vendeurs
     total_vendeurs = await db.vendeurs.count_documents({})
     vendeurs_premium = await db.vendeurs.count_documents({"est_premium": True})
