@@ -334,7 +334,7 @@ function updateNavbar() {
                     🛒<span id="cartBadge" style="position:absolute;top:-4px;right:-4px;background:#FFD700;color:#1565C0;font-size:0.65rem;font-weight:700;width:18px;height:18px;border-radius:50%;display:none;align-items:center;justify-content:center;">0</span>
                 </a>
                 ${user.role === 'vendeur' 
-                    ? '<a href="/dashboard" style="padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;border:none;cursor:pointer;background:#FFD700;color:#1565C0;text-decoration:none;transition:background 0.2s;">Dashboard</a><a href="vendre.html" style="padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;border:none;cursor:pointer;background:#FFD700;color:#1565C0;text-decoration:none;transition:background 0.2s;margin-left:8px;">Vendre</a>' 
+                    ? '<a href="/dashboard" style="padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;border:none;cursor:pointer;background:#FFD700;color:#1565C0;text-decoration:none;transition:background 0.2s;">Dashboard</a><a href="vendre.html" style="padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;border:none;cursor:pointer;background:#FFD700;color:#1565C0;text-decoration:none;transition:background 0.2s;margin-left:8px;">Vendre</a><a href="verification.html" style="padding:8px 18px;border-radius:100px;font-size:14px;font-weight:600;cursor:pointer;background:#fff;color:#1565C0;text-decoration:none;margin-left:8px;border:2px solid #FFD700;">✓ Vérifier ma boutique</a>' 
                     : ''}
                 <div style="display: flex; align-items: center; gap: 1rem;">
                     <span style="font-weight: 600; color: #fff;">👤 ${firstName}</span>
