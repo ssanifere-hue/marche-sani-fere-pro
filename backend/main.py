@@ -2012,3 +2012,265 @@ async def admin_rejeter_verification(vendeur_id: str, payload: RejetVerification
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Vendeur non trouvé")
     return {"message": "Demande rejetée", "vendeur_id": vendeur_id, "motif": payload.motif}
+    # ==================== ADMIN — BACK-OFFICE / VUE 360° ====================
+# Permet à l'admin (Z) de CONSULTER et GÉRER chaque vendeur et chaque acheteur
+# SANS jamais utiliser leur mot de passe. C'est ton statut admin qui ouvre les
+# portes — pas une usurpation de compte. Sûr, traçable, et scalable.
+#
+# >>> À COLLER À LA TOUTE FIN de main.py (après les routes de vérification).
+# >>> Pré-requis : ton compte doit avoir le champ  role: "admin"  dans MongoDB.
+
+class AdminToggleActif(BaseModel):
+    actif: bool
+
+
+def _oid(id_str: str) -> ObjectId:
+    """Convertit une chaîne en ObjectId proprement (erreur 400 si invalide)."""
+    try:
+        return ObjectId(id_str)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Identifiant invalide")
+
+
+async def require_admin(current_user = Depends(get_current_user)):
+    """Dépendance : bloque tout sauf les admins."""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Accès refusé. Réservé aux administrateurs.")
+    return current_user
+
+
+# -------------------- VOIR : FICHE VENDEUR COMPLÈTE --------------------
+
+@app.get("/api/admin/vendeur/{vendeur_id}")
+async def admin_fiche_vendeur(vendeur_id: str, admin = Depends(require_admin)):
+    """Vue 360° d'UN vendeur : profil, abonnement, vérification, statistiques."""
+    vendeur = await db.vendeurs.find_one({"_id": _oid(vendeur_id)})
+    if not vendeur:
+        raise HTTPException(status_code=404, detail="Vendeur non trouvé")
+
+    vid = str(vendeur["_id"])
+
+    nb_produits = await db.produits.count_documents({"vendeur_id": vid})
+    nb_commandes = await db.commandes.count_documents({"vendeur_id": vid})
+
+    commandes_par_statut = {}
+    for st in STATUTS_COMMANDE:
+        commandes_par_statut[st] = await db.commandes.count_documents(
+            {"vendeur_id": vid, "statut": st}
+        )
+
+    ca_agg = await db.commandes.aggregate([
+        {"$match": {"vendeur_id": vid, "statut": {"$ne": "annulee"}}},
+        {"$group": {"_id": None, "total": {"$sum": "$montant_total"}}}
+    ]).to_list(1)
+    ca = ca_agg[0]["total"] if ca_agg else 0
+
+    abo = await db.abonnements.find_one({
+        "vendeur_id": vid, "statut": "validé",
+        "date_fin": {"$gte": datetime.utcnow()}
+    })
+
+    return {
+        "id": vid,
+        "nom": vendeur.get("nom", ""),
+        "prenom": vendeur.get("prenom", ""),
+        "nom_boutique": vendeur.get("nom_boutique", ""),
+        "description_boutique": vendeur.get("description_boutique", ""),
+        "telephone": vendeur.get("telephone", ""),
+        "email": vendeur.get("email", ""),
+        "adresse": vendeur.get("adresse", ""),
+        "whatsapp": vendeur.get("whatsapp", ""),
+        "orange_money": vendeur.get("orange_money", ""),
+        "logo": vendeur.get("logo"),
+        "banniere": vendeur.get("banniere"),
+        "pays": vendeur.get("pays", "ML"),
+        "actif": vendeur.get("actif", False),
+        "est_premium": vendeur.get("est_premium", False),
+        "vendeur_verifie": bool(vendeur.get("vendeur_verifie", False)),
+        "verification_statut": vendeur.get("verification_statut", "non_demande"),
+        "score": vendeur.get("score", 0),
+        "code_parrainage": vendeur.get("code_parrainage", ""),
+        "date_creation": vendeur.get("date_creation"),
+        "derniere_connexion": vendeur.get("derniere_connexion"),
+        "abonnement": {
+            "actif": bool(abo),
+            "plan": abo["plan"] if abo else None,
+            "date_fin": abo["date_fin"] if abo else None,
+        },
+        "statistiques": {
+            "nb_produits": nb_produits,
+            "nb_commandes": nb_commandes,
+            "commandes_par_statut": commandes_par_statut,
+            "chiffre_affaires": ca,
+        },
+    }
+
+
+@app.get("/api/admin/vendeur/{vendeur_id}/produits")
+async def admin_produits_vendeur(vendeur_id: str, admin = Depends(require_admin)):
+    """Tous les produits d'un vendeur (l'admin voit tout, même non conforme)."""
+    produits = await db.produits.find({"vendeur_id": vendeur_id}) \
+        .sort("date_creation", -1).to_list(500)
+    return {
+        "total": len(produits),
+        "produits": [
+            {
+                "id": str(p["_id"]),
+                "nom": p["nom"],
+                "prix": p["prix"],
+                "categorie": p.get("categorie", ""),
+                "stock": p.get("stock", 0),
+                "est_premium": p.get("est_premium", False),
+                "images": filter_images(p.get("images", [])),
+                "date_creation": p.get("date_creation"),
+            }
+            for p in produits
+        ],
+    }
+
+
+@app.get("/api/admin/vendeur/{vendeur_id}/commandes")
+async def admin_commandes_vendeur(vendeur_id: str, admin = Depends(require_admin)):
+    """Toutes les commandes reçues par un vendeur."""
+    commandes = await db.commandes.find({"vendeur_id": vendeur_id}) \
+        .sort("date_commande", -1).to_list(500)
+    return {
+        "total": len(commandes),
+        "commandes": [
+            {
+                "id": str(c["_id"]),
+                "reference": c["reference"],
+                "produit_nom": c["produit_nom"],
+                "client_nom": f"{c['client_nom']} {c['client_prenom']}",
+                "client_telephone": c["client_telephone"],
+                "montant_total": c["montant_total"],
+                "statut": c["statut"],
+                "statut_label": LABELS_STATUT.get(c["statut"], c["statut"]),
+                "date_commande": c["date_commande"],
+            }
+            for c in commandes
+        ],
+    }
+
+
+# -------------------- VOIR : ACHETEURS --------------------
+
+@app.get("/api/admin/acheteurs")
+async def admin_liste_acheteurs(admin = Depends(require_admin)):
+    """Liste de tous les acheteurs (regroupés par téléphone, avec leurs stats)."""
+    pipeline = [
+        {"$group": {
+            "_id": "$client_telephone",
+            "nom": {"$first": "$client_nom"},
+            "prenom": {"$first": "$client_prenom"},
+            "nb_commandes": {"$sum": 1},
+            "total_depense": {"$sum": "$montant_total"},
+            "derniere_commande": {"$max": "$date_commande"},
+        }},
+        {"$sort": {"derniere_commande": -1}},
+    ]
+    acheteurs = await db.commandes.aggregate(pipeline).to_list(2000)
+    return {
+        "total": len(acheteurs),
+        "acheteurs": [
+            {
+                "telephone": a["_id"],
+                "nom": a.get("nom", ""),
+                "prenom": a.get("prenom", ""),
+                "nb_commandes": a["nb_commandes"],
+                "total_depense": a["total_depense"],
+                "derniere_commande": a["derniere_commande"],
+            }
+            for a in acheteurs
+        ],
+    }
+
+
+@app.get("/api/admin/acheteur/{telephone}")
+async def admin_fiche_acheteur(telephone: str, admin = Depends(require_admin)):
+    """Vue 360° d'UN acheteur : son compte (s'il existe) + toutes ses commandes."""
+    commandes = await db.commandes.find({"client_telephone": telephone}) \
+        .sort("date_commande", -1).to_list(200)
+    user = await db.users.find_one({"telephone": telephone})
+
+    total_depense = sum(
+        c["montant_total"] for c in commandes if c.get("statut") != "annulee"
+    )
+
+    nom = user.get("nom") if user else (commandes[0]["client_nom"] if commandes else "")
+    prenom = user.get("prenom") if user else (commandes[0]["client_prenom"] if commandes else "")
+
+    return {
+        "telephone": telephone,
+        "compte_enregistre": bool(user),
+        "nom": nom,
+        "prenom": prenom,
+        "email": user.get("email") if user else None,
+        "portefeuille": user.get("portefeuille", 0) if user else 0,
+        "nb_commandes": len(commandes),
+        "total_depense": total_depense,
+        "commandes": [
+            {
+                "id": str(c["_id"]),
+                "reference": c["reference"],
+                "produit_nom": c["produit_nom"],
+                "vendeur_nom": c["vendeur_nom_boutique"],
+                "montant_total": c["montant_total"],
+                "statut": c["statut"],
+                "statut_label": LABELS_STATUT.get(c["statut"], c["statut"]),
+                "date_commande": c["date_commande"],
+            }
+            for c in commandes
+        ],
+    }
+
+
+# -------------------- AGIR : RÉGLER LES PROBLÈMES DU QUOTIDIEN --------------------
+
+@app.post("/api/admin/vendeur/{vendeur_id}/actif")
+async def admin_toggle_vendeur_actif(
+    vendeur_id: str, payload: AdminToggleActif, admin = Depends(require_admin)
+):
+    """Suspendre (actif=false) ou réactiver (actif=true) un vendeur."""
+    result = await db.vendeurs.update_one(
+        {"_id": _oid(vendeur_id)},
+        {"$set": {"actif": payload.actif}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Vendeur non trouvé")
+    return {
+        "message": "Vendeur réactivé" if payload.actif else "Vendeur suspendu",
+        "actif": payload.actif,
+    }
+
+
+@app.put("/api/admin/commande/{commande_id}/statut")
+async def admin_forcer_statut_commande(
+    commande_id: str, payload: CommandeStatutUpdate, admin = Depends(require_admin)
+):
+    """L'admin force le statut d'une commande (ex. débloquer un litige).
+    Tracé dans l'historique avec par_admin=True."""
+    if payload.statut not in STATUTS_COMMANDE:
+        raise HTTPException(
+            status_code=400, detail=f"Statut invalide. Valides: {STATUTS_COMMANDE}"
+        )
+    commande = await db.commandes.find_one({"_id": _oid(commande_id)})
+    if not commande:
+        raise HTTPException(status_code=404, detail="Commande non trouvée")
+
+    historique_entry = {
+        "statut": payload.statut,
+        "label": LABELS_STATUT.get(payload.statut, payload.statut),
+        "date": datetime.utcnow(),
+        "par_admin": True,
+    }
+    await db.commandes.update_one(
+        {"_id": _oid(commande_id)},
+        {"$set": {"statut": payload.statut}, "$push": {"historique_statuts": historique_entry}}
+    )
+    return {
+        "message": "Statut forcé par l'admin",
+        "commande_id": commande_id,
+        "nouveau_statut": payload.statut,
+    }
+
