@@ -122,6 +122,11 @@
             box-shadow: 0 6px 12px rgba(0,0,0,0.2);
         }
 
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
         .table {
             width: 100%;
             border-collapse: collapse;
@@ -169,6 +174,16 @@
             color: #7c2d12;
         }
 
+        .badge-danger {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .badge-info {
+            background: #bee3f8;
+            color: #2a4365;
+        }
+
         .alert {
             padding: 1rem;
             border-radius: 8px;
@@ -186,22 +201,67 @@
             color: #742a2a;
         }
 
+        /* Connexion admin partagée */
+        .admin-login-box {
+            background:#f7fafc;
+            padding:1.5rem;
+            border-radius:12px;
+            margin-bottom:1.5rem;
+        }
+
+        /* Modal fiche détaillée */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal.open { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 760px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+        .modal-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .modal-head h2 { color:#2d3748; }
+        .close-x {
+            background:none;border:none;font-size:1.8rem;cursor:pointer;color:#718096;line-height:1;
+        }
+        .info-grid {
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:1rem;
+            margin-bottom:1.5rem;
+        }
+        .info-box {
+            background:#f7fafc;
+            padding:0.9rem 1rem;
+            border-radius:8px;
+        }
+        .info-box .lbl { color:#718096; font-size:0.8rem; margin-bottom:0.2rem; }
+        .info-box .val { color:#2d3748; font-weight:700; font-size:1.05rem; }
+
         @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
-            .header h1 {
-                font-size: 1.8rem;
-            }
-            .stat-card h3 {
-                font-size: 2rem;
-            }
-            .tabs {
-                flex-direction: column;
-            }
-            .table {
-                font-size: 0.875rem;
-            }
+            body { padding: 1rem; }
+            .header h1 { font-size: 1.8rem; }
+            .stat-card h3 { font-size: 2rem; }
+            .tabs { flex-direction: column; }
+            .table { font-size: 0.875rem; }
+            .info-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -214,6 +274,8 @@
 
         <div class="tabs">
             <button class="tab active" onclick="showSection('dashboard')">📊 Dashboard</button>
+            <button class="tab" onclick="showSection('vendeurs')">🏪 Vendeurs</button>
+            <button class="tab" onclick="showSection('acheteurs')">👥 Acheteurs</button>
             <button class="tab" onclick="showSection('produits')">📦 Tous les Produits</button>
             <button class="tab" onclick="showSection('categories')">🏷️ Catégories</button>
             <button class="tab" onclick="showSection('verifications')">✅ Vérifications</button>
@@ -222,29 +284,92 @@
         <!-- Dashboard -->
         <div id="dashboard-section" class="section active">
             <h2 style="margin-bottom: 1.5rem; color: #2d3748;">Statistiques</h2>
-            
             <div id="dashboard-alert" style="display: none;"></div>
-            
             <div class="stats-grid">
-                <div class="stat-card">
-                    <h3 id="stat-products">-</h3>
-                    <p>Total Produits</p>
-                </div>
-                <div class="stat-card">
-                    <h3 id="stat-categories">18</h3>
-                    <p>Catégories</p>
-                </div>
-                <div class="stat-card">
-                    <h3 id="stat-premium">-</h3>
-                    <p>Produits Premium</p>
-                </div>
-                <div class="stat-card">
-                    <h3 id="stat-recent">-</h3>
-                    <p>Ajoutés Aujourd'hui</p>
+                <div class="stat-card"><h3 id="stat-products">-</h3><p>Total Produits</p></div>
+                <div class="stat-card"><h3 id="stat-categories">18</h3><p>Catégories</p></div>
+                <div class="stat-card"><h3 id="stat-premium">-</h3><p>Produits Premium</p></div>
+                <div class="stat-card"><h3 id="stat-recent">-</h3><p>Ajoutés Aujourd'hui</p></div>
+            </div>
+            <button class="btn" onclick="loadStats()">🔄 Actualiser</button>
+        </div>
+
+        <!-- ==================== VENDEURS ==================== -->
+        <div id="vendeurs-section" class="section">
+            <h2 style="margin-bottom: 1.5rem; color: #2d3748;">🏪 Gestion des vendeurs</h2>
+
+            <div id="vendeurs-login-box" class="admin-login-box">
+                <p style="margin-bottom:1rem;color:#2d3748;font-weight:600;">🔒 Connexion administrateur requise</p>
+                <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;">
+                    <input id="v-admin-tel" type="text" placeholder="Téléphone admin" style="padding:0.8rem;border:1px solid #cbd5e0;border-radius:8px;flex:1;min-width:150px;">
+                    <input id="v-admin-pass" type="password" placeholder="Mot de passe" style="padding:0.8rem;border:1px solid #cbd5e0;border-radius:8px;flex:1;min-width:150px;">
+                    <button class="btn" onclick="adminLogin('vendeurs')">Se connecter</button>
                 </div>
             </div>
 
-            <button class="btn" onclick="loadStats()">🔄 Actualiser</button>
+            <div id="vendeurs-alert" style="display:none;"></div>
+
+            <div id="vendeurs-content" style="display:none;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                    <p style="color:#22543d;font-weight:600;">✅ Connecté en admin</p>
+                    <button class="btn btn-sm" onclick="loadVendeurs()">🔄 Actualiser</button>
+                </div>
+                <table class="table" id="vendeurs-table">
+                    <thead>
+                        <tr>
+                            <th>Boutique</th>
+                            <th>Téléphone</th>
+                            <th>Statut</th>
+                            <th>Premium</th>
+                            <th>Produits</th>
+                            <th>Commandes</th>
+                            <th>CA (FCFA)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="8" style="text-align:center;padding:2rem;color:#718096;">Connectez-vous pour voir les vendeurs</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ==================== ACHETEURS ==================== -->
+        <div id="acheteurs-section" class="section">
+            <h2 style="margin-bottom: 1.5rem; color: #2d3748;">👥 Gestion des acheteurs</h2>
+
+            <div id="acheteurs-login-box" class="admin-login-box">
+                <p style="margin-bottom:1rem;color:#2d3748;font-weight:600;">🔒 Connexion administrateur requise</p>
+                <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;">
+                    <input id="a-admin-tel" type="text" placeholder="Téléphone admin" style="padding:0.8rem;border:1px solid #cbd5e0;border-radius:8px;flex:1;min-width:150px;">
+                    <input id="a-admin-pass" type="password" placeholder="Mot de passe" style="padding:0.8rem;border:1px solid #cbd5e0;border-radius:8px;flex:1;min-width:150px;">
+                    <button class="btn" onclick="adminLogin('acheteurs')">Se connecter</button>
+                </div>
+            </div>
+
+            <div id="acheteurs-alert" style="display:none;"></div>
+
+            <div id="acheteurs-content" style="display:none;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                    <p style="color:#22543d;font-weight:600;">✅ Connecté en admin</p>
+                    <button class="btn btn-sm" onclick="loadAcheteurs()">🔄 Actualiser</button>
+                </div>
+                <table class="table" id="acheteurs-table">
+                    <thead>
+                        <tr>
+                            <th>Téléphone</th>
+                            <th>Nom</th>
+                            <th>Commandes</th>
+                            <th>Total dépensé (FCFA)</th>
+                            <th>Dernière commande</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="6" style="text-align:center;padding:2rem;color:#718096;">Connectez-vous pour voir les acheteurs</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Produits -->
@@ -253,42 +378,29 @@
                 <h2 style="color: #2d3748;">Tous les Produits</h2>
                 <button class="btn" onclick="loadProduits()">🔄 Actualiser</button>
             </div>
-            
             <div id="produits-alert" style="display: none;"></div>
-
             <table class="table" id="produits-table">
                 <thead>
                     <tr>
-                        <th>Image</th>
-                        <th>Nom</th>
-                        <th>Prix</th>
-                        <th>Catégorie</th>
-                        <th>Stock</th>
-                        <th>Premium</th>
-                        <th>Date</th>
+                        <th>Image</th><th>Nom</th><th>Prix</th><th>Catégorie</th><th>Stock</th><th>Premium</th><th>Date</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td colspan="7" style="text-align: center; padding: 2rem; color: #718096;">
-                            Chargement...
-                        </td>
-                    </tr>
+                    <tr><td colspan="7" style="text-align: center; padding: 2rem; color: #718096;">Chargement...</td></tr>
                 </tbody>
             </table>
         </div>
 
-       <!-- Vérifications Vendeurs -->
+        <!-- Vérifications Vendeurs -->
         <div id="verifications-section" class="section">
             <h2 style="margin-bottom: 1.5rem; color: #2d3748;">Vérification des vendeurs</h2>
 
-            <!-- Connexion admin -->
-            <div id="admin-login-box" style="background:#f7fafc;padding:1.5rem;border-radius:12px;margin-bottom:1.5rem;">
+            <div id="verifications-login-box" class="admin-login-box">
                 <p style="margin-bottom:1rem;color:#2d3748;font-weight:600;">🔒 Connexion administrateur requise</p>
                 <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;">
                     <input id="admin-tel" type="text" placeholder="Téléphone admin" style="padding:0.8rem;border:1px solid #cbd5e0;border-radius:8px;flex:1;min-width:150px;">
                     <input id="admin-pass" type="password" placeholder="Mot de passe" style="padding:0.8rem;border:1px solid #cbd5e0;border-radius:8px;flex:1;min-width:150px;">
-                    <button class="btn" onclick="adminLogin()">Se connecter</button>
+                    <button class="btn" onclick="adminLogin('verifications')">Se connecter</button>
                 </div>
             </div>
 
@@ -297,18 +409,12 @@
             <div id="verifications-content" style="display:none;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
                     <p style="color:#22543d;font-weight:600;">✅ Connecté en admin</p>
-                    <button class="btn" onclick="loadVerifications()">🔄 Actualiser</button>
+                    <button class="btn btn-sm" onclick="loadVerifications()">🔄 Actualiser</button>
                 </div>
-
                 <table class="table" id="verifications-table">
                     <thead>
                         <tr>
-                            <th>Boutique</th>
-                            <th>Téléphone</th>
-                            <th>Type doc</th>
-                            <th>Documents</th>
-                            <th>Adresse</th>
-                            <th>Actions</th>
+                            <th>Boutique</th><th>Téléphone</th><th>Type doc</th><th>Documents</th><th>Adresse</th><th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -317,10 +423,10 @@
                 </table>
             </div>
         </div>
+
         <!-- Catégories -->
         <div id="categories-section" class="section">
             <h2 style="margin-bottom: 1.5rem; color: #2d3748;">Catégories APHRIKE JULA</h2>
-            
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
                 <div class="stat-card">🌾 Agriculture</div>
                 <div class="stat-card">🍎 Alimentation</div>
@@ -344,100 +450,65 @@
         </div>
     </div>
 
+    <!-- Modal fiche vendeur -->
+    <div id="vendeur-modal" class="modal">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h2 id="vm-title">Fiche vendeur</h2>
+                <button class="close-x" onclick="closeModal('vendeur-modal')">&times;</button>
+            </div>
+            <div id="vendeur-modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Modal fiche acheteur -->
+    <div id="acheteur-modal" class="modal">
+        <div class="modal-box">
+            <div class="modal-head">
+                <h2 id="am-title">Fiche acheteur</h2>
+                <button class="close-x" onclick="closeModal('acheteur-modal')">&times;</button>
+            </div>
+            <div id="acheteur-modal-body"></div>
+        </div>
+    </div>
+
     <script>
         const API_BASE_URL = '';
+        let ADMIN_TOKEN = null;
+
+        function fcfa(n) { return (n || 0).toLocaleString('fr-FR'); }
+        function frDate(d) { return d ? new Date(d).toLocaleDateString('fr-FR') : '-'; }
 
         function showSection(sectionName) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-
             document.getElementById(sectionName + '-section').classList.add('active');
-            event.target.classList.add('active');
+            if (event && event.target) event.target.classList.add('active');
 
-            if (sectionName === 'produits') {
-                loadProduits();
+            if (sectionName === 'produits') loadProduits();
+            // Si déjà connecté en admin, on saute le login et on charge directement
+            if (ADMIN_TOKEN) {
+                if (sectionName === 'vendeurs') { revealAdminSection('vendeurs'); loadVendeurs(); }
+                if (sectionName === 'acheteurs') { revealAdminSection('acheteurs'); loadAcheteurs(); }
+                if (sectionName === 'verifications') { revealAdminSection('verifications'); loadVerifications(); }
             }
         }
 
-        async function loadStats() {
-            try {
-                const response = await fetch('/api/produits?limit=1000');
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-                const data = await response.json();
-                
-                const totalProducts = data.total || data.produits?.length || 0;
-                const premiumProducts = data.produits?.filter(p => p.est_premium).length || 0;
-                
-                const today = new Date().toISOString().split('T')[0];
-                const recentProducts = data.produits?.filter(p => {
-                    const pDate = new Date(p.date_creation).toISOString().split('T')[0];
-                    return pDate === today;
-                }).length || 0;
-
-                document.getElementById('stat-products').textContent = totalProducts;
-                document.getElementById('stat-premium').textContent = premiumProducts;
-                document.getElementById('stat-recent').textContent = recentProducts;
-
-                showAlert('dashboard', 'success', '✅ Statistiques actualisées');
-            } catch (error) {
-                console.error('Erreur:', error);
-                showAlert('dashboard', 'error', `❌ Erreur: ${error.message}`);
-            }
-        }
-
-        async function loadProduits() {
-            try {
-                const response = await fetch('/api/produits?limit=100');
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
-                const data = await response.json();
-                const produits = data.produits || [];
-
-                const tbody = document.querySelector('#produits-table tbody');
-                tbody.innerHTML = '';
-
-                if (produits.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #718096;">Aucun produit trouvé</td></tr>';
-                    return;
-                }
-
-                produits.forEach(p => {
-                    const tr = document.createElement('tr');
-                    const date = new Date(p.date_creation).toLocaleDateString('fr-FR');
-                    
-                    tr.innerHTML = `
-                        <td><img src="${p.images[0]}" alt="${p.nom}"></td>
-                        <td><strong>${p.nom}</strong><br><small style="color: #718096;">${p.description?.substring(0, 50)}...</small></td>
-                        <td><strong>${p.prix.toLocaleString()} FCFA</strong></td>
-                        <td>${p.categorie}</td>
-                        <td>${p.stock || 0}</td>
-                        <td>${p.est_premium ? '<span class="badge badge-premium"><svg viewBox="0 0 220 250" style="height:1.15em;width:auto;vertical-align:-0.22em;margin-right:3px" xmlns="http://www.w3.org/2000/svg" aria-label="APHRIKE JULA"><path d="M 54,40 C 70,30 110,28 150,32 C 158,33 164,38 168,46 C 175,56 182,66 196,82 C 200,87 200,92 194,94 C 184,96 176,100 170,108 C 166,120 164,135 158,152 C 152,170 146,184 138,198 C 130,212 122,222 114,223 C 108,223 104,216 101,206 C 97,192 95,176 92,160 C 90,150 88,142 84,136 C 81,131 76,130 70,131 C 60,132 52,130 46,124 C 40,118 38,118 30,114 C 24,111 24,104 30,100 C 40,94 44,86 46,74 C 47,62 48,50 54,40 Z" fill="#EAF1FB" stroke="#0D3C82" stroke-width="2" stroke-linejoin="round"/><ellipse cx="160" cy="185" rx="7" ry="17" transform="rotate(-22 160 185)" fill="#EAF1FB" stroke="#0D3C82" stroke-width="1.6"/><g transform="translate(62,84)"><polygon points="0,-19 5.7,-6 19,-6 8,2.5 12.5,15.5 0,7.5 -12.5,15.5 -8,2.5 -19,-6 -5.7,-6" fill="#F2A100" stroke="#A86604" stroke-width="1.3" stroke-linejoin="round"/><polygon points="0,-11.4 3.42,-3.6 11.4,-3.6 4.8,1.5 7.5,9.3 0,4.5 -7.5,9.3 -4.8,1.5 -11.4,-3.6 -3.42,-3.6" fill="#FFD400"/><polygon points="0,-19 5.7,-6 0,-3 -5.7,-6" fill="#FFF6C8" opacity="0.9"/><polygon points="17,-20 18.2,-16.2 22,-15 18.2,-13.8 17,-10 15.8,-13.8 12,-15 15.8,-16.2" fill="#FFFFFF" opacity="0.95"/><polygon points="-14,8 -13,11 -10,12 -13,13 -14,16 -15,13 -18,12 -15,11" fill="#FFFFFF" opacity="0.9"/><polygon points="16,7 16.7,9 19,9.7 16.7,10.4 16,12.5 15.3,10.4 13,9.7 15.3,9" fill="#FFF1B0" opacity="0.9"/></g></svg> Premium</span>' : '<span class="badge badge-success">Standard</span>'}</td>
-                        <td>${date}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-
-                showAlert('produits', 'success', `✅ ${produits.length} produit(s) chargé(s)`);
-            } catch (error) {
-                console.error('Erreur:', error);
-                showAlert('produits', 'error', `❌ Erreur: ${error.message}`);
-            }
-        }
-// ==================== VÉRIFICATIONS VENDEURS ====================
-        let ADMIN_TOKEN = null;
-
-        async function adminLogin() {
-            const tel = document.getElementById('admin-tel').value.trim();
-            const pass = document.getElementById('admin-pass').value;
+        // ==================== LOGIN ADMIN (partagé) ====================
+        // section = 'vendeurs' | 'acheteurs' | 'verifications'
+        async function adminLogin(section) {
+            const map = {
+                vendeurs:      { tel: 'v-admin-tel', pass: 'v-admin-pass' },
+                acheteurs:     { tel: 'a-admin-tel', pass: 'a-admin-pass' },
+                verifications: { tel: 'admin-tel',   pass: 'admin-pass' }
+            };
+            const ids = map[section];
+            const tel = document.getElementById(ids.tel).value.trim();
+            const pass = document.getElementById(ids.pass).value;
             if (!tel || !pass) {
-                showAlert('verifications', 'error', '❌ Téléphone et mot de passe requis');
+                showAlert(section, 'error', '❌ Téléphone et mot de passe requis');
                 return;
             }
             try {
@@ -448,18 +519,297 @@
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.detail || 'Connexion échouée');
-                if (data.user && data.user.role !== 'admin') throw new Error('Ce compte n\'est pas administrateur');
+                if (data.user && data.user.role !== 'admin') throw new Error("Ce compte n'est pas administrateur");
 
                 ADMIN_TOKEN = data.token || data.access_token;
-                document.getElementById('admin-login-box').style.display = 'none';
-                document.getElementById('verifications-content').style.display = 'block';
-                showAlert('verifications', 'success', '✅ Connecté en tant qu\'admin');
-                loadVerifications();
+                showAlert(section, 'success', '✅ Connecté en tant qu\'admin');
+
+                // Affiche la section demandée + charge ses données
+                revealAdminSection(section);
+                if (section === 'vendeurs') loadVendeurs();
+                if (section === 'acheteurs') loadAcheteurs();
+                if (section === 'verifications') loadVerifications();
             } catch (e) {
-                showAlert('verifications', 'error', '❌ ' + e.message);
+                showAlert(section, 'error', '❌ ' + e.message);
             }
         }
 
+        // Masque la boîte de login et révèle le contenu (pour toutes les sections admin)
+        function revealAdminSection(section) {
+            ['vendeurs', 'acheteurs', 'verifications'].forEach(s => {
+                const box = document.getElementById(s + '-login-box');
+                const content = document.getElementById(s + '-content');
+                if (box) box.style.display = 'none';
+                if (content) content.style.display = 'block';
+            });
+        }
+
+        // ==================== VENDEURS ====================
+        async function loadVendeurs() {
+            if (!ADMIN_TOKEN) return;
+            try {
+                const res = await fetch('/api/admin/vendeurs-activite', {
+                    headers: { 'Authorization': 'Bearer ' + ADMIN_TOKEN }
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Erreur');
+
+                const tbody = document.querySelector('#vendeurs-table tbody');
+                tbody.innerHTML = '';
+                const vendeurs = data.vendeurs || [];
+
+                if (vendeurs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:2rem;color:#718096;">Aucun vendeur</td></tr>';
+                    return;
+                }
+
+                vendeurs.forEach(function(v) {
+                    const statut = v.actif
+                        ? '<span class="badge badge-success">Actif</span>'
+                        : '<span class="badge badge-danger">Suspendu</span>';
+                    const premium = v.est_premium
+                        ? '<span class="badge badge-premium">Premium</span>'
+                        : '<span class="badge badge-info">Standard</span>';
+                    const toggleLabel = v.actif ? '⏸️ Suspendre' : '▶️ Réactiver';
+                    const toggleColor = v.actif ? '#e53e3e' : '#38a169';
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML =
+                        '<td><strong>' + (v.nom_boutique || '-') + '</strong></td>' +
+                        '<td>' + (v.telephone || '-') + '</td>' +
+                        '<td>' + statut + '</td>' +
+                        '<td>' + premium + '</td>' +
+                        '<td>' + (v.nb_produits || 0) + '</td>' +
+                        '<td>' + (v.nb_commandes || 0) +
+                            (v.commandes_nouvelles ? ' <span class="badge badge-danger" style="padding:0.2rem 0.5rem;">' + v.commandes_nouvelles + ' new</span>' : '') +
+                        '</td>' +
+                        '<td><strong>' + fcfa(v.chiffre_affaires) + '</strong></td>' +
+                        '<td>' +
+                            '<button class="btn btn-sm" style="margin-bottom:0.3rem;" onclick="voirFicheVendeur(\'' + v.id + '\')">👁️ Voir</button> ' +
+                            '<button class="btn btn-sm" style="background:' + toggleColor + ';" onclick="toggleVendeur(\'' + v.id + '\',' + (!v.actif) + ')">' + toggleLabel + '</button>' +
+                        '</td>';
+                    tbody.appendChild(tr);
+                });
+                showAlert('vendeurs', 'success', '✅ ' + vendeurs.length + ' vendeur(s)');
+            } catch (e) {
+                showAlert('vendeurs', 'error', '❌ ' + e.message);
+            }
+        }
+
+        async function toggleVendeur(vendeurId, nouvelEtat) {
+            const action = nouvelEtat ? 'réactiver' : 'suspendre';
+            if (!confirm('Voulez-vous ' + action + ' ce vendeur ?')) return;
+            try {
+                const res = await fetch('/api/admin/vendeur/' + vendeurId + '/actif', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + ADMIN_TOKEN, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ actif: nouvelEtat })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Erreur');
+                showAlert('vendeurs', 'success', '✅ ' + data.message);
+                loadVendeurs();
+            } catch (e) {
+                showAlert('vendeurs', 'error', '❌ ' + e.message);
+            }
+        }
+
+        async function voirFicheVendeur(vendeurId) {
+            try {
+                // Fiche + produits + commandes en parallèle
+                const [ficheRes, prodRes, cmdRes] = await Promise.all([
+                    fetch('/api/admin/vendeur/' + vendeurId, { headers: { 'Authorization': 'Bearer ' + ADMIN_TOKEN } }),
+                    fetch('/api/admin/vendeur/' + vendeurId + '/produits', { headers: { 'Authorization': 'Bearer ' + ADMIN_TOKEN } }),
+                    fetch('/api/admin/vendeur/' + vendeurId + '/commandes', { headers: { 'Authorization': 'Bearer ' + ADMIN_TOKEN } })
+                ]);
+                const fiche = await ficheRes.json();
+                if (!ficheRes.ok) throw new Error(fiche.detail || 'Erreur fiche');
+                const prod = await prodRes.json();
+                const cmd = await cmdRes.json();
+
+                const st = fiche.statistiques || {};
+                const verifBadge = fiche.vendeur_verifie
+                    ? '<span class="badge badge-success">Vérifié ✅</span>'
+                    : '<span class="badge badge-info">' + (fiche.verification_statut || 'non vérifié') + '</span>';
+
+                let produitsHtml = '<p style="color:#718096;">Aucun produit</p>';
+                if ((prod.produits || []).length) {
+                    produitsHtml = '<table class="table"><thead><tr><th>Nom</th><th>Prix</th><th>Catégorie</th><th>Stock</th></tr></thead><tbody>';
+                    prod.produits.forEach(function(p) {
+                        produitsHtml += '<tr><td>' + p.nom + '</td><td>' + fcfa(p.prix) + ' FCFA</td><td>' + (p.categorie || '-') + '</td><td>' + (p.stock || 0) + '</td></tr>';
+                    });
+                    produitsHtml += '</tbody></table>';
+                }
+
+                let cmdHtml = '<p style="color:#718096;">Aucune commande</p>';
+                if ((cmd.commandes || []).length) {
+                    cmdHtml = '<table class="table"><thead><tr><th>Réf.</th><th>Client</th><th>Produit</th><th>Montant</th><th>Statut</th></tr></thead><tbody>';
+                    cmd.commandes.forEach(function(c) {
+                        cmdHtml += '<tr><td>' + c.reference + '</td><td>' + c.client_nom + '</td><td>' + c.produit_nom + '</td><td>' + fcfa(c.montant_total) + ' FCFA</td><td>' + (c.statut_label || c.statut) + '</td></tr>';
+                    });
+                    cmdHtml += '</tbody></table>';
+                }
+
+                document.getElementById('vm-title').textContent = '🏪 ' + (fiche.nom_boutique || 'Boutique');
+                document.getElementById('vendeur-modal-body').innerHTML =
+                    '<div class="info-grid">' +
+                        '<div class="info-box"><div class="lbl">Responsable</div><div class="val">' + (fiche.prenom || '') + ' ' + (fiche.nom || '') + '</div></div>' +
+                        '<div class="info-box"><div class="lbl">Téléphone</div><div class="val">' + (fiche.telephone || '-') + '</div></div>' +
+                        '<div class="info-box"><div class="lbl">WhatsApp</div><div class="val">' + (fiche.whatsapp || '-') + '</div></div>' +
+                        '<div class="info-box"><div class="lbl">Orange Money</div><div class="val">' + (fiche.orange_money || '-') + '</div></div>' +
+                        '<div class="info-box"><div class="lbl">Adresse</div><div class="val">' + (fiche.adresse || '-') + '</div></div>' +
+                        '<div class="info-box"><div class="lbl">Vérification</div><div class="val">' + verifBadge + '</div></div>' +
+                        '<div class="info-box"><div class="lbl">Produits</div><div class="val">' + (st.nb_produits || 0) + '</div></div>' +
+                        '<div class="info-box"><div class="lbl">Chiffre d\'affaires</div><div class="val">' + fcfa(st.chiffre_affaires) + ' FCFA</div></div>' +
+                    '</div>' +
+                    '<h3 style="color:#2d3748;margin:1rem 0 0.5rem;">📦 Produits</h3>' + produitsHtml +
+                    '<h3 style="color:#2d3748;margin:1.5rem 0 0.5rem;">🛒 Commandes</h3>' + cmdHtml;
+
+                document.getElementById('vendeur-modal').classList.add('open');
+            } catch (e) {
+                showAlert('vendeurs', 'error', '❌ ' + e.message);
+            }
+        }
+
+        // ==================== ACHETEURS ====================
+        async function loadAcheteurs() {
+            if (!ADMIN_TOKEN) return;
+            try {
+                const res = await fetch('/api/admin/acheteurs', {
+                    headers: { 'Authorization': 'Bearer ' + ADMIN_TOKEN }
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Erreur');
+
+                const tbody = document.querySelector('#acheteurs-table tbody');
+                tbody.innerHTML = '';
+                const acheteurs = data.acheteurs || [];
+
+                if (acheteurs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:#718096;">Aucun acheteur</td></tr>';
+                    return;
+                }
+
+                acheteurs.forEach(function(a) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML =
+                        '<td><strong>' + (a.telephone || '-') + '</strong></td>' +
+                        '<td>' + (a.prenom || '') + ' ' + (a.nom || '') + '</td>' +
+                        '<td>' + (a.nb_commandes || 0) + '</td>' +
+                        '<td><strong>' + fcfa(a.total_depense) + '</strong></td>' +
+                        '<td>' + frDate(a.derniere_commande) + '</td>' +
+                        '<td><button class="btn btn-sm" onclick="voirFicheAcheteur(\'' + a.telephone + '\')">👁️ Voir</button></td>';
+                    tbody.appendChild(tr);
+                });
+                showAlert('acheteurs', 'success', '✅ ' + acheteurs.length + ' acheteur(s)');
+            } catch (e) {
+                showAlert('acheteurs', 'error', '❌ ' + e.message);
+            }
+        }
+
+        async function voirFicheAcheteur(telephone) {
+            try {
+                const res = await fetch('/api/admin/acheteur/' + encodeURIComponent(telephone), {
+                    headers: { 'Authorization': 'Bearer ' + ADMIN_TOKEN }
+                });
+                const fiche = await res.json();
+                if (!res.ok) throw new Error(fiche.detail || 'Erreur');
+
+                let cmdHtml = '<p style="color:#718096;">Aucune commande</p>';
+                if ((fiche.commandes || []).length) {
+                    cmdHtml = '<table class="table"><thead><tr><th>Réf.</th><th>Produit</th><th>Boutique</th><th>Montant</th><th>Statut</th><th>Date</th></tr></thead><tbody>';
+                    fiche.commandes.forEach(function(c) {
+                        cmdHtml += '<tr><td>' + c.reference + '</td><td>' + c.produit_nom + '</td><td>' + c.vendeur_nom + '</td><td>' + fcfa(c.montant_total) + ' FCFA</td><td>' + (c.statut_label || c.statut) + '</td><td>' + frDate(c.date_commande) + '</td></tr>';
+                    });
+                    cmdHtml += '</tbody></table>';
+                }
+
+                const compte = fiche.compte_enregistre
+                    ? '<span class="badge badge-success">Compte enregistré</span>'
+                    : '<span class="badge badge-info">Invité (commande sans compte)</span>';
+
+                document.getElementById('am-title').textContent = '👥 ' + (fiche.prenom || '') + ' ' + (fiche.nom || telephone);
+                document.getElementById('acheteur-modal-body').innerHTML =
+                    '<div class="info-grid">' +
+                        '<div class="info-box"><div class="lbl">Téléphone</div><div class="val">' + (fiche.telephone || '-') + '</div></div>' +
+                        '<div class="info-box"><div class="lbl">Email</div><div class="val">' + (fiche.email || '-') + '</div></div>' +
+                        '<div class="info-box"><div class="lbl">Type</div><div class="val">' + compte + '</div></div>' +
+                        '<div class="info-box"><div class="lbl">Nb commandes</div><div class="val">' + (fiche.nb_commandes || 0) + '</div></div>' +
+                        '<div class="info-box"><div class="lbl">Total dépensé</div><div class="val">' + fcfa(fiche.total_depense) + ' FCFA</div></div>' +
+                        '<div class="info-box"><div class="lbl">Portefeuille</div><div class="val">' + fcfa(fiche.portefeuille) + ' FCFA</div></div>' +
+                    '</div>' +
+                    '<h3 style="color:#2d3748;margin:1rem 0 0.5rem;">🛒 Historique des commandes</h3>' + cmdHtml +
+                    '<a href="https://wa.me/223' + telephone + '" target="_blank" style="display:inline-block;margin-top:1rem;background:#25D366;color:white;padding:0.7rem 1.5rem;border-radius:100px;text-decoration:none;font-weight:600;">📱 Contacter sur WhatsApp</a>';
+
+                document.getElementById('acheteur-modal').classList.add('open');
+            } catch (e) {
+                showAlert('acheteurs', 'error', '❌ ' + e.message);
+            }
+        }
+
+        // ==================== STATISTIQUES ====================
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/produits?limit=1000');
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+
+                const totalProducts = data.total || data.produits?.length || 0;
+                const premiumProducts = data.produits?.filter(p => p.est_premium).length || 0;
+                const today = new Date().toISOString().split('T')[0];
+                const recentProducts = data.produits?.filter(p => {
+                    const pDate = new Date(p.date_creation).toISOString().split('T')[0];
+                    return pDate === today;
+                }).length || 0;
+
+                document.getElementById('stat-products').textContent = totalProducts;
+                document.getElementById('stat-premium').textContent = premiumProducts;
+                document.getElementById('stat-recent').textContent = recentProducts;
+                showAlert('dashboard', 'success', '✅ Statistiques actualisées');
+            } catch (error) {
+                console.error('Erreur:', error);
+                showAlert('dashboard', 'error', `❌ Erreur: ${error.message}`);
+            }
+        }
+
+        // ==================== PRODUITS ====================
+        async function loadProduits() {
+            try {
+                const response = await fetch('/api/produits?limit=100');
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                const produits = data.produits || [];
+
+                const tbody = document.querySelector('#produits-table tbody');
+                tbody.innerHTML = '';
+                if (produits.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: #718096;">Aucun produit trouvé</td></tr>';
+                    return;
+                }
+
+                produits.forEach(p => {
+                    const tr = document.createElement('tr');
+                    const date = new Date(p.date_creation).toLocaleDateString('fr-FR');
+                    const img = (p.images && p.images[0]) ? p.images[0] : '';
+                    tr.innerHTML = `
+                        <td><img src="${img}" alt="${p.nom}"></td>
+                        <td><strong>${p.nom}</strong><br><small style="color: #718096;">${(p.description || '').substring(0, 50)}...</small></td>
+                        <td><strong>${p.prix.toLocaleString()} FCFA</strong></td>
+                        <td>${p.categorie}</td>
+                        <td>${p.stock || 0}</td>
+                        <td>${p.est_premium ? '<span class="badge badge-premium">Premium</span>' : '<span class="badge badge-success">Standard</span>'}</td>
+                        <td>${date}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                showAlert('produits', 'success', `✅ ${produits.length} produit(s) chargé(s)`);
+            } catch (error) {
+                console.error('Erreur:', error);
+                showAlert('produits', 'error', `❌ Erreur: ${error.message}`);
+            }
+        }
+
+        // ==================== VÉRIFICATIONS ====================
         async function loadVerifications() {
             if (!ADMIN_TOKEN) return;
             try {
@@ -493,8 +843,8 @@
                         '<td>' + docsHtml + '</td>' +
                         '<td>' + (doc.adresse || '-') + '</td>' +
                         '<td>' +
-                            '<button class="btn" style="padding:0.5rem 1rem;background:#38a169;margin-bottom:0.3rem;" onclick="validerVerif(\'' + d.vendeur_id + '\')">✅ Valider</button> ' +
-                            '<button class="btn" style="padding:0.5rem 1rem;background:#e53e3e;" onclick="rejeterVerif(\'' + d.vendeur_id + '\')">❌ Rejeter</button>' +
+                            '<button class="btn btn-sm" style="background:#38a169;margin-bottom:0.3rem;" onclick="validerVerif(\'' + d.vendeur_id + '\')">✅ Valider</button> ' +
+                            '<button class="btn btn-sm" style="background:#e53e3e;" onclick="rejeterVerif(\'' + d.vendeur_id + '\')">❌ Rejeter</button>' +
                         '</td>';
                     tbody.appendChild(tr);
                 });
@@ -537,17 +887,15 @@
                 showAlert('verifications', 'error', '❌ ' + e.message);
             }
         }
+
+        // ==================== UTILITAIRE ====================
         function showAlert(section, type, message) {
             const alertDiv = document.getElementById(section + '-alert');
             if (!alertDiv) return;
-            
             alertDiv.className = `alert alert-${type}`;
             alertDiv.textContent = message;
             alertDiv.style.display = 'block';
-            
-            setTimeout(() => {
-                alertDiv.style.display = 'none';
-            }, 5000);
+            setTimeout(() => { alertDiv.style.display = 'none'; }, 5000);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
