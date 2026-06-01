@@ -662,10 +662,101 @@
                         '<div class="info-box"><div class="lbl">Produits</div><div class="val">' + (st.nb_produits || 0) + '</div></div>' +
                         '<div class="info-box"><div class="lbl">Chiffre d\'affaires</div><div class="val">' + fcfa(st.chiffre_affaires) + ' FCFA</div></div>' +
                     '</div>' +
+                    '<div style="margin:1.2rem 0;">' +
+                        '<button class="btn btn-sm" style="background:#dd6b20;" onclick="ouvrirEditVitrine(\'' + vendeurId + '\')">✏️ Modifier la vitrine</button>' +
+                    '</div>' +
+                    '<div id="edit-vitrine-box" style="display:none;"></div>' +
                     '<h3 style="color:#2d3748;margin:1rem 0 0.5rem;">📦 Produits</h3>' + produitsHtml +
                     '<h3 style="color:#2d3748;margin:1.5rem 0 0.5rem;">🛒 Commandes</h3>' + cmdHtml;
 
+                // On garde la fiche en mémoire pour pré-remplir le formulaire
+                window._ficheVendeurCourante = fiche;
+
                 document.getElementById('vendeur-modal').classList.add('open');
+            } catch (e) {
+                showAlert('vendeurs', 'error', '❌ ' + e.message);
+            }
+        }
+
+        // ----- Édition de la vitrine -----
+        function champVitrine(id, label, valeur, placeholder) {
+            return '<div style="margin-bottom:0.8rem;">' +
+                '<label style="display:block;color:#718096;font-size:0.8rem;margin-bottom:0.2rem;">' + label + '</label>' +
+                '<input id="' + id + '" value="' + (valeur ? String(valeur).replace(/"/g, '&quot;') : '') + '" placeholder="' + (placeholder || '') + '" ' +
+                'style="width:100%;padding:0.7rem;border:1px solid #cbd5e0;border-radius:8px;">' +
+                '</div>';
+        }
+
+        function champImage(idUrl, idFile, label, valeur) {
+            return '<div style="margin-bottom:1rem;border:1px dashed #cbd5e0;border-radius:8px;padding:0.8rem;">' +
+                '<label style="display:block;color:#2d3748;font-weight:600;font-size:0.9rem;margin-bottom:0.5rem;">' + label + '</label>' +
+                (valeur ? '<img src="' + valeur + '" style="max-height:60px;border-radius:6px;margin-bottom:0.5rem;display:block;">' : '') +
+                '<input id="' + idUrl + '" value="' + (valeur ? String(valeur).replace(/"/g, '&quot;') : '') + '" placeholder="Coller un lien (URL) d\'image" ' +
+                'style="width:100%;padding:0.6rem;border:1px solid #cbd5e0;border-radius:8px;margin-bottom:0.5rem;">' +
+                '<div style="color:#a0aec0;font-size:0.8rem;margin-bottom:0.3rem;">— ou —</div>' +
+                '<input id="' + idFile + '" type="file" accept="image/*" style="font-size:0.85rem;">' +
+                '</div>';
+        }
+
+        function ouvrirEditVitrine(vendeurId) {
+            const f = window._ficheVendeurCourante || {};
+            const box = document.getElementById('edit-vitrine-box');
+            box.style.display = 'block';
+            box.innerHTML =
+                '<div style="background:#fffaf0;border:1px solid #fbd38d;border-radius:10px;padding:1.2rem;margin-bottom:1rem;">' +
+                    '<h3 style="color:#dd6b20;margin-bottom:1rem;">✏️ Modifier la vitrine</h3>' +
+                    champVitrine('ev-nom', 'Nom de la boutique', f.nom_boutique, 'Nom de la boutique') +
+                    champVitrine('ev-desc', 'Description', f.description_boutique, 'Description de la boutique') +
+                    champImage('ev-logo-url', 'ev-logo-file', '🖼️ Logo', f.logo) +
+                    champImage('ev-banniere-url', 'ev-banniere-file', '🏞️ Bannière', f.banniere) +
+                    champVitrine('ev-whatsapp', 'WhatsApp', f.whatsapp, 'Ex : 70000000') +
+                    champVitrine('ev-om', 'Orange Money', f.orange_money, 'Ex : 70000000') +
+                    champVitrine('ev-adresse', 'Adresse', f.adresse, 'Adresse de la boutique') +
+                    '<button class="btn" style="background:#38a169;margin-top:0.5rem;" onclick="enregistrerVitrine(\'' + vendeurId + '\')">💾 Enregistrer</button> ' +
+                    '<button class="btn btn-sm" style="background:#a0aec0;" onclick="document.getElementById(\'edit-vitrine-box\').style.display=\'none\';">Annuler</button>' +
+                '</div>';
+            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Lit un fichier image et renvoie son base64 (ou null si aucun fichier)
+        function lireFichierImage(inputId) {
+            return new Promise(function(resolve) {
+                const input = document.getElementById(inputId);
+                if (!input || !input.files || !input.files[0]) { resolve(null); return; }
+                const reader = new FileReader();
+                reader.onload = function() { resolve(reader.result); };
+                reader.onerror = function() { resolve(null); };
+                reader.readAsDataURL(input.files[0]);
+            });
+        }
+
+        async function enregistrerVitrine(vendeurId) {
+            try {
+                // Pour le logo et la bannière : un fichier uploadé a priorité sur le lien collé
+                const logoFile = await lireFichierImage('ev-logo-file');
+                const banniereFile = await lireFichierImage('ev-banniere-file');
+
+                const payload = {
+                    nom_boutique: document.getElementById('ev-nom').value.trim(),
+                    description_boutique: document.getElementById('ev-desc').value.trim(),
+                    logo: logoFile || document.getElementById('ev-logo-url').value.trim(),
+                    banniere: banniereFile || document.getElementById('ev-banniere-url').value.trim(),
+                    whatsapp: document.getElementById('ev-whatsapp').value.trim(),
+                    orange_money: document.getElementById('ev-om').value.trim(),
+                    adresse: document.getElementById('ev-adresse').value.trim()
+                };
+
+                const res = await fetch('/api/admin/vendeur/' + vendeurId + '/vitrine', {
+                    method: 'PUT',
+                    headers: { 'Authorization': 'Bearer ' + ADMIN_TOKEN, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Erreur');
+
+                showAlert('vendeurs', 'success', '✅ Vitrine mise à jour');
+                document.getElementById('vendeur-modal').classList.remove('open');
+                voirFicheVendeur(vendeurId); // recharge la fiche avec les nouvelles infos
             } catch (e) {
                 showAlert('vendeurs', 'error', '❌ ' + e.message);
             }
