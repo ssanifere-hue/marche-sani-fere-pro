@@ -2274,3 +2274,45 @@ async def admin_forcer_statut_commande(
         "nouveau_statut": payload.statut,
     }
 
+# ==================== ADMIN — MODIFIER LA VITRINE D'UN VENDEUR ====================
+# Permet à l'admin de modifier la boutique de N'IMPORTE QUEL vendeur (par son ID) :
+# nom, description, logo, bannière, WhatsApp, Orange Money, adresse.
+# Les images peuvent être un lien (URL) OU du base64 (upload) — détecté automatiquement.
+#
+# >>> À COLLER À LA TOUTE FIN de main.py.
+# >>> Réutilise require_admin et _oid déjà définis dans le bloc back-office.
+
+class AdminVitrineUpdate(BaseModel):
+    nom_boutique: Optional[str] = None
+    description_boutique: Optional[str] = None
+    logo: Optional[str] = None
+    banniere: Optional[str] = None
+    whatsapp: Optional[str] = None
+    orange_money: Optional[str] = None
+    adresse: Optional[str] = None
+
+
+@app.put("/api/admin/vendeur/{vendeur_id}/vitrine")
+async def admin_modifier_vitrine(
+    vendeur_id: str, payload: AdminVitrineUpdate, admin = Depends(require_admin)
+):
+    """L'admin modifie la vitrine (boutique) d'un vendeur par son ID."""
+    vendeur = await db.vendeurs.find_one({"_id": _oid(vendeur_id)})
+    if not vendeur:
+        raise HTTPException(status_code=404, detail="Vendeur non trouvé")
+
+    update_data = {k: v for k, v in payload.dict(exclude_unset=True).items() if v is not None}
+
+    # Upload des images si ce sont des base64 (sinon on garde l'URL telle quelle)
+    for img_field in ["logo", "banniere"]:
+        val = update_data.get(img_field)
+        if val and isinstance(val, str) and val.startswith("data:image/"):
+            update_data[img_field] = await upload_image_to_cloudinary(val)
+
+    if update_data:
+        await db.vendeurs.update_one(
+            {"_id": _oid(vendeur_id)},
+            {"$set": update_data}
+        )
+
+    return {"message": "Vitrine mise à jour avec succès", "champs_modifies": list(update_data.keys())}
