@@ -59,6 +59,13 @@ async def serve_dashboard():
     if not os.path.exists(dashboard_path):
         raise HTTPException(status_code=404, detail="Dashboard file not found")
     return FileResponse(dashboard_path)
+    
+@app.get("/admin")
+async def serve_admin():
+    admin_path = os.path.join(STATIC_DIR, "admin.html")
+    if not os.path.exists(admin_path):
+        raise HTTPException(status_code=404, detail="Admin file not found")
+    return FileResponse(admin_path)
 
 
 
