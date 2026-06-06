@@ -1246,6 +1246,7 @@ async def modifier_produit(produit_id: str, produit: ProduitUpdate, current_user
        vendeur = await db.vendeurs.find_one({"user_id": str(current_user["_id"])}) or await db.vendeurs.find_one({"telephone": current_user.get("telephone", "")})
         if not vendeur or str(existing_product["vendeur_id"]) != str(vendeur["_id"]):
             raise HTTPException(status_code=403, detail="Vous n'êtes pas propriétaire de ce produit")
+           
             
     update_data = {k: v for k, v in produit.dict(exclude_unset=True).items() if v is not None}
     
