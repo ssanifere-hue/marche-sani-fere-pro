@@ -465,7 +465,20 @@ async def login(credentials: UserLogin):
             "role": user["role"]
         }
     }
-
+@app.get("/api/auth/me")
+async def get_me(current_user = Depends(get_current_user)):
+    """Renvoie l'utilisateur courant + son id vendeur s'il en a un"""
+    vendeur = await db.vendeurs.find_one({"user_id": str(current_user["_id"])}) \
+        or await db.vendeurs.find_one({"telephone": current_user.get("telephone", "")})
+    return {
+        "id": str(current_user["_id"]),
+        "nom": current_user.get("nom"),
+        "prenom": current_user.get("prenom"),
+        "role": current_user["role"],
+        "telephone": current_user.get("telephone"),
+        "vendeur_id": str(vendeur["_id"]) if vendeur else None,
+        "nom_boutique": vendeur.get("nom_boutique") if vendeur else None
+    }
 # ==================== VENDEURS ====================
 
 
