@@ -170,9 +170,12 @@ async function login(){
     TOKEN = data.access_token || data.token || data.jwt;
     if(!TOKEN) throw new Error('Token manquant dans la réponse du serveur');
     localStorage.setItem('aj_token',TOKEN);
-    // récupère l'id vendeur si dispo
-    const u = data.user || data.vendeur || {};
-    if(u.vendeur_id || u.id){ VENDEUR_ID = u.vendeur_id || u.id; localStorage.setItem('aj_vendeur_id',VENDEUR_ID); }
+    // récupère le vrai id vendeur via /api/auth/me
+      try{
+        const me = await fetch(API+'/api/auth/me',{ headers:{'Authorization':'Bearer '+TOKEN} });
+        const meData = await me.json();
+        if(meData.vendeur_id){ VENDEUR_ID = meData.vendeur_id; localStorage.setItem('aj_vendeur_id',VENDEUR_ID); }
+      }catch(e){ console.warn('me failed', e); }
     showVendor();
   }catch(e){ alertBox('loginAlert','err','❌ '+e.message); }
   finally{ btn.disabled=false; btn.textContent='Se connecter'; }
