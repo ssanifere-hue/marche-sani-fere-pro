@@ -450,15 +450,15 @@
             return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
         }
 
-        function ajouterAuPanierProduit() {
+       function ajouterAuPanierProduit() {
             if (!productData) return;
-            let delivNom = null, delivPrix = 0;
-            const selected = document.querySelector('input[name="delivery"]:checked');
-            if (selected) {
-                delivNom = selected.dataset.name;
-                delivPrix = parseInt(selected.dataset.price) || 0;
+            if (!selectedDeliveryMethod && productData.methodes_livraison && productData.methodes_livraison.length > 0) {
+                selectedDeliveryMethod = productData.methodes_livraison[0];
             }
+            const delivNom = selectedDeliveryMethod ? selectedDeliveryMethod.nom : null;
+            const delivPrix = selectedDeliveryMethod ? selectedDeliveryMethod.prix : 0;
             ajouterAuPanier(productData.id, delivNom, delivPrix);
+        }
         }
     </script>
     <script src="cart.js"></script>
