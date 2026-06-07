@@ -586,6 +586,7 @@
                         '<td><strong>' + fcfa(v.chiffre_affaires) + '</strong></td>' +
                         '<td>' +
                             '<button class="btn btn-sm" style="margin-bottom:0.3rem;" onclick="voirFicheVendeur(\'' + v.id + '\')">👁️ Voir</button> ' +
+                        '<button class="btn btn-sm" style="background:#667eea;margin-bottom:0.3rem;" onclick="voirVitrine(\'' + v.id + '\')">🏪 Vitrine</button> ' +
                             '<button class="btn btn-sm" style="background:' + toggleColor + ';" onclick="toggleVendeur(\'' + v.id + '\',' + (!v.actif) + ')">' + toggleLabel + '</button>' +
                         '</td>';
                     tbody.appendChild(tr);
@@ -595,6 +596,10 @@
                 showAlert('vendeurs', 'error', '❌ ' + e.message);
             }
         }
+function voirVitrine(vendeurId) {
+            window.open('boutique.html?id=' + vendeurId, '_blank');
+        }
+        
 
         async function toggleVendeur(vendeurId, nouvelEtat) {
             const action = nouvelEtat ? 'réactiver' : 'suspendre';
